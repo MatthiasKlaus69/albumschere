@@ -63,7 +63,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 .tool:disabled { opacity: .3; cursor: default; background: transparent }
 .tool.warn { color: #ffb38f }
 .sep { width: 1px; height: 30px; background: rgba(255,255,255,.12); margin: 0 3px }
-@media (max-width: 440px) { .tool { min-width: 50px; height: 50px } .tool span { display: none } .tool svg.i { width: 22px; height: 22px } }
+@media (max-width: 440px) { .tool { min-width: 44px; height: 48px; padding: 4px 3px } .tool span { display: none } .tool svg.i { width: 22px; height: 22px } }
 .empty-stage { display: grid; gap: 18px; justify-items: center; text-align: center; color: #a9a7a1; max-width: 360px }
 .empty-art { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: rgba(245,189,60,.12); color: #f5bd3c }
 .empty-art svg.i { width: 30px; height: 30px }
@@ -122,6 +122,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 .card .acts { position: absolute; top: 6px; right: 6px; display: flex; flex-direction: column; gap: 6px }
 .card .acts .btn { width: 36px; min-height: 36px; padding: 0; border-radius: 50%; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
 .card .acts .btn .lbl { display: none }
+.card.saved .meta b { color: #2f7d4f }
 .empty { color: var(--muted); font-size: 14px; padding: 22px 16px; text-align: center; border: 1.5px dashed var(--line); border-radius: 14px; grid-column: 1 / -1; margin: 0 }
 
 /* Einstellungen: Seitenspalte (Desktop) bzw. Sheet (Telefon) */
@@ -177,6 +178,8 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
   <symbol id="i-merge" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v5M12 15v5M9 12h6"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-new" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></symbol>
   <symbol id="i-photos" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.9 2.9M15.5 15.5l2.9 2.9M5.6 18.4l2.9-2.9M15.5 8.5l2.9-2.9"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
 </svg>
@@ -201,6 +204,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
         <p class="empty-tip">Senkrecht von oben, ohne Blitz. Quer oder hoch ist egal.</p>
       </div>
       <div class="toolbar" id="toolbar" role="toolbar" aria-label="Rahmen bearbeiten">
+        <button class="tool" id="bUndo" title="Rückgängig" disabled><svg class="i"><use href="#i-undo"/></svg><span>Zurück</span></button>
         <button class="tool" id="bAdd" title="Rahmen hinzufügen"><svg class="i"><use href="#i-frame"/></svg><span>Rahmen</span></button>
         <button class="tool" id="bRot" title="Ausgewähltes Foto drehen" disabled><svg class="i"><use href="#i-rot"/></svg><span>Drehen</span></button>
         <button class="tool" id="bMerge" title="Mit dem Nachbarrahmen zu einem Foto verbinden" disabled><svg class="i"><use href="#i-merge"/></svg><span>Verbinden</span></button>
@@ -237,7 +241,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
     <section class="panel o-exp">
       <h2>Export</h2>
       <label class="field" for="album">Dateinamen beginnen mit
-        <input id="album" type="text" value="261022" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <input id="album" type="text" value="" autocomplete="off" autocapitalize="off" spellcheck="false">
       </label>
       <div class="preview-name" id="nameEx"></div>
       <button class="btn accent full desk-only" id="bCut"><svg class="i"><use href="#i-cut"/></svg>Fotos ausschneiden</button>
@@ -252,6 +256,9 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
         <button class="btn" id="bRedetect"><svg class="i"><use href="#i-scan"/></svg>Neu erkennen</button>
         <button class="btn ghost danger" id="bDelPage"><svg class="i"><use href="#i-x"/></svg>Seite entfernen</button>
       </div>
+    </section>
+    <section class="panel">
+      <button class="btn full" id="bReset"><svg class="i"><use href="#i-new"/></svg>Neues Album beginnen</button>
     </section>
   </aside>
 </div>
@@ -1045,7 +1052,7 @@ function pageOrientation(rgba, w, h, quads) {
 <script>
 const $ = id => document.getElementById(id);
 const S = { pages: [], cur: -1, sel: -1, results: [], downloads: null, uid: 1 };
-const DET = 640, PREV = 1800, MAXPX = 12_000_000, JPEG_Q = 0.95;
+const DET = 640, PREV = 1600, MAXPX = 12_000_000, JPEG_Q = 0.95;
 
 // ---------- Laden ----------
 function loadImg(src) {
@@ -1095,13 +1102,19 @@ async function runDetect(page, sens) {
   // Kanten in der höher aufgelösten Vorschau nachschärfen
   const quads = refineQuads(grayOf(page.preview), page.preview.width, page.preview.height, q, Math.max(3, page.preview.width / c.width * 2.5));
   // Ausrichtung: alle Fotos der Seite stimmen gemeinsam ab; unsichere Seiten übernehmen die Lage der sicheren
+  const keepRot = page.rotManual ? (page.rot || 0) : null;
   page.rotAuto = o ? o.rot : 0; page.rotConf = o ? o.conf : 0; page.rot = 0;
   for (const k of quads) k.rot = 0;
   page.quads = quads;
-  resolveRotations(page);
+  if (keepRot !== null) setPageRot(page, keepRot); else resolveRotations(page);
 }
 const ROT_SURE = 0.15;
+// Jede Seite merkt sich, ob ihre Rahmen seit dem letzten Ausschneiden geändert wurden
+function bump(p) { if (p) p.ver = (p.ver || 0) + 1; }
+const pendingPages = () => S.pages.filter(p => p.quads.length && p.cutVer !== p.ver);
+const pendingCount = () => pendingPages().reduce((s, p) => s + p.quads.length, 0);
 function setPageRot(p, r) {
+  bump(p);
   const d = ((r - (p.rot || 0)) % 4 + 4) % 4;
   for (const q of p.quads) q.rot = (q.rot + d) % 4;
   p.rot = r; p.quads = sortReading(p.quads, r);
@@ -1133,9 +1146,13 @@ function status(text, busy) { $('pageInfo').textContent = text; $('chip').classL
 let toastT = 0;
 function toast(msg, ms = 2600) { const t = $('cutInfo'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); if (ms) toastT = setTimeout(() => t.classList.remove('show'), ms); }
 async function addFiles(files) {
-  const list = [...files].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+  let list = [...files].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+  // dieselbe Datei nicht zweimal laden
+  const key = f => `${f.name}|${f.size}|${f.lastModified}`, have = new Set(S.pages.map(p => p.key));
+  const dupes = list.filter(f => have.has(key(f))).length; list = list.filter(f => !have.has(key(f)));
+  if (dupes) toast(dupes === 1 ? 'Diese Seite ist schon geladen' : `${dupes} Seiten sind schon geladen`);
+  if (!list.length) return;
   list.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
-  if (S.pages.length && S.pages.every(p => p.sample)) { S.pages = []; S.results = []; renderGrid(); }
   let n = 0;
   for (const f of list) {
     status(`Lese Seite ${++n} von ${list.length} …`, true);
@@ -1144,15 +1161,16 @@ async function addFiles(files) {
       const preview = scaledCanvas(dec.img, dec.w, dec.h, PREV);
       const iw = dec.w, ih = dec.h; dec.close();
       status(`Erkenne Fotos auf Seite ${n} von ${list.length} …`, true); await tick();
-      const page = { id: S.uid++, name: f.name, file: f, w: iw, h: ih, preview, thumb: scaledCanvas(preview, preview.width, preview.height, 240).toDataURL('image/jpeg', .8), quads: [] };
+      const page = { id: S.uid++, key: key(f), name: f.name, file: f, w: iw, h: ih, preview, quads: [] };
       await runDetect(page, +$('sens').value);
+      page.ver = (page.ver || 0) + 1; page.cutVer = 0;
       S.pages.push(page);
       S.cur = S.pages.length - 1; S.sel = -1;
       renderPages(); drawEditor();
     } catch (e) { alertBox(`${f.name}: ${e.message}`); }
   }
   status('', false); renderPages(); drawEditor();
-  if (list.length) toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
+  toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
 }
 $('inCam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 $('inPick').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
@@ -1160,35 +1178,6 @@ $('inDir').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 if (!('webkitdirectory' in document.createElement('input')) || /iPhone|iPad|Android/i.test(navigator.userAgent)) $('lblDir').hidden = true;
 
 function alertBox(msg) { toast(msg, 5000); }
-
-// ---------- Beispielseite ----------
-function makeSample() {
-  const W = 1800, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
-  const x = c.getContext('2d');
-  x.fillStyle = '#2b2a27'; x.fillRect(0, 0, W, H);
-  for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * .03})`; x.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
-  const scene = (w, h, sky, hill, sun) => {
-    const g = x.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]);
-    x.fillStyle = g; x.fillRect(-w / 2, -h / 2, w, h);
-    x.fillStyle = sun; x.beginPath(); x.arc(w * .22, -h * .18, h * .1, 0, 7); x.fill();
-    x.fillStyle = hill; x.beginPath(); x.moveTo(-w / 2, h / 2);
-    for (let i = 0; i <= 20; i++) x.lineTo(-w / 2 + w * i / 20, h * .12 - Math.sin(i * .7) * h * .12 - Math.cos(i * 1.9) * h * .05);
-    x.lineTo(w / 2, h / 2); x.fill();
-  };
-  const photo = (cx, cy, w, h, ang, sky, hill, sun) => {
-    x.save(); x.translate(cx, cy); x.rotate(ang);
-    x.fillStyle = '#f1ede3'; x.fillRect(-w / 2, -h / 2, w, h);
-    x.save(); x.beginPath(); x.rect(-w / 2 + 28, -h / 2 + 28, w - 56, h - 56); x.clip(); scene(w - 56, h - 56, sky, hill, sun); x.restore();
-    x.restore();
-  };
-  photo(470, 380, 700, 500, -0.05, ['#8fb4cf', '#e8d6b2'], '#4d6b3c', '#f6e7a8');
-  photo(1340, 360, 520, 620, 0.06, ['#c9a77d', '#f0dcc0'], '#6a5040', '#fff3d1');
-  x.save(); x.beginPath(); x.arc(520, 1010, 230, 0, 7); x.clip(); x.translate(520, 1010); scene(460, 460, ['#5b7f9e', '#c2d3d9'], '#2f4a3a', '#ffffff'); x.restore();
-  photo(1300, 1010, 560, 380, 0.03, ['#e0a879', '#7a4e6d'], '#2d2533', '#ffd9a0');
-  const page = { id: S.uid++, name: 'Beispielseite', sample: true, file: null, src: c, w: W, h: H, preview: c, thumb: scaledCanvas(c, W, H, 240).toDataURL('image/jpeg', .8), quads: [] };
-  S.pages.push(page); S.cur = 0;
-  return runDetect(page, 50);
-}
 
 // ---------- Seitenleiste ----------
 function renderPages() {
@@ -1204,9 +1193,9 @@ function renderPages() {
   updateSummary();
 }
 function updateSummary() {
-  const total = S.pages.reduce((s, p) => s + p.quads.length, 0);
-  const lab = total === 1 ? '1 Foto ausschneiden' : `${total} Fotos ausschneiden`;
-  $('bCut').lastChild.textContent = lab;
+  const total = pendingCount(), more = S.results.length > 0;
+  const lab = total === 1 ? (more ? '1 weiteres Foto ausschneiden' : '1 Foto ausschneiden') : (more ? `${total} weitere Fotos ausschneiden` : `${total} Fotos ausschneiden`);
+  $('bCut').lastChild.textContent = total ? lab : 'Alles ausgeschnitten';
   $('bCut').disabled = !total || S.cutting;
   const any = S.results.length > 0 && !!S.downloads;
   $('bEach').disabled = !any || S.cutting;
@@ -1215,9 +1204,9 @@ function updateSummary() {
 }
 // Hauptaktion in der Daumenleiste: erst ausschneiden, dann sichern
 function updateDock() {
-  const total = S.pages.reduce((s, p) => s + p.quads.length, 0), n = S.results.length, saveMode = n > 0 && !S.dirty;
+  const total = pendingCount(), n = S.results.length, saveMode = n > 0 && !total;
   $('dock').hidden = !S.pages.length;
-  $('mMainL').textContent = S.cutting ? 'Schneide aus …' : saveMode ? (S.saveShort || `${n} ${n === 1 ? 'Foto' : 'Fotos'} sichern`) : (total === 1 ? '1 Foto ausschneiden' : `${total} Fotos ausschneiden`);
+  $('mMainL').textContent = S.cutting ? 'Schneide aus …' : saveMode ? (S.saveShort || `${n} ${n === 1 ? 'Foto' : 'Fotos'} sichern`) : (total === 1 ? (n ? '1 weiteres ausschneiden' : '1 Foto ausschneiden') : (n ? `${total} weitere ausschneiden` : `${total} Fotos ausschneiden`));
   $('mIco').innerHTML = `<use href="#${saveMode ? 'i-down' : 'i-cut'}"/>`;
   $('mMain').classList.toggle('accent', !saveMode); $('mMain').classList.toggle('primary', saveMode);
   $('mMain').disabled = S.cutting || (saveMode ? !S.downloads : !total);
@@ -1238,8 +1227,10 @@ function rotCanvas(src, r) {
   const x = c.getContext('2d'); x.translate(c.width / 2, c.height / 2); x.rotate(-r * Math.PI / 2); x.drawImage(src, -sw / 2, -sh / 2);
   return c;
 }
+// Speicher sparen (iPhone): gedrehte Ansicht nur für die aktuelle Seite behalten
+function dropViews(keep) { for (const q of S.pages) if (q !== keep && q._view && q._view !== q.preview) { q._view.width = q._view.height = 0; q._view = null; q._vrot = undefined; } }
 function viewCanvas(p) { const r = p.rot || 0; if (p._vrot !== r) { p._view = rotCanvas(p.preview, r); p._vrot = r; p._thumbR = null; } return p._view; }
-function thumbOf(p) { const r = p.rot || 0; if (p._thumbR !== r + 1) { const v = viewCanvas(p); p._thumbV = scaledCanvas(v, v.width, v.height, 240).toDataURL('image/jpeg', .8); p._thumbR = r + 1; } return p._thumbV; }
+function thumbOf(p) { const r = p.rot || 0; if (p._thumbR !== r + 1) { const t = rotCanvas(scaledCanvas(p.preview, p.preview.width, p.preview.height, 240), r); p._thumbV = t.toDataURL('image/jpeg', .8); p._thumbR = r + 1; } return p._thumbV; }
 
 function drawEditor() {
   const p = page();
@@ -1252,7 +1243,7 @@ function drawEditor() {
   const st = $('stage'), cs = getComputedStyle(st);
   const stageW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   const wide = window.innerWidth >= 980, maxH = Math.max(240, wide ? window.innerHeight - 290 : window.innerHeight * 0.6);
-  const pv = viewCanvas(p);
+  dropViews(p); const pv = viewCanvas(p);
   let w = stageW, h = w * pv.height / pv.width;
   if (h > maxH) { h = maxH; w = h * pv.width / pv.height; }
   const dpr = Math.min(3, window.devicePixelRatio || 1);
@@ -1323,11 +1314,11 @@ cv.addEventListener('pointerdown', e => {
     const d = Math.hypot((c[0] - pos[0]) / hit, (c[1] - pos[1]) / hitY);
     if (d < 1 && d < bd - (qi === S.sel ? 0.3 : 0)) { bd = d; best = { qi, ci }; }
   });
-  if (best) { S.sel = best.qi; drag = { type: 'corner', ...best }; loupe = vq[best.qi][best.ci].slice(); }
+  if (best) { S.sel = best.qi; drag = { type: 'corner', ...best, start: pos, moved: false }; loupe = vq[best.qi][best.ci].slice(); }
   else {
     const qi = [...p.quads.keys()].reverse().find(i => inside(vq[i], pos));
     if (qi === undefined) { S.sel = -1; drag = null; }
-    else { S.sel = qi; drag = { type: 'move', qi, start: pos, orig: vq[qi].map(c => c.slice()) }; }
+    else { S.sel = qi; drag = { type: 'move', qi, start: pos, orig: vq[qi].map(c => c.slice()), moved: false }; }
   }
   if (drag) cv.setPointerCapture(e.pointerId);
   updateButtons(); drawEditor();
@@ -1335,22 +1326,45 @@ cv.addEventListener('pointerdown', e => {
 cv.addEventListener('pointermove', e => {
   if (!drag) return; const p = page(), pos = evPos(e), cl = v => Math.min(1, Math.max(0, v));
   const q = p.quads[drag.qi];
+  if (!drag.moved) {
+    // kleine Bewegungen beim Antippen ignorieren
+    if (Math.hypot((pos[0] - drag.start[0]) * view.w, (pos[1] - drag.start[1]) * view.h) < 4) return;
+    snap(); drag.moved = true;
+  }
   if (drag.type === 'corner') { const v = [cl(pos[0]), cl(pos[1])]; q.c[drag.ci] = fromView(p, v); loupe = v; }
-  else { const dx = pos[0] - drag.start[0], dy = pos[1] - drag.start[1]; q.c = drag.orig.map(([x, y]) => fromView(p, [cl(x + dx), cl(y + dy)])); }
+  else {
+    // ganzen Rahmen verschieben, ohne ihn am Rand zu verzerren
+    let dx = pos[0] - drag.start[0], dy = pos[1] - drag.start[1];
+    const xs = drag.orig.map(c => c[0]), ys = drag.orig.map(c => c[1]);
+    dx = Math.min(1 - Math.max(...xs), Math.max(-Math.min(...xs), dx)); dy = Math.min(1 - Math.max(...ys), Math.max(-Math.min(...ys), dy));
+    q.c = drag.orig.map(([x, y]) => fromView(p, [x + dx, y + dy]));
+  }
   drawEditor();
 });
-const endDrag = () => { if (drag) { drag = null; loupe = null; markDirty(); drawEditor(); } };
+const endDrag = () => { if (drag) { const moved = drag.moved; drag = null; loupe = null; if (moved) markDirty(); drawEditor(); } };
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 
 function updateButtons() {
   const p = page(), has = p && S.sel >= 0 && S.sel < p.quads.length;
-  $('bRot').disabled = !has; $('bDel').disabled = !has; $('bMerge').disabled = !has || p.quads.length < 2;
+  $('bRot').disabled = !has; $('bDel').disabled = !has; $('bMerge').disabled = !has || p.quads.length < 2; $('bUndo').disabled = !p || !p.undo || !p.undo.length;
 }
-function markDirty() { if (S.results.length) S.dirty = true; renderPages(); updateDock(); }
+function markDirty() {
+  const p = page(); bump(p);
+  // Seite ohne Rahmen: alte Ergebnisse sofort entfernen
+  if (p && !p.quads.length && S.results.some(r => r.pageId === p.id)) { S.results.filter(r => r.pageId === p.id).forEach(r => URL.revokeObjectURL(r.url)); S.results = S.results.filter(r => r.pageId !== p.id); reindex(); p.cutVer = p.ver; }
+  renderPages(); updateDock(); renderGrid();
+}
+// Rückgängig: Zustand der Seite vor jeder Änderung merken
+function snap() { const p = page(); if (!p) return; (p.undo = p.undo || []).push({ quads: JSON.parse(JSON.stringify(p.quads)), rot: p.rot || 0, rotManual: !!p.rotManual }); if (p.undo.length > 30) p.undo.shift(); updateButtons(); }
+$('bUndo').onclick = () => {
+  const p = page(); if (!p || !p.undo || !p.undo.length) return;
+  const st = p.undo.pop(); p.quads = st.quads; p.rot = st.rot; p.rotManual = st.rotManual; p._vrot = undefined; p._thumbR = null;
+  S.sel = -1; markDirty(); drawEditor(); toast('Rückgängig gemacht');
+};
 $('sens').oninput = () => { $('sensOut').textContent = $('sens').value; };
 
 $('bAdd').onclick = () => {
-  const p = page(); if (!p) return;
+  const p = page(); if (!p) return; snap();
   const pv = viewCanvas(p), ar = pv.width / pv.height, w = 0.3, h = 0.3 * ar * 0.75;
   const vc = [[.5 - w / 2, .5 - h / 2], [.5 + w / 2, .5 - h / 2], [.5 + w / 2, .5 + h / 2], [.5 - w / 2, .5 + h / 2]];
   // Ecken im Original so ordnen, dass die obere Kante der Ansicht oben ist
@@ -1358,7 +1372,7 @@ $('bAdd').onclick = () => {
   p.quads.push({ c: [0, 1, 2, 3].map(i => oc[(i - r + 4) % 4]), rot: r });
   S.sel = p.quads.length - 1; markDirty(); drawEditor();
 };
-$('bRotPage').onclick = () => { const p = page(); if (!p) return; setPageRot(p, ((p.rot || 0) + 3) % 4); p.rotManual = true; resolveRotations(); S.sel = -1; renderPages(); drawEditor(); };
+$('bRotPage').onclick = () => { const p = page(); if (!p) return; snap(); setPageRot(p, ((p.rot || 0) + 3) % 4); p.rotManual = true; resolveRotations(); S.sel = -1; renderPages(); drawEditor(); };
 // zwei Rahmen zu einem Foto verbinden (wenn die Erkennung ein Foto geteilt hat)
 $('bMerge').onclick = () => {
   const p = page(); if (!p || S.sel < 0 || p.quads.length < 2) return;
@@ -1366,21 +1380,21 @@ $('bMerge').onclick = () => {
   const px = q => q.c.map(([x, y]) => [x * W, y * H]), cen = q => px(q).reduce((a, v) => [a[0] + v[0] / 4, a[1] + v[1] / 4], [0, 0]);
   const gap = (a, b) => { let m = Infinity; for (const u of px(a)) for (const v of px(b)) m = Math.min(m, Math.hypot(u[0] - v[0], u[1] - v[1])); return m; };
   let bi = -1, bd = Infinity; p.quads.forEach((q, i) => { if (i === S.sel) return; const d = gap(A, q); if (d < bd) { bd = d; bi = i; } });
-  if (bi < 0) return;
+  if (bi < 0) return; snap();
   const B = p.quads[bi], rect = minAreaRect(convexHull([...px(A), ...px(B)]));
   const oc = orderCorners(rect.c).map(([x, y]) => [Math.min(1, Math.max(0, x / W)), Math.min(1, Math.max(0, y / H))]);
   const m = { c: oc, rot: p.rot || 0 };
   p.quads = p.quads.filter((_, i) => i !== S.sel && i !== bi); p.quads.push(m); p.quads = sortReading(p.quads, p.rot || 0);
   S.sel = p.quads.indexOf(m); markDirty(); drawEditor(); toast('Rahmen verbunden');
 };
-$('bDel').onclick = () => { const p = page(); if (S.sel < 0) return; p.quads.splice(S.sel, 1); S.sel = -1; markDirty(); drawEditor(); };
-$('bRot').onclick = () => { const q = page().quads[S.sel]; q.rot = (q.rot + 3) % 4; drawEditor(); };
+$('bDel').onclick = () => { const p = page(); if (S.sel < 0) return; snap(); p.quads.splice(S.sel, 1); S.sel = -1; markDirty(); drawEditor(); };
+$('bRot').onclick = () => { if (S.sel < 0) return; snap(); const q = page().quads[S.sel]; q.rot = (q.rot + 3) % 4; markDirty(); drawEditor(); };
 $('bDelPage').onclick = () => {
   const p = page(); if (!p) return;
-  S.pages.splice(S.cur, 1); S.results = S.results.filter(r => r.pageId !== p.id); renderGrid();
+  S.pages.splice(S.cur, 1); S.results.filter(r => r.pageId === p.id).forEach(r => URL.revokeObjectURL(r.url)); S.results = S.results.filter(r => r.pageId !== p.id); reindex(); renderGrid(); updateDock();
   S.cur = Math.min(S.cur, S.pages.length - 1); S.sel = -1; renderPages(); drawEditor();
 };
-$('bRedetect').onclick = async () => { const p = page(); if (!p) return; status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value); status('', false); S.sel = -1; markDirty(); drawEditor(); toast(`${p.quads.length} Fotos erkannt`); };
+$('bRedetect').onclick = async () => { const p = page(); if (!p) return; snap(); status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value); status('', false); S.sel = -1; markDirty(); drawEditor(); toast(`${p.quads.length} Fotos erkannt`); };
 window.addEventListener('resize', () => drawEditor());
 
 // ---------- Entzerren in voller Auflösung ----------
@@ -1459,28 +1473,42 @@ function names(pi, qi) {
   return { file: `${a ? a + '_' : ''}S${pad(pi + 1)}_F${pad(qi + 1)}.jpg` };
 }
 
+// Seitennummern der Ergebnisse an die aktuelle Seitenreihenfolge anpassen
+function reindex() {
+  for (const r of S.results) r.pi = S.pages.findIndex(p => p.id === r.pageId);
+  S.results.sort((a, b) => a.pi - b.pi || a.qi - b.qi);
+}
+// Schneidet nur neue oder geänderte Seiten aus; fertige Seiten bleiben erhalten
 async function cutAll() {
-  const total = S.pages.reduce((s, p) => s + p.quads.length, 0); if (!total || S.cutting) return;
-  S.cutting = true; S.dirty = false; S.saveIdx = 0; updateDock(); S.results.forEach(r => URL.revokeObjectURL(r.url)); S.results = []; renderGrid();
+  const todo = pendingPages(), total = todo.reduce((s, p) => s + p.quads.length, 0);
+  if (!total || S.cutting) return;
+  S.cutting = true; S.saveIdx = 0; updateDock();
+  for (const p of todo) { S.results.filter(r => r.pageId === p.id).forEach(r => URL.revokeObjectURL(r.url)); S.results = S.results.filter(r => r.pageId !== p.id); }
+  // auch Ergebnisse geleerter Seiten entfernen
+  S.results = S.results.filter(r => { const p = S.pages.find(x => x.id === r.pageId); return p && p.quads.length; });
+  reindex(); renderGrid();
   $('prog').hidden = false; $('progBar').style.width = '0%';
   let done = 0;
-  for (const [pi, p] of S.pages.entries()) {
-    if (!p.quads.length) continue;
-    let src = null;
+  for (const p of todo) {
+    const ver = p.ver; let src = null;
     try {
       src = await fullSource(p);
       for (const [qi, q] of p.quads.entries()) {
         $('resSub').textContent = `Schneide ${++done} von ${total} …`;
         const r = await cutQuad(p, src, q);
-        S.results.push({ pageId: p.id, pi, qi, ...r });
+        if (!S.pages.includes(p)) break;
+        S.results.push({ pageId: p.id, pi: 0, qi, saved: false, ...r });
+        reindex();
         $('progBar').style.width = (done / total * 100) + '%';
         renderGrid();
       }
-    } catch (e) { toast(`Seite ${pi + 1}: ${e && e.message || e}`, 6000); }
+      p.cutVer = ver;
+    } catch (e) { toast(`Seite ${S.pages.indexOf(p) + 1}: ${e && e.message || e}`, 6000); }
     if (!p.sample) releaseSource(src);
   }
+  S.results = S.results.filter(r => S.pages.some(p => p.id === r.pageId)); reindex();
   S.cutting = false; $('prog').hidden = true; renderGrid(); updateDock();
-  toast(`${total} Fotos fertig`);
+  toast(total === 1 ? '1 Foto fertig' : `${total} Fotos fertig`);
   if (window.innerWidth < 980) $('secOut').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 $('bCut').onclick = cutAll;
@@ -1495,24 +1523,30 @@ function renderGrid() {
     card.innerHTML = `<div class="pic"><img alt="Foto ${r.qi + 1} von Seite ${r.pi + 1}" src="${r.url}"></div>
       <div class="meta"><b></b><span>${r.w} × ${r.h} px · ${(r.blob.size / 1048576).toFixed(1)} MB</span></div>
       <div class="acts"><button class="btn" data-a="save" title="Sichern" aria-label="Foto sichern" ${S.downloads ? '' : 'disabled'}><svg class="i"><use href="#i-down"/></svg></button><button class="btn" data-a="rot" title="Drehen" aria-label="Foto drehen"><svg class="i"><use href="#i-rot"/></svg></button></div>`;
-    card.querySelector('.meta b').textContent = n.file;
+    card.querySelector('.meta b').textContent = (r.saved ? '✓ ' : '') + n.file; if (r.saved) card.classList.add('saved');
     card.querySelector('[data-a=rot]').onclick = () => rotateResult(i);
     card.querySelector('[data-a=save]').onclick = () => saveOne(i);
     g.appendChild(card);
   });
-  if (!S.cutting) $('resSub').textContent = S.results.length ? `${(bytes / 1048576).toFixed(1)} MB · JPG in voller Auflösung${S.dirty ? ' · Rahmen geändert, neu ausschneiden' : ''}` : '';
+  const pend = pendingCount();
+  if (!S.cutting) $('resSub').textContent = S.results.length ? `${(bytes / 1048576).toFixed(1)} MB · JPG in voller Auflösung${pend ? ` · ${pend} noch nicht ausgeschnitten` : ''}` : '';
   $('resTitle').textContent = S.results.length === 1 ? '1 Foto' : `${S.results.length} Fotos`;
   const ex = names(0, 0).file, ex2 = names(0, 1).file;
   $('nameEx').innerHTML = ''; const b1 = document.createElement('b'); b1.textContent = ex; $('nameEx').append(b1, `, ${ex2} …  (S = Seite, F = Foto)`);
   updateSummary();
 }
 async function rotateResult(i) {
-  const r = S.results[i], p = S.pages.find(x => x.id === r.pageId); if (!p) return;
-  const q = p.quads[r.qi]; q.rot = (q.rot + 3) % 4;
+  const r = S.results[i], p = S.pages.find(x => x.id === r.pageId); if (!p || S.cutting || r.busy) return;
+  if (p.cutVer !== p.ver) { toast('Diese Seite wurde geändert – bitte erst neu ausschneiden'); return; }
+  r.busy = true;
+  const q = p.quads[r.qi]; q.rot = (q.rot + 3) % 4; const clean = p.cutVer === p.ver; bump(p); if (clean) p.cutVer = p.ver;
   const src = await fullSource(p); const old = r.url; Object.assign(r, await cutQuad(p, src, q)); if (!p.sample) releaseSource(src);
-  URL.revokeObjectURL(old); renderGrid(); if (p === page()) drawEditor();
+  URL.revokeObjectURL(old); r.busy = false; r.saved = false; renderGrid(); if (p === page()) drawEditor();
 }
-$('album').oninput = () => renderGrid();
+(() => { const d = new Date(), v = String(d.getFullYear() % 100).padStart(2, '0') + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  let saved = null; try { saved = localStorage.getItem('albumschere.prefix'); } catch (e) {}
+  $('album').value = saved !== null ? saved : v; })();
+$('album').oninput = () => { try { localStorage.setItem('albumschere.prefix', $('album').value); } catch (e) {} for (const r of S.results) r.saved = false; renderGrid(); };
 
 // ---------- Speichern ----------
 async function save(filename, data) {
@@ -1523,7 +1557,7 @@ async function save(filename, data) {
     return 'error';
   }
 }
-async function saveOne(i) { const r = S.results[i]; await save(names(r.pi, r.qi).file, r.blob); }
+async function saveOne(i) { const r = S.results[i]; const res = await save(names(r.pi, r.qi).file, r.blob); if (res === 'ok') { r.saved = true; renderGrid(); toast('Gesichert'); } else if (res === 'error') toast('Speichern ging nicht'); }
 // ---------- Speicherort ----------
 const MOBILE = /iPhone|iPad|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const CAN_SHARE = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.jpg', { type: 'image/jpeg' })] })); } catch (e) { return false; } })();
@@ -1576,33 +1610,32 @@ async function saveFiles(list) {
   } catch (e) { if (e && e.name === 'AbortError') return 'declined'; toast('Speichern ging nicht: ' + (e && e.message || e), 5000); return 'error'; }
 }
 async function saveTo({ filename, data }) { const r = await saveFiles([[filename, data]]); if (r !== 'ok') throw { code: r === 'declined' ? 'declined' : 'unavailable', message: r }; return { status: 'saved' }; }
-async function saveAll() { if (S.results.length) await saveFiles(S.results.map(r => [names(r.pi, r.qi).file, r.blob])); }
+async function saveAll() { if (!S.results.length) return; if (await saveFiles(S.results.map(r => [names(r.pi, r.qi).file, r.blob])) === 'ok') { S.results.forEach(r => r.saved = true); renderGrid(); if (target !== 'photos') toast(`Alle ${S.results.length} Fotos gesichert`); } }
 $('bEach').onclick = saveAll;
-const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
-function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
-async function makeZip(entries) {
-  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
-  const now = new Date(), dt = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)), dd = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate());
-  for (const { path, blob } of entries) {
-    const data = new Uint8Array(await blob.arrayBuffer()), name = enc.encode(path), crc = crc32(data);
-    const lh = new DataView(new ArrayBuffer(30));
-    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
-    lh.setUint16(10, dt, true); lh.setUint16(12, dd, true); lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
-    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
-    parts.push(lh, name, data);
-    const ch = new DataView(new ArrayBuffer(46));
-    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
-    ch.setUint16(12, dt, true); ch.setUint16(14, dd, true); ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
-    ch.setUint16(28, name.length, true); ch.setUint32(42, off, true);
-    central.push(ch, name);
-    off += 30 + name.length + data.length;
+// ---------- Neues Album ----------
+let resetArm = 0;
+$('bReset').onclick = () => {
+  const unsaved = S.results.filter(r => !r.saved).length;
+  if ((unsaved || pendingCount()) && Date.now() - resetArm > 4000) {
+    resetArm = Date.now();
+    $('bReset').lastChild.textContent = 'Wirklich alles verwerfen?';
+    setTimeout(() => { $('bReset').lastChild.textContent = 'Neues Album beginnen'; }, 4000);
+    toast(unsaved ? `${unsaved} Fotos sind noch nicht gesichert` : 'Nicht ausgeschnittene Seiten gehen verloren', 4000); return;
   }
-  const csize = central.reduce((s, x) => s + x.byteLength, 0), end = new DataView(new ArrayBuffer(22));
-  end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true);
-  end.setUint32(12, csize, true); end.setUint32(16, off, true);
-  return new Blob([...parts, ...central, end], { type: 'application/zip' });
-}
-
+  S.results.forEach(r => URL.revokeObjectURL(r.url));
+  for (const p of S.pages) { if (p.preview) p.preview.width = p.preview.height = 0; if (p._view) p._view.width = p._view.height = 0; }
+  S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; resetArm = 0;
+  $('bReset').lastChild.textContent = 'Neues Album beginnen';
+  openSheet(false); renderPages(); drawEditor(); renderGrid(); updateDock(); window.scrollTo(0, 0); toast('Neues Album');
+};
+document.addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA/.test(document.activeElement?.tagName || '')) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel >= 0) { e.preventDefault(); $('bDel').click(); }
+  else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); $('bUndo').click(); }
+  else if (e.key === 'ArrowRight' && S.cur < S.pages.length - 1) { S.cur++; S.sel = -1; renderPages(); drawEditor(); }
+  else if (e.key === 'ArrowLeft' && S.cur > 0) { S.cur--; S.sel = -1; renderPages(); drawEditor(); }
+});
+window.addEventListener('beforeunload', e => { if (S.results.some(r => !r.saved) || pendingCount()) { e.preventDefault(); e.returnValue = ''; } });
 // ---------- Einstellungen-Sheet ----------
 function openSheet(on) { document.body.classList.toggle('sheet-open', on); $('scrim').hidden = !on; }
 $('bMenu').onclick = () => openSheet(true); $('bClose').onclick = () => openSheet(false); $('scrim').onclick = () => openSheet(false);

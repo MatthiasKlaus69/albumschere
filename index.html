@@ -1,0 +1,1630 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111113">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Albumschere">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Albumschere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: wie eine Kamera-/Foto-App – große dunkle Bühne oben, Filmstreifen darunter, Hauptaktion in der Daumenleiste; Einstellungen als Sheet (Telefon) bzw. Seitenspalte (Desktop) */
+:root {
+  --bg: #f4f3f0; --surface: #ffffff; --sunk: #ebe9e4; --ink: #17171a; --muted: #6c6a65; --line: #e2dfd9;
+  --accent: #f0b429; --accent-ink: #1d1500;
+  --stage: #0f0f11; --danger: #c2410c;
+  --shadow: 0 1px 2px rgba(20,18,12,.05), 0 6px 20px rgba(20,18,12,.06);
+  --f-ui: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b0b0d; --surface: #161618; --sunk: #1f1f23; --ink: #f1f0ec; --muted: #9b9993; --line: #28282d;
+  --accent: #f5bd3c; --accent-ink: #1d1500; --stage: #050506; --danger: #fb8a5c;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b0b0d; --surface: #161618; --sunk: #1f1f23; --ink: #f1f0ec; --muted: #9b9993; --line: #28282d;
+  --accent: #f5bd3c; --accent-ink: #1d1500; --stage: #050506; --danger: #fb8a5c;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3); color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { background: var(--bg); color: var(--ink) }
+body { font: 15px/1.45 var(--f-ui); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent }
+button, input { font: inherit; color: inherit }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; left: -9999px }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round }
+
+/* Grundraster */
+.app { max-width: 1280px; margin: 0 auto; padding-block: 12px 104px; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) }
+@media (min-width: 980px) { .app { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; padding-block: 20px 40px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)) } }
+.main { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+
+/* Bühne */
+.stage { position: relative; background: var(--stage); border-radius: 22px; padding: 54px 12px 86px; min-height: 340px; display: grid; place-items: center; overflow: hidden }
+.stage.is-empty { padding: 28px 18px; min-height: min(70vh, 560px) }
+#cv { display: block; touch-action: none; border-radius: 4px; max-width: 100% }
+.chip { position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #f1f0ec; font-size: 13px; font-weight: 500; max-width: calc(100% - 72px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: #6fcf97; flex: none }
+.chip.busy .dot { background: var(--accent); animation: pulse 1s ease-in-out infinite }
+@keyframes pulse { 50% { opacity: .3 } }
+.glass-btn { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #f1f0ec; cursor: pointer }
+.glass-btn svg.i { width: 18px; height: 18px }
+.glass-btn.light { position: static; background: var(--sunk); color: var(--ink) }
+@media (min-width: 980px) { #bMenu { display: none } }
+.toolbar { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 18px; background: rgba(28,28,31,.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08) }
+.tool { display: grid; place-items: center; gap: 3px; min-width: 58px; height: 54px; padding: 4px 6px; border: 0; border-radius: 13px; background: transparent; color: #ecebe7; cursor: pointer; font-size: 10.5px; font-weight: 500 }
+.tool:hover { background: rgba(255,255,255,.08) }
+.tool:disabled { opacity: .3; cursor: default; background: transparent }
+.tool.warn { color: #ffb38f }
+.sep { width: 1px; height: 30px; background: rgba(255,255,255,.12); margin: 0 3px }
+@media (max-width: 440px) { .tool { min-width: 50px; height: 50px } .tool span { display: none } .tool svg.i { width: 22px; height: 22px } }
+.empty-stage { display: grid; gap: 18px; justify-items: center; text-align: center; color: #a9a7a1; max-width: 360px }
+.empty-art { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: rgba(245,189,60,.12); color: #f5bd3c }
+.empty-art svg.i { width: 30px; height: 30px }
+.empty-txt { display: grid; gap: 6px }
+.empty-txt b { color: #f4f3ef; font-size: 21px; font-weight: 650; letter-spacing: -.015em }
+.empty-txt span { font-size: 14.5px; line-height: 1.5 }
+.empty-acts { display: grid; gap: 10px; width: 100%; max-width: 300px }
+.empty-acts .btn { min-height: 52px; font-size: 16px; border-radius: 14px }
+.empty-tip { margin: 0; font-size: 12.5px; color: #77756f }
+
+/* Filmstreifen */
+.strip { overflow-x: auto; scrollbar-width: none; margin: 0 -2px }
+.strip::-webkit-scrollbar { display: none }
+.pages { display: flex; gap: 8px; padding: 2px }
+.thumb { position: relative; flex: none; width: 66px; height: 66px; border-radius: 12px; overflow: hidden; border: 0; padding: 0; background: var(--sunk); cursor: pointer; opacity: .62; transition: opacity .15s, transform .15s }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block }
+.thumb.on { opacity: 1; box-shadow: 0 0 0 2.5px var(--accent) }
+.thumb .n { position: absolute; right: 4px; bottom: 4px; min-width: 18px; text-align: center; font: 600 11px var(--f-mono); background: rgba(10,10,12,.78); color: #fff; padding: 1px 5px; border-radius: 6px }
+.legend { margin: 0 4px; font-size: 12.5px; color: var(--muted) }
+
+/* Knöpfe */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; cursor: pointer; position: relative; transition: background .15s, transform .1s, opacity .15s; white-space: nowrap; text-decoration: none }
+.btn:hover { background: var(--sunk) }
+.btn:active { transform: scale(.97) }
+.btn:disabled { opacity: .4; cursor: default; transform: none }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.btn.accent { background: var(--accent); color: var(--accent-ink); border-color: var(--accent) }
+.btn.accent:hover { background: color-mix(in srgb, var(--accent) 88%, #000) }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted) }
+.btn.ghost-dark { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #f1f0ec }
+.btn.ghost-dark:hover { background: rgba(255,255,255,.14) }
+.btn.danger { color: var(--danger) }
+.btn.full { width: 100% }
+.btn:focus-visible, .tool:focus-visible, .thumb:focus-visible, .glass-btn:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.row { display: flex; gap: 8px; flex-wrap: wrap }
+.row > .btn { flex: 1 1 auto }
+
+/* Ergebnisse */
+.results { display: grid; gap: 12px; margin-top: 8px }
+.results-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 0 4px }
+.results-head h3 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.02em }
+.results-head p { margin: 0; color: var(--muted); font-size: 13.5px; font-variant-numeric: tabular-nums }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; padding: 3px; background: var(--sunk); border-radius: 12px }
+.seg button { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 550; font-size: 14px; cursor: pointer }
+.seg button[aria-checked="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow) }
+.progress { height: 4px; border-radius: 999px; background: var(--sunk); overflow: hidden }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px }
+@media (max-width: 440px) { .grid { grid-template-columns: 1fr 1fr } }
+.card { position: relative; border-radius: 14px; overflow: hidden; background: var(--sunk); min-width: 0 }
+.card .pic { aspect-ratio: 1; max-width: 100%; display: grid; place-items: center }
+.card .pic img { max-width: 88%; max-height: 88%; object-fit: contain; box-shadow: 0 3px 12px rgba(0,0,0,.22); border-radius: 2px }
+.card .meta { position: absolute; left: 8px; bottom: 8px; right: 52px; display: grid; min-width: 0 }
+.card .meta b { font: 500 11px var(--f-mono); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: color-mix(in srgb, var(--surface) 86%, transparent); padding: 2px 6px; border-radius: 6px; justify-self: start; max-width: 100% }
+.card .meta span { display: none }
+.card .acts { position: absolute; top: 6px; right: 6px; display: flex; flex-direction: column; gap: 6px }
+.card .acts .btn { width: 36px; min-height: 36px; padding: 0; border-radius: 50%; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
+.card .acts .btn .lbl { display: none }
+.empty { color: var(--muted); font-size: 14px; padding: 22px 16px; text-align: center; border: 1.5px dashed var(--line); border-radius: 14px; grid-column: 1 / -1; margin: 0 }
+
+/* Einstellungen: Seitenspalte (Desktop) bzw. Sheet (Telefon) */
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px }
+.panel h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px }
+.hint { margin: 0; color: var(--muted); font-size: 13px }
+.field { display: grid; gap: 6px; font-size: 13px; color: var(--muted) }
+.field input[type=text] { height: 46px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font: 500 15px var(--f-mono); color: var(--ink); width: 100% }
+.preview-name { font: 12px var(--f-mono); color: var(--muted); overflow-wrap: anywhere; font-weight: 400; text-transform: none; letter-spacing: 0 }
+.preview-name b { color: var(--ink); font-weight: 500 }
+.range { display: flex; align-items: center; gap: 10px }
+.range input { flex: 1; accent-color: var(--accent); min-width: 0 }
+.range output { font: 12px var(--f-mono); color: var(--muted); width: 3ch; text-align: right }
+.sheet-head { display: none }
+@media (min-width: 980px) { .side { position: sticky; top: 20px } }
+@media (max-width: 979px) {
+  .desk-only { display: none !important }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; max-height: 82vh; overflow-y: auto; background: var(--bg); border-radius: 22px 22px 0 0; padding: 8px max(14px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); box-shadow: 0 -10px 40px rgba(0,0,0,.25); transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1); visibility: hidden }
+  body.sheet-open .side { transform: none; visibility: visible }
+  .sheet-head { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 14px 4px 4px; position: relative }
+  .sheet-head b { font-size: 18px; font-weight: 650 }
+  .grab { position: absolute; top: 2px; left: 50%; width: 38px; height: 5px; border-radius: 3px; background: var(--line); transform: translateX(-50%) }
+}
+.scrim { position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.35) }
+
+/* Daumenleiste (Telefon) */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-top: 10px; padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); border-top: 1px solid var(--line); display: flex; gap: 8px }
+.dock .icon-lg { width: 54px; min-height: 54px; padding: 0; border-radius: 16px; flex: none }
+.dock .main-act { flex: 1; min-height: 54px; font-size: 16px; border-radius: 16px }
+@media (min-width: 980px) { .dock { display: none } }
+.drop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(4px); font-size: 18px; font-weight: 600 }
+.drop div { border: 2px dashed var(--accent); border-radius: 24px; padding: 48px 56px; background: var(--surface) }
+.toast { position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px); z-index: 60; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px) }
+.toast.show { opacity: 1; transform: translate(-50%, 0) }
+@media (min-width: 980px) { .toast { bottom: 28px } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+</style>
+<style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-frame" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M12 9v6M9 12h6"/></symbol>
+  <symbol id="i-rot" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-page" viewBox="0 0 24 24"><rect x="4" y="7" width="13" height="13" rx="1.5"/><path d="M9 3h8a4 4 0 0 1 4 4v6"/><path d="m18 11 3 2 2-3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></symbol>
+  <symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  <symbol id="i-merge" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v5M12 15v5M9 12h6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+  <symbol id="i-photos" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.9 2.9M15.5 15.5l2.9 2.9M5.6 18.4l2.9-2.9M15.5 8.5l2.9-2.9"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+</svg>
+
+<input id="inCam" class="vh" type="file" accept="image/*" capture="environment">
+<input id="inPick" class="vh" type="file" accept="image/*" multiple>
+<input id="inDir" class="vh" type="file" webkitdirectory multiple>
+
+<div class="app">
+  <main class="main">
+    <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
+      <div class="chip" id="chip"><span class="dot"></span><span id="pageInfo"></span></div>
+      <button class="glass-btn" id="bMenu" title="Einstellungen" aria-label="Einstellungen"><svg class="i"><use href="#i-sliders"/></svg></button>
+      <canvas id="cv"></canvas>
+      <div class="empty-stage" id="emptyStage" hidden>
+        <div class="empty-art"><svg class="i"><use href="#i-cut"/></svg></div>
+        <div class="empty-txt"><b>Albumseite fotografieren</b><span>Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</span></div>
+        <div class="empty-acts">
+          <label class="btn accent" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
+          <label class="btn ghost-dark" for="inPick"><svg class="i"><use href="#i-img"/></svg>Aus Fotos wählen</label>
+        </div>
+        <p class="empty-tip">Senkrecht von oben, ohne Blitz. Quer oder hoch ist egal.</p>
+      </div>
+      <div class="toolbar" id="toolbar" role="toolbar" aria-label="Rahmen bearbeiten">
+        <button class="tool" id="bAdd" title="Rahmen hinzufügen"><svg class="i"><use href="#i-frame"/></svg><span>Rahmen</span></button>
+        <button class="tool" id="bRot" title="Ausgewähltes Foto drehen" disabled><svg class="i"><use href="#i-rot"/></svg><span>Drehen</span></button>
+        <button class="tool" id="bMerge" title="Mit dem Nachbarrahmen zu einem Foto verbinden" disabled><svg class="i"><use href="#i-merge"/></svg><span>Verbinden</span></button>
+        <button class="tool warn" id="bDel" title="Ausgewählten Rahmen löschen" disabled><svg class="i"><use href="#i-trash"/></svg><span>Löschen</span></button>
+        <span class="sep"></span>
+        <button class="tool" id="bRotPage" title="Ganze Seite um 90° drehen"><svg class="i"><use href="#i-page"/></svg><span>Seite</span></button>
+      </div>
+    </section>
+    <div class="strip">
+      <div class="pages" id="pages" aria-label="Albumseiten"></div>
+    </div>
+    <p class="legend" id="legend">Ecke ziehen passt an · Rahmen antippen für Drehen, Verbinden, Löschen</p>
+
+    <section class="results" id="secOut" aria-live="polite">
+      <div class="results-head">
+        <h3 id="resTitle">Ergebnis</h3>
+        <p id="resSub"></p>
+      </div>
+      <div class="progress" id="prog" hidden><i id="progBar"></i></div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+
+  <aside class="side" id="sheet" aria-label="Einstellungen">
+    <div class="sheet-head"><span class="grab"></span><b>Einstellungen</b><button class="glass-btn light" id="bClose" aria-label="Schließen"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <section class="panel desk-only">
+      <h2>Albumseiten</h2>
+      <div class="row">
+        <label class="btn primary" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
+        <label class="btn" for="inPick"><svg class="i"><use href="#i-img"/></svg>Auswählen</label>
+        <label class="btn" for="inDir" id="lblDir"><svg class="i"><use href="#i-folder"/></svg>Ordner</label>
+      </div>
+    </section>
+    <section class="panel o-exp">
+      <h2>Export</h2>
+      <label class="field" for="album">Dateinamen beginnen mit
+        <input id="album" type="text" value="261022" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </label>
+      <div class="preview-name" id="nameEx"></div>
+      <button class="btn accent full desk-only" id="bCut"><svg class="i"><use href="#i-cut"/></svg>Fotos ausschneiden</button>
+      <button class="btn primary full desk-only" id="bEach" disabled><svg class="i"><use href="#i-down"/></svg>Alle sichern</button>
+      <div class="field" id="targetWrap" hidden>Speichern in<div class="seg" id="target" role="radiogroup" aria-label="Speicherort"></div></div>
+      <p class="hint" id="saveNote">Jedes Foto wird als eigene JPG-Datei gesichert. Auf dem iPhone im Teilen-Menü „Bild sichern“ für die Fotos-App oder „In Dateien sichern“ für einen Ordner.</p>
+    </section>
+    <section class="panel" id="secEdit">
+      <h2>Erkennung <span class="preview-name" id="pageName"></span></h2>
+      <div class="range"><label for="sens" class="hint" style="white-space:nowrap">Empfindlichkeit</label><input id="sens" type="range" min="0" max="100" value="50"><output id="sensOut">50</output></div>
+      <div class="row">
+        <button class="btn" id="bRedetect"><svg class="i"><use href="#i-scan"/></svg>Neu erkennen</button>
+        <button class="btn ghost danger" id="bDelPage"><svg class="i"><use href="#i-x"/></svg>Seite entfernen</button>
+      </div>
+    </section>
+  </aside>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="dock" id="dock">
+  <label class="btn icon-lg" for="inCam" aria-label="Seite fotografieren" title="Seite fotografieren"><svg class="i"><use href="#i-cam"/></svg></label>
+  <label class="btn icon-lg" for="inPick" aria-label="Aus Fotos wählen" title="Aus Fotos wählen"><svg class="i"><use href="#i-img"/></svg></label>
+  <button class="btn accent main-act" id="mMain"><svg class="i" id="mIco"><use href="#i-cut"/></svg><span id="mMainL">Ausschneiden</span></button>
+</div>
+<div class="drop" id="drop" hidden><div>Albumseiten hier ablegen</div></div>
+<div class="toast" id="cutInfo" role="status" aria-live="polite"></div>
+<script id="detectSrc">
+// ---- Fotoerkennung (reines JS, ohne DOM) ----
+function boxMorph(m, w, h, r, erode) {
+  const t = new Uint8Array(m.length), o = new Uint8Array(m.length), ps = new Int32Array(w + 1);
+  for (let y = 0; y < h; y++) {
+    const off = y * w; ps[0] = 0;
+    for (let x = 0; x < w; x++) ps[x + 1] = ps[x] + m[off + x];
+    for (let x = 0; x < w; x++) {
+      const a = x - r < 0 ? 0 : x - r, b = x + r + 1 > w ? w : x + r + 1, s = ps[b] - ps[a];
+      t[off + x] = erode ? (s === b - a ? 1 : 0) : (s > 0 ? 1 : 0);
+    }
+  }
+  const col = new Int32Array(w);
+  // laufende Spaltensummen
+  for (let y = 0; y <= Math.min(h - 1, r); y++) for (let x = 0; x < w; x++) col[x] += t[y * w + x];
+  for (let y = 0; y < h; y++) {
+    const a = y - r < 0 ? 0 : y - r, b = y + r + 1 > h ? h : y + r + 1, cnt = b - a, off = y * w;
+    for (let x = 0; x < w; x++) o[off + x] = erode ? (col[x] === cnt ? 1 : 0) : (col[x] > 0 ? 1 : 0);
+    const yin = y + r + 1, yout = y - r;
+    if (yin < h) for (let x = 0; x < w; x++) col[x] += t[yin * w + x];
+    if (yout >= 0) for (let x = 0; x < w; x++) col[x] -= t[yout * w + x];
+  }
+  return o;
+}
+
+function boxBlurF(src, w, h, r) {
+  const t = new Float32Array(src.length), o = new Float32Array(src.length), k = 1 / (2 * r + 1);
+  for (let y = 0; y < h; y++) {
+    const off = y * w; let s = 0;
+    for (let x = -r; x <= r; x++) s += src[off + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+    for (let x = 0; x < w; x++) {
+      t[off + x] = s * k;
+      const xa = x + r + 1, xb = x - r;
+      s += src[off + (xa >= w ? w - 1 : xa)] - src[off + (xb < 0 ? 0 : xb)];
+    }
+  }
+  for (let y = 0; y < h; y++) {
+    const off = y * w;
+    for (let x = 0; x < w; x++) o[off + x] = 0;
+    for (let d = -r; d <= r; d++) {
+      const yy = y + d < 0 ? 0 : y + d >= h ? h - 1 : y + d, o2 = yy * w;
+      for (let x = 0; x < w; x++) o[off + x] += t[o2 + x];
+    }
+    for (let x = 0; x < w; x++) o[off + x] *= k;
+  }
+  return o;
+}
+
+function convexHull(pts) {
+  pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  lo.pop(); up.pop();
+  return lo.concat(up);
+}
+
+function minAreaRect(hull) {
+  let best = null;
+  for (let i = 0; i < hull.length; i++) {
+    const p = hull[i], q = hull[(i + 1) % hull.length];
+    let ex = q[0] - p[0], ey = q[1] - p[1]; const L = Math.hypot(ex, ey); if (L < 1e-9) continue;
+    ex /= L; ey /= L; const nx = -ey, ny = ex;
+    let u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+    for (const s of hull) { const u = s[0] * ex + s[1] * ey, v = s[0] * nx + s[1] * ny; if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v; }
+    const area = (u1 - u0) * (v1 - v0);
+    if (!best || area < best.area) best = { area, c: [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => [ex * u + nx * v, ey * u + ny * v]) };
+  }
+  return best;
+}
+
+function polyArea(c) { let a = 0; for (let i = 0; i < c.length; i++) { const p = c[i], q = c[(i + 1) % c.length]; a += p[0] * q[1] - q[0] * p[1]; } return Math.abs(a) / 2; }
+
+function orderCorners(c) {
+  const cx = c.reduce((s, p) => s + p[0], 0) / 4, cy = c.reduce((s, p) => s + p[1], 0) / 4;
+  const s = c.slice().sort((a, b) => Math.atan2(a[1] - cy, a[0] - cx) - Math.atan2(b[1] - cy, b[0] - cx));
+  let k = 0; for (let i = 1; i < 4; i++) if (s[i][0] + s[i][1] < s[k][0] + s[k][1]) k = i;
+  return [0, 1, 2, 3].map(i => s[(i + k) % 4]);
+}
+
+var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5 }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
+// ---- Kantenbasierte Mehrfach-Fotoerkennung ----
+// Ablauf nach dem Vorbild aktueller Dokumentscanner: Farbkanten -> Hough-Linien mit Belegungsprofil
+// -> Vierecke aus zwei Linienpaaren -> Bewertung -> gierige Auswahl; Rückfall über Flächenmaske für runde Fotos.
+const pointInQuad = (c, x, y) => { let s = false; for (let i = 0, j = 3; i < 4; j = i++) { const [a, b] = c[i], [e, f] = c[j]; if ((b > y) !== (f > y) && x < (e - a) * (y - b) / (f - b) + a) s = !s; } return s; };
+const angDiff = (a, b) => { const d = Math.abs(a - b) % 180; return Math.min(d, 180 - d); };
+
+function detectQuads(rgba, w, h, sens) {
+  const n = w * h;
+  const R = new Float32Array(n), G = new Float32Array(n), B = new Float32Array(n);
+  for (let i = 0; i < n; i++) { R[i] = rgba[4 * i]; G[i] = rgba[4 * i + 1]; B[i] = rgba[4 * i + 2]; }
+  const Rb = boxBlurF(R, w, h, 1), Gb = boxBlurF(G, w, h, 1), Bb = boxBlurF(B, w, h, 1);
+  // Farbgradient: Kanal mit stärkster Antwort
+  const mag = new Float32Array(n), gxA = new Float32Array(n), gyA = new Float32Array(n);
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x;
+    let gx = Rb[i - w + 1] + 2 * Rb[i + 1] + Rb[i + w + 1] - Rb[i - w - 1] - 2 * Rb[i - 1] - Rb[i + w - 1];
+    let gy = Rb[i + w - 1] + 2 * Rb[i + w] + Rb[i + w + 1] - Rb[i - w - 1] - 2 * Rb[i - w] - Rb[i - w + 1];
+    let bm = gx * gx + gy * gy;
+    const gx2 = Gb[i - w + 1] + 2 * Gb[i + 1] + Gb[i + w + 1] - Gb[i - w - 1] - 2 * Gb[i - 1] - Gb[i + w - 1];
+    const gy2 = Gb[i + w - 1] + 2 * Gb[i + w] + Gb[i + w + 1] - Gb[i - w - 1] - 2 * Gb[i - w] - Gb[i - w + 1];
+    const m2 = gx2 * gx2 + gy2 * gy2; if (m2 > bm) { bm = m2; gx = gx2; gy = gy2; }
+    const gx3 = Bb[i - w + 1] + 2 * Bb[i + 1] + Bb[i + w + 1] - Bb[i - w - 1] - 2 * Bb[i - 1] - Bb[i + w - 1];
+    const gy3 = Bb[i + w - 1] + 2 * Bb[i + w] + Bb[i + w + 1] - Bb[i - w - 1] - 2 * Bb[i - w] - Bb[i - w + 1];
+    const m3 = gx3 * gx3 + gy3 * gy3; if (m3 > bm) { bm = m3; gx = gx3; gy = gy3; }
+    mag[i] = Math.sqrt(bm); gxA[i] = gx; gyA[i] = gy;
+  }
+  const tex = boxBlurF(mag, w, h, 2);
+  // Albumseite: häufigste Farbe unter ruhigen Pixeln
+  const hist = new Uint32Array(4096), bin = i => ((rgba[4 * i] >> 4) << 8) | ((rgba[4 * i + 1] >> 4) << 4) | (rgba[4 * i + 2] >> 4);
+  for (let i = 0; i < n; i++) if (tex[i] < 14) hist[bin(i)]++;
+  // bis zu drei dominante ruhige Farben (Albumseite, Folie, Nachbarseite)
+  const pageCols = [];
+  const used = new Uint8Array(4096);
+  for (let k = 0; k < 3; k++) {
+    let mb = -1; for (let b = 0; b < 4096; b++) if (!used[b] && (mb < 0 || hist[b] > hist[mb])) mb = b;
+    if (mb < 0 || hist[mb] < n * (k ? 0.03 : 0)) break;
+    // Nachbarbins mitnehmen
+    const r0 = mb >> 8, g0 = (mb >> 4) & 15, b0 = mb & 15;
+    for (let dr = -1; dr <= 1; dr++) for (let dg = -1; dg <= 1; dg++) for (let db = -1; db <= 1; db++) { const r = r0 + dr, g = g0 + dg, bb = b0 + db; if (r >= 0 && g >= 0 && bb >= 0 && r < 16 && g < 16 && bb < 16) used[(r << 8) | (g << 4) | bb] = 1; }
+    let pr = 0, pg = 0, pb = 0, pc = 0;
+    for (let i = 0; i < n; i++) if (tex[i] < 14 && bin(i) === mb) { pr += Rb[i]; pg += Gb[i]; pb += Bb[i]; pc++; }
+    if (pc) pageCols.push([pr / pc, pg / pc, pb / pc]);
+  }
+  if (!pageCols.length) pageCols.push([235, 235, 230]);
+  const pageDist = i => { let m = Infinity; for (const [r, g, b] of pageCols) { const d = Math.hypot(Rb[i] - r, Gb[i] - g, Bb[i] - b); if (d < m) m = d; } return m; };
+  const pageLike = new Uint8Array(n);
+  if (CFG.plMode === 'region') {
+    // Albumseite = größte zusammenhängende glatte, helle, wenig bunte Fläche (wächst über Lichtverläufe, stoppt an Kanten)
+    const smooth = new Uint8Array(n); for (let i = 0; i < n; i++) smooth[i] = tex[i] < CFG.plTex ? 1 : 0;
+    const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), comps = [];
+    for (let s0 = 0; s0 < n; s0++) {
+      if (!smooth[s0] || lab[s0] >= 0) continue;
+      const id = comps.length; let top = 0, cnt = 0, sr = 0, sg = 0, sb = 0; stk[top++] = s0; lab[s0] = id;
+      while (top) {
+        const i = stk[--top]; cnt++; sr += Rb[i]; sg += Gb[i]; sb += Bb[i]; const x = i % w;
+        if (x > 0 && smooth[i - 1] && lab[i - 1] < 0) { lab[i - 1] = id; stk[top++] = i - 1; }
+        if (x < w - 1 && smooth[i + 1] && lab[i + 1] < 0) { lab[i + 1] = id; stk[top++] = i + 1; }
+        if (i >= w && smooth[i - w] && lab[i - w] < 0) { lab[i - w] = id; stk[top++] = i - w; }
+        if (i < n - w && smooth[i + w] && lab[i + w] < 0) { lab[i + w] = id; stk[top++] = i + w; }
+      }
+      const r = sr / cnt, g = sg / cnt, b = sb / cnt, L = 0.299 * r + 0.587 * g + 0.114 * b, ch = Math.max(r, g, b) - Math.min(r, g, b);
+      comps.push({ cnt, r, g, b, ok: L > CFG.plLum && ch < CFG.plChroma });
+    }
+    let best = -1; comps.forEach((c, k) => { if (c.ok && (best < 0 || c.cnt > comps[best].cnt)) best = k; });
+    const keep = new Uint8Array(comps.length);
+    if (best >= 0) { const B0 = comps[best]; comps.forEach((c, k) => { if (c.ok && (k === best || (c.cnt >= B0.cnt * CFG.plRel && Math.hypot(c.r - B0.r, c.g - B0.g, c.b - B0.b) < 45))) keep[k] = 1; }); }
+    for (let i = 0; i < n; i++) pageLike[i] = lab[i] >= 0 && keep[lab[i]] ? 1 : 0;
+  } else for (let i = 0; i < n; i++) pageLike[i] = (tex[i] < CFG.plTex && pageDist(i) < CFG.plDist) ? 1 : 0;
+
+  // Kanten mit Non-Maximum-Suppression
+  const tEdge = CFG.tEdgeBase - 0.9 * sens;
+  const edge = new Uint8Array(n), eAng = new Float32Array(n), edges = [], tWeak = tEdge * 0.3;
+  for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+    const i = y * w + x, m = mag[i]; if (m < tWeak) continue;
+    let a = Math.atan2(gyA[i], gxA[i]) * 180 / Math.PI; if (a < 0) a += 180;
+    let o1, o2;
+    if (a < 22.5 || a >= 157.5) { o1 = i - 1; o2 = i + 1; }
+    else if (a < 67.5) { o1 = i - w - 1; o2 = i + w + 1; }
+    else if (a < 112.5) { o1 = i - w; o2 = i + w; }
+    else { o1 = i - w + 1; o2 = i + w - 1; }
+    if (m < mag[o1] || m < mag[o2]) continue;
+    edge[i] = m >= tEdge ? 2 : 1; eAng[i] = a; edges.push(i);
+  }
+
+  // Hough mit Orientierung (Normalenwinkel 0..179°)
+  const D = Math.ceil(Math.hypot(w, h)), NR = 2 * D + 1, acc = new Float32Array(180 * NR);
+  const COS = new Float32Array(180), SIN = new Float32Array(180);
+  for (let t = 0; t < 180; t++) { COS[t] = Math.cos(t * Math.PI / 180); SIN[t] = Math.sin(t * Math.PI / 180); }
+  for (const i of edges) {
+    const x = i % w, y = (i / w) | 0, a = Math.round(eAng[i]);
+    for (let d = -4; d <= 4; d++) {
+      const t = (a + d + 180) % 180, r = Math.round(x * COS[t] + y * SIN[t]) + D;
+      acc[t * NR + r] += edge[i] === 2 ? 1 : 0.6;
+    }
+  }
+  const minVotes = Math.max(18, Math.min(w, h) * 0.05), peaks = [];
+  for (let t = 0; t < 180; t++) for (let r = 1; r < NR - 1; r++) {
+    const v = acc[t * NR + r]; if (v < minVotes) continue;
+    let isMax = true;
+    for (let dt = -3; dt <= 3 && isMax; dt++) for (let dr = -4; dr <= 4; dr++) {
+      if (!dt && !dr) continue;
+      let tt = t + dt, rr = r + dr;
+      if (tt < 0) { tt += 180; rr = NR - 1 - rr; } else if (tt >= 180) { tt -= 180; rr = NR - 1 - rr; }
+      if (rr < 0 || rr >= NR) continue;
+      const u = acc[tt * NR + rr]; if (u > v || (u === v && (dt < 0 || (dt === 0 && dr < 0)))) { isMax = false; break; }
+    }
+    if (isMax) peaks.push({ t, r: r - D, v });
+  }
+  peaks.sort((a, b) => b.v - a.v);
+  const lines = [];
+  for (const p of peaks) {
+    if (lines.length >= CFG.lineCap) break;
+    // Belegungsprofil entlang der Linie
+    const c = COS[p.t], s = SIN[p.t], dx = -s, dy = c, x0 = p.r * c, y0 = p.r * s;
+    let tmin = -D, tmax = D;
+    const clip = (p0, dp, lo, hi) => { if (Math.abs(dp) < 1e-9) return (p0 >= lo && p0 <= hi); let a = (lo - p0) / dp, b = (hi - p0) / dp; if (a > b) [a, b] = [b, a]; tmin = Math.max(tmin, a); tmax = Math.min(tmax, b); return true; };
+    if (!clip(x0, dx, 2, w - 3) || !clip(y0, dy, 2, h - 3) || tmax - tmin < 10) continue;
+    const t0 = Math.ceil(tmin), len = Math.floor(tmax) - t0 + 1, cum = new Float32Array(len + 1);
+    for (let k = 0; k < len; k++) {
+      const t = t0 + k; let hit = 0;
+      for (let o = -CFG.tol; o <= CFG.tol + 1e-6 && !hit; o += CFG.tol / 3) {
+        const X = Math.round(x0 + dx * t + c * o), Y = Math.round(y0 + dy * t + s * o);
+        if (X < 0 || Y < 0 || X >= w || Y >= h) continue;
+        const i = Y * w + X; if (edge[i] && angDiff(eAng[i], p.t) < 14) hit = 1;
+      }
+      cum[k + 1] = cum[k] + hit;
+    }
+    lines.push({ t: p.t, r: p.r, c, s, dx, dy, t0, len, cum, v: p.v });
+  }
+  // Bildränder als schwache Kanten, damit vom Bildrand angeschnittene Fotos erkannt werden
+  for (const [t, r] of [[0, 1], [0, w - 2], [90, 1], [90, h - 2]]) {
+    const c = COS[t], s = SIN[t], dx = -s, dy = c;
+    const t0 = t === 0 ? 0 : -(w - 1), len = t === 0 ? h : w, cum = new Float32Array(len + 1);
+    for (let k = 0; k < len; k++) cum[k + 1] = cum[k] + 0.45;
+    lines.push({ t, r, c, s, dx, dy, t0, len, cum, v: 0, border: true });
+  }
+  const cover = (L, ta, tb) => {
+    if (ta > tb) [ta, tb] = [tb, ta];
+    const a = Math.max(0, Math.min(L.len, Math.round(ta) - L.t0)), b = Math.max(0, Math.min(L.len, Math.round(tb) - L.t0));
+    const span = tb - ta; if (span < 1) return 0;
+    return (L.cum[b] - L.cum[a]) / span;
+  };
+  const inter = (A, Bq) => { const det = A.c * Bq.s - A.s * Bq.c; if (Math.abs(det) < 1e-6) return null; return [(A.r * Bq.s - Bq.r * A.s) / det, (A.c * Bq.r - Bq.c * A.r) / det]; };
+  const tOn = (L, p) => p[0] * L.dx + p[1] * L.dy;
+
+  // Vierecke aus zwei annähernd parallelen Linienpaaren
+  const NL = lines.length, X = new Array(NL * NL).fill(null);
+  for (let a = 0; a < NL; a++) for (let b = a + 1; b < NL; b++) if (angDiff(lines[a].t, lines[b].t) > 55) { const p = inter(lines[a], lines[b]); X[a * NL + b] = X[b * NL + a] = p; }
+  const pairs = [];
+  for (let a = 0; a < NL; a++) for (let b = a + 1; b < NL; b++) if (angDiff(lines[a].t, lines[b].t) <= 18) pairs.push([a, b]);
+  const minSide = Math.max(w, h) * CFG.minSide, mg = Math.max(w, h) * 0.02;
+  const covMin = CFG.covBase - 0.004 * sens, lowMin = 0.3;
+  const inImg = p => p && p[0] > -mg && p[1] > -mg && p[0] < w + mg && p[1] < h + mg;
+  const cands = [];
+  // Seitenbelegung je Linienpaar vorab: Linie a zwischen den Schnittpunkten mit c und d
+  const tI = new Float32Array(NL * NL); for (let a = 0; a < NL; a++) for (let c = 0; c < NL; c++) { const p = X[a * NL + c]; tI[a * NL + c] = p ? tOn(lines[a], p) : NaN; }
+  const okP = new Uint8Array(NL * NL); for (let a = 0; a < NL; a++) for (let c = 0; c < NL; c++) okP[a * NL + c] = inImg(X[a * NL + c]) ? 1 : 0;
+  const memo = new Float32Array(NL * NL * NL).fill(-2);
+  const sideCov = (a, c, d) => {
+    const k = (a * NL + c) * NL + d; let v = memo[k]; if (v !== -2) return v;
+    const t1 = tI[a * NL + c], t2 = tI[a * NL + d];
+    v = Math.abs(t1 - t2) < minSide ? -1 : cover(lines[a], t1, t2);
+    memo[k] = v; memo[(a * NL + d) * NL + c] = v; return v;
+  };
+  const endsMemo = new Int8Array(NL * NL * NL);
+  const ends = (a, c, d) => {
+    const k = (a * NL + c) * NL + d; if (endsMemo[k]) return endsMemo[k] > 0;
+    const L = lines[a], t1 = tI[a * NL + c], t2 = tI[a * NL + d], span = t2 - t1;
+    let ok = true;
+    if (!L.border) for (const [f0, f1] of [[0.05, 0.18], [0.82, 0.95]]) if (cover(L, t1 + span * f0, t1 + span * f1) < CFG.ends) { ok = false; break; }
+    endsMemo[k] = endsMemo[(a * NL + d) * NL + c] = ok ? 1 : -1; return ok;
+  };
+  const pAng = pairs.map(([a, b]) => { const A = lines[a].t, Bt = lines[b].t; return Math.abs(A - Bt) > 90 ? ((A + Bt + 180) / 2) % 180 : (A + Bt) / 2; });
+  const byAng = Array.from({ length: 180 }, () => []);
+  pairs.forEach((p, i) => byAng[Math.round(pAng[i]) % 180].push(i));
+  const dist2 = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+  const cross = (P, Q, R) => (Q[0] - P[0]) * (R[1] - Q[1]) - (Q[1] - P[1]) * (R[0] - Q[0]);
+  for (let i = 0; i < pairs.length; i++) {
+    const [a, b] = pairs[i], base = Math.round(pAng[i]);
+    for (let da = 62; da <= 118; da++) {
+      const bucket = byAng[(base + da) % 180]; if (!bucket.length) continue;
+      if ((base + da) % 180 < base && da <= 90) {} // beide Richtungen werden über i<j vermieden
+      for (const j of bucket) {
+        if (j <= i) continue;
+        const [c, d] = pairs[j];
+        if (!okP[a * NL + c] || !okP[a * NL + d] || !okP[b * NL + d] || !okP[b * NL + c]) continue;
+        const cA = sideCov(a, c, d); if (cA < lowMin) continue;
+        const cB = sideCov(b, c, d); if (cB < lowMin) continue;
+        const cC = sideCov(c, a, b); if (cC < lowMin) continue;
+        const cD = sideCov(d, a, b); if (cD < lowMin) continue;
+        // Kanten müssen bis nahe an jede Ecke reichen (Fotoecken bis 5 % ausgespart)
+        if (CFG.ends > 0 && (!ends(a, c, d) || !ends(b, c, d) || !ends(c, a, b) || !ends(d, a, b))) continue;
+        let m1 = cA, m2 = Infinity; for (const v of [cB, cC, cD]) { if (v < m1) { m2 = m1; m1 = v; } else if (v < m2) m2 = v; }
+        const srt = [m1, m2];
+        const mean4 = (cA + cB + cC + cD) / 4;
+        if (srt[0] < covMin && !(srt[1] >= covMin + 0.1 && srt[0] >= 0.4) && !(mean4 >= covMin + 0.04 && srt[0] >= 0.3)) continue;
+        const q = [X[a * NL + c], X[a * NL + d], X[b * NL + d], X[b * NL + c]];
+        const s0 = Math.sign(cross(q[0], q[1], q[2])); if (!s0 || Math.sign(cross(q[1], q[2], q[3])) !== s0 || Math.sign(cross(q[2], q[3], q[0])) !== s0 || Math.sign(cross(q[3], q[0], q[1])) !== s0) continue;
+        { const lA = dist2(q[0], q[1]), lD = dist2(q[1], q[2]), lB = dist2(q[2], q[3]), lC = dist2(q[3], q[0]); const P = lA + lB + lC + lD, Cv = cA * lA + cD * lD + cB * lB + cC * lC; cands.push({ q, lines: [a, b, c, d], cov: (cA + cB + cC + cD) / 4, P, Cv, area: polyArea(q), sides: [[cA, lA, lines[a].border], [cD, lD, lines[d].border], [cB, lB, lines[b].border], [cC, lC, lines[c].border]] }); }
+      }
+    }
+  }
+  const bbOf = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const bbIoU = (a, b) => { const ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])), I = ix * iy; return I / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - I); };
+  const nms = (list, thr, score) => {
+    list.sort((x, y) => score(y) - score(x));
+    const cell = Math.max(w, h) * 0.08, grid = new Map(), keep = [];
+    for (const C of list) {
+      C.bb = C.bb || bbOf(C.q);
+      const gx = Math.floor((C.bb[0] + C.bb[2]) / 2 / cell), gy = Math.floor((C.bb[1] + C.bb[3]) / 2 / cell);
+      let dup = false;
+      for (let dx = -1; dx <= 1 && !dup; dx++) for (let dy = -1; dy <= 1 && !dup; dy++) { const L = grid.get((gx + dx) + ',' + (gy + dy)); if (L) for (const K of L) if (bbIoU(C.bb, K.bb) > thr) { dup = true; break; } }
+      if (dup) continue;
+      keep.push(C); const k = gx + ',' + gy; (grid.get(k) || grid.set(k, []).get(k)).push(C);
+    }
+    return keep;
+  };
+  // fast gleiche Kandidaten zusammenfassen (Ecken auf Raster), bester bleibt
+  if (CFG.dedup) {
+    const cell = Math.max(w, h) * CFG.cell, best = new Map();
+    for (const C of cands) {
+      const k = C.q.map(([x, y]) => Math.round(x / cell) + ',' + Math.round(y / cell)).sort().join('|');
+      const o = best.get(k); if (!o || C.Cv - 0.8 * (C.P - C.Cv) > o.Cv - 0.8 * (o.P - o.Cv)) best.set(k, C);
+    }
+    cands.length = 0; for (const C of best.values()) cands.push(C);
+  }
+  if (CFG.nms1 < 1) { const k = nms(cands, CFG.nms1, C => C.Cv - 0.8 * (C.P - C.Cv)); cands.length = 0; for (const C of k) cands.push(C); }
+  if (CFG.candSort === 'gain') cands.sort((x, y) => (y.Cv - 0.8 * (y.P - y.Cv)) - (x.Cv - 0.8 * (x.P - x.Cv))); else cands.sort((x, y) => y.cov - x.cov);
+  if (CFG.bucket && cands.length > CFG.candCap) {
+    // je Bildbereich und Größe die besten behalten, damit schwächere Fotos an anderer Stelle nicht verdrängt werden
+    const buckets = new Map(), keep = [];
+    for (const C of cands) {
+      const cx = C.q.reduce((s2, p) => s2 + p[0], 0) / 4, cy = C.q.reduce((s2, p) => s2 + p[1], 0) / 4;
+      const k = Math.floor(cx / w * 8) + ',' + Math.floor(cy / h * 8) + ',' + Math.round(Math.log2(C.area) * 2);
+      const n0 = buckets.get(k) || 0; if (n0 < CFG.bucket) { buckets.set(k, n0 + 1); keep.push(C); }
+    }
+    cands.length = 0; for (const C of keep) cands.push(C);
+  }
+  const allC = cands.slice();
+
+  // Bewertung: kein Seitenhintergrund im Inneren, keine durchgehende Trennkante
+  const grid = (q, m0 = 0) => { const pts = []; for (let v = 0; v < 10; v++) for (let u = 0; u < 10; u++) { const U = m0 + (1 - 2 * m0) * (u + .5) / 10, V = m0 + (1 - 2 * m0) * (v + .5) / 10; const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; pts.push([tx + (bx - tx) * V, ty + (by - ty) * V]); } return pts; };
+  const grid6 = q => { const pts = []; for (let v = 0; v < 6; v++) for (let u = 0; u < 6; u++) { const U = (u + .5) / 6, V = (v + .5) / 6; const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; pts.push([tx + (bx - tx) * V, ty + (by - ty) * V]); } return pts; };
+  const plausible = P => {
+    const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+    const u = (d(P[0], P[1]) + d(P[3], P[2])) / 2, v = (d(P[0], P[3]) + d(P[1], P[2])) / 2;
+    if (Math.min(u, v) < minSide) return false;
+    const r = Math.max(u, v) / Math.min(u, v);
+    return (r < 1.1) || (r > 1.2 && r < 1.72);
+  };
+  const aspect = P => { const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]); const u = (d(P[0], P[1]) + d(P[3], P[2])) / 2, v = (d(P[0], P[3]) + d(P[1], P[2])) / 2; return Math.max(u, v) / Math.max(1e-6, Math.min(u, v)); };
+  const printFormat = P => { const r = aspect(P); return [1, 4 / 3, 1.4, 1.5].some(f => Math.abs(r / f - 1) < 0.06); };
+  const pageMax = CFG.pageMaxBase + 0.002 * (100 - sens);
+  // Eine durchgehende parallele Kante knapp innerhalb einer Rahmenkante ist die eigentliche Fotokante
+  const innerEdge = C => {
+    const [a, b, c, d] = C.lines;
+    for (const [s1, s2, o1, o2] of [[a, b, c, d], [c, d, a, b]]) {
+      const L1 = lines[s1], L2 = lines[s2];
+      for (let k = 0; k < NL; k++) {
+        if (k === a || k === b || k === c || k === d) continue;
+        const L = lines[k]; if (L.border || angDiff(L.t, L1.t) > 8) continue;
+        const e1 = X[k * NL + o1], e2 = X[k * NL + o2]; if (!e1 || !e2) continue;
+        const mx = (e1[0] + e2[0]) / 2, my = (e1[1] + e2[1]) / 2;
+        if (!pointInQuad(C.q, mx, my)) continue;
+        const d1 = Math.abs(mx * L1.c + my * L1.s - L1.r), d2 = Math.abs(mx * L2.c + my * L2.s - L2.r), fr = Math.min(d1, d2) / (d1 + d2);
+        if (fr < CFG.innerLo || fr > CFG.innerHi) continue;
+        if (cover(L, tOn(L, e1), tOn(L, e2)) >= CFG.innerCov) return true;
+      }
+    }
+    return false;
+  };
+  // Direkt innerhalb jeder Kante liegt Bildinhalt; ein Streifen Albumseite dort heißt: Rahmen zu groß
+  const looseSide = q => {
+    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? pageLike[y * w + x] : 0; };
+    for (let side = 0; side < 4; side++) {
+      let c = 0, n0 = 0;
+      for (const dpt of [0.03, 0.06, 0.09]) for (let j = 0; j < 16; j++) {
+        const t = 0.1 + 0.8 * j / 15;
+        const v = side === 0 ? at(t, dpt) : side === 1 ? at(1 - dpt, t) : side === 2 ? at(t, 1 - dpt) : at(dpt, t);
+        c += v; n0++;
+      }
+      if (c / n0 > CFG.band) return true;
+    }
+    return false;
+  };
+  // Ein Foto wird nie von einem durchgehenden Streifen leerer Albumseite durchzogen
+  const corridor = q => {
+    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? pageLike[y * w + x] : 0; };
+    for (let dir = 0; dir < 2; dir++) for (let k = 3; k <= 45; k += 2) {
+      const s0 = k / 48; let miss = 0;
+      for (let j = 0; j < 30 && miss <= 4; j++) { const t = 0.03 + 0.94 * j / 29; if (!(dir ? at(s0, t) : at(t, s0))) miss++; }
+      if (miss <= 4) return true;
+    }
+    return false;
+  };
+  const overlapFrac = (Ain, Bq) => { let k = 0; for (const [x, y] of Ain.pts) if (pointInQuad(Bq.q, x, y)) k++; return k / Ain.pts.length; };
+  const pick = list => { const sel = []; list.sort((x, y) => y.val - x.val); for (const K of list) { if (K.val <= 0) break; if (sel.some(S2 => overlapFrac(K, S2) > 0.12 || overlapFrac(S2, K) > 0.12)) continue; sel.push(K); } return sel; };
+  const expand = K => K.tiles ? K.tiles.flatMap(expand) : [K];
+  // Kontrast je Seite: Streifen innen gegen Streifen außen (Mittel und Streuung der Farbe)
+  const sideContrast = q => {
+    const cx = q.reduce((s2, p) => s2 + p[0], 0) / 4, cy = q.reduce((s2, p) => s2 + p[1], 0) / 4, res = [];
+    for (let k = 0; k < 4; k++) {
+      const A = q[k], Bq = q[(k + 1) % 4], len = Math.hypot(Bq[0] - A[0], Bq[1] - A[1]) || 1;
+      let nx = -(Bq[1] - A[1]) / len, ny = (Bq[0] - A[0]) / len;
+      if ((cx - (A[0] + Bq[0]) / 2) * nx + (cy - (A[1] + Bq[1]) / 2) * ny < 0) { nx = -nx; ny = -ny; }
+      const st = [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]];
+      for (let j = 0; j < 12; j++) {
+        const f = 0.1 + 0.8 * j / 11, px = A[0] + (Bq[0] - A[0]) * f, py = A[1] + (Bq[1] - A[1]) * f;
+        for (let side = 0; side < 2; side++) for (let d = 4; d <= 10; d += 3) {
+          const sg = side ? -1 : 1, X = Math.round(px + nx * d * sg), Y = Math.round(py + ny * d * sg);
+          if (X < 0 || Y < 0 || X >= w || Y >= h) continue;
+          const i = Y * w + X, t = st[side]; t[0]++; t[1] += Rb[i]; t[2] += Gb[i]; t[3] += Bb[i]; t[4] += Rb[i] * Rb[i]; t[5] += Gb[i] * Gb[i]; t[6] += Bb[i] * Bb[i];
+        }
+      }
+      const [I, O] = st;
+      if (I[0] < 8 || O[0] < 8) { res.push(-1); continue; }
+      let dm = 0, ds = 0;
+      for (let c = 1; c <= 3; c++) { const mi = I[c] / I[0], mo = O[c] / O[0]; dm += (mi - mo) ** 2; ds += Math.abs(Math.sqrt(Math.max(0, I[c + 3] / I[0] - mi * mi)) - Math.sqrt(Math.max(0, O[c + 3] / O[0] - mo * mo))); }
+      res.push(Math.sqrt(dm) + ds);
+    }
+    return res;
+  };
+  const evalSel = list => {
+  const good = [];
+  for (const C of list) {
+    if (C.area > n * 0.92) continue;
+    { // billiger Vorfilter auf 5x5 Punkten
+      let pl5 = 0, tx5 = 0; const q = C.q;
+      for (let v = 0; v < 5; v++) for (let u = 0; u < 5; u++) {
+        const U = 0.12 + 0.76 * (u + .5) / 5, V = 0.12 + 0.76 * (v + .5) / 5;
+        const tx0 = q[0][0] + (q[1][0] - q[0][0]) * U, ty0 = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U;
+        const X0 = Math.min(w - 1, Math.max(0, Math.round(tx0 + (bx - tx0) * V))), Y0 = Math.min(h - 1, Math.max(0, Math.round(ty0 + (by - ty0) * V)));
+        pl5 += pageLike[Y0 * w + X0]; if (tex[Y0 * w + X0] > 30) tx5++;
+      }
+      if (CFG.prefilter && (pl5 / 25 > pageMax + 0.15 || tx5 / 25 < 0.08)) continue;
+    }
+    let pl = 0, tx = 0;
+    { const q = C.q;
+      for (let v = 0; v < 8; v++) { const V = 0.12 + 0.76 * (v + .5) / 8;
+        for (let u = 0; u < 8; u++) { const U = 0.12 + 0.76 * (u + .5) / 8;
+          const tx0 = q[0][0] + (q[1][0] - q[0][0]) * U, ty0 = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U;
+          let X0 = (tx0 + (bx - tx0) * V + 0.5) | 0, Y0 = (ty0 + (by - ty0) * V + 0.5) | 0; if (X0 < 0) X0 = 0; else if (X0 >= w) X0 = w - 1; if (Y0 < 0) Y0 = 0; else if (Y0 >= h) Y0 = h - 1;
+          const i = Y0 * w + X0; pl += pageLike[i]; if (tex[i] > 30) tx++; } } }
+    if (pl / 64 > pageMax || tx / 64 < 0.2) continue;
+    const pts = C.pts || grid6(C.q);
+    if (corridor(C.q)) continue;
+    if (CFG.band && looseSide(C.q)) continue;
+    if (CFG.inner && innerEdge(C)) continue;
+    C.plaus = plausible(C.q); C.print = printFormat(C.q);
+
+    C.pts = pts; good.push(C);
+  }
+  // Auswahl nach Wert: belegte minus unbelegte Kantenlänge, gewichtet mit Fotoformat.
+  // Ein Rahmen bleibt nur, wenn er mehr wert ist als die beste Aufteilung in kleinere Rahmen darin.
+  for (const C of good) {
+    let Cv2 = C.Cv;
+    if (CFG.contrast) {
+      const ct = C.ct || (C.ct = sideContrast(C.q)); Cv2 = 0;
+      C.sides.forEach(([cv, len, border], k) => { const f = border || ct[k] < 0 ? 0.7 : (1 - CFG.contrast) + CFG.contrast * Math.min(1, ct[k] / CFG.cD0); Cv2 += cv * len * f; });
+    }
+    C.gain = (Cv2 - 0.8 * (C.P - C.Cv)) * (CFG.gainPrint ? (C.print ? 1.25 : C.plaus ? 1.0 : 0.7) : (C.plaus ? 1.2 : 0.7));
+  }
+  if (CFG.nms2 < 1) { const k = nms(good, CFG.nms2, C => C.gain); good.length = 0; for (const C of k) good.push(C); }
+  if (good.length > CFG.goodCap) {
+    // beste je Bildbereich und Größe behalten, damit kein Foto von starken Nachbarn verdrängt wird
+    good.sort((x, y) => y.gain - x.gain);
+    const bk = new Map(), keep = [], rest = [];
+    for (const C of good) {
+      const c0 = C.q.reduce((a, p) => [a[0] + p[0] / 4, a[1] + p[1] / 4], [0, 0]);
+      const k = Math.floor(c0[0] / w * 6) + ',' + Math.floor(c0[1] / h * 6) + ',' + Math.round(Math.log2(C.area));
+      const m0 = bk.get(k) || 0; if (m0 < CFG.goodPer) { bk.set(k, m0 + 1); keep.push(C); } else rest.push(C);
+    }
+    for (const C of rest) { if (keep.length >= CFG.goodCap) break; keep.push(C); }
+    if (keep.length > CFG.goodCap) keep.length = CFG.goodCap;
+    good.length = 0; for (const C of keep) good.push(C);
+  }
+  good.sort((x, y) => x.area - y.area);
+  for (const C of good) { const xs = C.q.map(p => p[0]), ys = C.q.map(p => p[1]); C.bb = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
+  for (let i = 0; i < good.length; i++) {
+    const C = good[i], inside = [];
+    const cb = C.bb, sl = (cb[2] - cb[0]) * 0.1, sv = (cb[3] - cb[1]) * 0.1;
+    for (let j = 0; j < i; j++) {
+      const K = good[j], kb = K.bb;
+      if (K.area >= C.area * 0.75) break;
+      if (kb[0] < cb[0] - sl || kb[1] < cb[1] - sv || kb[2] > cb[2] + sl || kb[3] > cb[3] + sv) continue;
+      if ((!CFG.tileStrict || (K.print && K.gain >= C.gain * CFG.tileMin)) && overlapFrac(K, C) > 0.8) inside.push(K);
+    }
+    const sel = inside.length ? pick(inside.slice()) : [];
+    const sum = sel.reduce((s2, K) => s2 + K.val, 0);
+    let filled = 0;
+    if (CFG.tileStrict && sel.length >= 2 && sum > C.gain) for (const [x, y] of C.pts) if (sel.some(K => pointInQuad(K.q, x, y))) filled++;
+    if (sum > C.gain && (!CFG.tileStrict || (sel.length >= 2 && sel.length <= 8 && sel.every(K => K.print) && filled / C.pts.length >= CFG.fill))) { C.val = sum; C.tiles = sel; } else { C.val = C.gain; C.tiles = null; }
+  }
+    return pick(good.slice()).flatMap(expand);
+  };
+  // mehrere Durchgänge: gefundene Fotos ausblenden, damit schwächer belegte Fotos zum Zug kommen
+  const cen = q => [q.reduce((s2, p) => s2 + p[0], 0) / 4, q.reduce((s2, p) => s2 + p[1], 0) / 4];
+  const clash = (A, Bq) => { const a = cen(A.q), b = cen(Bq.q); return pointInQuad(Bq.q, a[0], a[1]) || pointInQuad(A.q, b[0], b[1]); };
+  const chosen = [];
+  for (let round = 0; round < CFG.rounds; round++) {
+    const list = [];
+    for (const C of allC) { if (list.length >= CFG.candCap) break; if (C.used) continue; if (chosen.some(K => clash(C, K))) continue; C.used = true; list.push(C); }
+    if (!list.length) break;
+    let sel = evalSel(list).filter(K => !chosen.some(J => clash(K, J) || overlapFrac(K, J) > 0.1 || overlapFrac(J, K) > 0.1));
+    if (round && chosen.length) {
+      const g = chosen.map(K => K.gain || 0).sort((a, b) => a - b), med = g[g.length >> 1];
+      sel = sel.filter(K => K.plaus && K.gain >= CFG.roundMin * med && K.cov >= CFG.roundCov);
+    }
+    if (!sel.length) { if (round) break; else continue; }
+    chosen.push(...sel);
+  }
+
+  // Lücken in der Albumseite: jede rechteckige Aussparung in der Seitenfläche ist ein Fotokandidat.
+  // Sie ersetzt schwächere Linien-Rahmen, die sie überdecken, und füllt fehlende Fotos auf.
+  if (CFG.holes && CFG.plMode === 'region') {
+    const hole = new Uint8Array(n);
+    // Seitenumriss: Zeilen- und Spaltenspanne der Seitenfläche, innerhalb davon alles Nicht-Seite
+    const rowL = new Int32Array(h).fill(w), rowR = new Int32Array(h).fill(-1);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (pageLike[y * w + x]) { if (x < rowL[y]) rowL[y] = x; rowR[y] = x; }
+    const colT = new Int32Array(w).fill(h), colB = new Int32Array(w).fill(-1);
+    for (let x = 0; x < w; x++) for (let y = 0; y < h; y++) if (pageLike[y * w + x]) { if (y < colT[x]) colT[x] = y; colB[x] = y; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (!pageLike[i] && x > rowL[y] && x < rowR[y] && y > colT[x] && y < colB[x]) hole[i] = 1; }
+    const hr = Math.max(2, Math.round(Math.max(w, h) * CFG.holeOpen));
+    let hm = boxMorph(boxMorph(hole, w, h, hr, true), w, h, hr, false);
+    const lab = new Uint8Array(n), stk = new Int32Array(n), props = [];
+    for (let s0 = 0; s0 < n; s0++) {
+      if (!hm[s0] || lab[s0]) continue;
+      let top = 0, cnt = 0; stk[top++] = s0; lab[s0] = 1; const comp = [];
+      while (top) { const i = stk[--top]; comp.push(i); cnt++; const x = i % w;
+        if (x > 0 && hm[i - 1] && !lab[i - 1]) { lab[i - 1] = 1; stk[top++] = i - 1; }
+        if (x < w - 1 && hm[i + 1] && !lab[i + 1]) { lab[i + 1] = 1; stk[top++] = i + 1; }
+        if (i >= w && hm[i - w] && !lab[i - w]) { lab[i - w] = 1; stk[top++] = i - w; }
+        if (i < n - w && hm[i + w] && !lab[i + w]) { lab[i + w] = 1; stk[top++] = i + w; } }
+      if (cnt < n * 0.006) continue;
+      const pts = []; let y0 = h, y1 = 0; for (const i of comp) { const y = (i / w) | 0; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      const rmin = new Int32Array(y1 - y0 + 1).fill(w), rmax = new Int32Array(y1 - y0 + 1).fill(-1);
+      for (const i of comp) { const x = i % w, y = ((i / w) | 0) - y0; if (x < rmin[y]) rmin[y] = x; if (x > rmax[y]) rmax[y] = x; }
+      for (let y = 0; y < rmin.length; y++) if (rmax[y] >= 0) pts.push([rmin[y], y + y0], [rmax[y] + 1, y + y0], [rmin[y], y + y0 + 1], [rmax[y] + 1, y + y0 + 1]);
+      const hull = convexHull(pts), rect = minAreaRect(hull); if (!rect) continue;
+      const fill = cnt / rect.area;
+      const q = orderCorners(rect.c.map(p => p.slice()));
+      if (fill < CFG.holeFill || !plausible(q)) {
+        // unsaubere Aussparung (z. B. mit Nachbarseite verbunden): größten passenden Linien-Rahmen darin nehmen
+        const hb0 = bbOf(q); let bestC = null;
+        for (const C of allC) {
+          if (C.cov < CFG.holeCov) continue;
+          C.bb = C.bb || bbOf(C.q); const b = C.bb;
+          if (b[0] < hb0[0] - 3 || b[1] < hb0[1] - 3 || b[2] > hb0[2] + 3 || b[3] > hb0[3] + 3) continue;
+          if (C.area < cnt * 0.35 || (bestC && C.area * C.cov <= bestC.area * bestC.cov)) continue;
+          if (!plausible(C.q)) continue;
+          let ins = 0, tot = 0; for (const [x, y] of grid6(C.q)) { tot++; const X0 = Math.round(x), Y0 = Math.round(y); if (X0 >= 0 && Y0 >= 0 && X0 < w && Y0 < h && hm[Y0 * w + X0]) ins++; }
+          if (ins / tot >= 0.94) bestC = C;
+        }
+        if (!bestC) continue;
+        const insideChosen2 = chosen.filter(K => { const c0 = cen(K.q); return pointInQuad(bestC.q, c0[0], c0[1]); });
+        if (insideChosen2.length >= 2) continue;
+        props.push({ q: bestC.q, pts: grid6(bestC.q), area: bestC.area, cov: bestC.cov, hole: true });
+        continue;
+      }
+      // nicht übernehmen, wenn Linien-Rahmen darin eine Aufteilung in mehrere Fotos zeigen
+      const insideChosen = chosen.filter(K => { const c0 = cen(K.q); return pointInQuad(q, c0[0], c0[1]); });
+      if (insideChosen.length >= 2) continue;
+      // an Bildrand angeschnittene Aussparungen sind Nachbarseiten, keine Fotos
+      if (q.some(([x, y]) => x < 3 || y < 3 || x > w - 4 || y > h - 4)) continue;
+      // auf den passendsten Linien-Rahmen einrasten (genauere Kanten)
+      const hb = bbOf(q); let snap = null, sv = -Infinity;
+      for (const C of allC) {
+        C.bb = C.bb || bbOf(C.q); if (bbIoU(hb, C.bb) < CFG.snapIoU) continue;
+        const v = C.Cv - 0.8 * (C.P - C.Cv); if (v > sv) { sv = v; snap = C; }
+      }
+      const qq = snap ? snap.q : q;
+      props.push({ q: qq, pts: grid6(qq), area: polyArea(qq), cov: snap ? snap.cov : 1, hole: true });
+    }
+    for (const P of props) {
+      const pc = cen(P.q);
+      for (let k = chosen.length - 1; k >= 0; k--) { const K = chosen[k], kc = cen(K.q); if (pointInQuad(P.q, kc[0], kc[1]) || pointInQuad(K.q, pc[0], pc[1])) chosen.splice(k, 1); }
+      chosen.push(P);
+    }
+  }
+
+  // Nachbarn ergänzen: ein Foto, das eine Kante mit einem gefundenen Foto teilt und gleich hoch bzw. breit ist,
+  // braucht weniger Kantenbelegung (z. B. weißer Himmel auf heller Seite)
+  if (CFG.neighbors) {
+    const tolN = Math.max(w, h) * 0.03, dd = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+    const texOK = q => { let pl = 0, tx = 0; for (let v = 0; v < 8; v++) for (let u = 0; u < 8; u++) { const U = 0.12 + 0.76 * (u + .5) / 8, V = 0.12 + 0.76 * (v + .5) / 8; const tx0 = q[0][0] + (q[1][0] - q[0][0]) * U, ty0 = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const X0 = Math.min(w - 1, Math.max(0, Math.round(tx0 + (bx - tx0) * V))), Y0 = Math.min(h - 1, Math.max(0, Math.round(ty0 + (by - ty0) * V))); pl += pageLike[Y0 * w + X0]; if (tex[Y0 * w + X0] > 30) tx++; } return pl / 64 <= CFG.nbPage && tx / 64 >= 0.2; };
+    // außerhalb der übrigen drei Kanten liegt Albumseite oder ein anderes Foto
+    const ringOK = (q, skip) => {
+      const cx = q.reduce((a, p) => a + p[0], 0) / 4, cy = q.reduce((a, p) => a + p[1], 0) / 4;
+      for (let k = 0; k < 4; k++) {
+        if (k === skip) continue;
+        const A = q[k], B = q[(k + 1) % 4], len = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1;
+        let nx = -(B[1] - A[1]) / len, ny = (B[0] - A[0]) / len;
+        if ((cx - (A[0] + B[0]) / 2) * nx + (cy - (A[1] + B[1]) / 2) * ny > 0) { nx = -nx; ny = -ny; }
+        let good0 = 0, tot0 = 0;
+        for (let j = 0; j < 12; j++) { const f = 0.1 + 0.8 * j / 11; for (const d of [5, 9]) {
+          const X0 = Math.round(A[0] + (B[0] - A[0]) * f + nx * d), Y0 = Math.round(A[1] + (B[1] - A[1]) * f + ny * d); tot0++;
+          if (X0 < 0 || Y0 < 0 || X0 >= w || Y0 >= h) continue;
+          if (pageLike[Y0 * w + X0] || chosen.some(J => pointInQuad(J.q, X0, Y0))) good0++; } }
+        if (good0 / tot0 < CFG.nbRing) return false;
+      }
+      return true;
+    };
+    for (let pass = 0; pass < 2; pass++) {
+      const add = [];
+      for (const K of chosen) {
+        for (let k = 0; k < 4; k++) {
+          const a1 = K.q[k], a2 = K.q[(k + 1) % 4];
+          let best = null, bv = -Infinity;
+          const sx0 = Math.min(a1[0], a2[0]) - tolN, sx1 = Math.max(a1[0], a2[0]) + tolN, sy0 = Math.min(a1[1], a2[1]) - tolN, sy1 = Math.max(a1[1], a2[1]) + tolN;
+          for (const C of allC) {
+            if (C.cov < CFG.nbCov) continue;
+            C.bb = C.bb || bbOf(C.q); if (C.bb[2] < sx0 || C.bb[0] > sx1 || C.bb[3] < sy0 || C.bb[1] > sy1) continue;
+            let shared = -1;
+            for (let l = 0; l < 4 && shared < 0; l++) { const b1 = C.q[l], b2 = C.q[(l + 1) % 4]; if (dd(a1, b2) < tolN && dd(a2, b1) < tolN) shared = l; }
+            if (shared < 0) continue;
+            if (!ringOK(C.q, shared)) continue;
+            if (!plausible(C.q)) continue;
+            const pts = C.pts || grid6(C.q);
+            if ([...chosen, ...add].some(J => { let o = 0; for (const [x, y] of pts) if (pointInQuad(J.q, x, y)) o++; return o / pts.length > 0.1; })) continue;
+            const v = C.Cv - 0.8 * (C.P - C.Cv); if (v <= bv) continue;
+            if (!texOK(C.q) || corridor(C.q)) continue;
+            bv = v; best = C;
+          }
+          if (best) { best.pts = best.pts || grid6(best.q); add.push(best); }
+        }
+      }
+      if (!add.length) break;
+      chosen.push(...add);
+    }
+  }
+  // sehr lange schmale Streifen (Seitenränder, Folgeseiten) sind keine Fotos
+  if (CFG.maxAspect) for (let k = chosen.length - 1; k >= 0; k--) { const P = chosen[k].q, u = (Math.hypot(P[1][0] - P[0][0], P[1][1] - P[0][1]) + Math.hypot(P[2][0] - P[3][0], P[2][1] - P[3][1])) / 2, v = (Math.hypot(P[3][0] - P[0][0], P[3][1] - P[0][1]) + Math.hypot(P[2][0] - P[1][0], P[2][1] - P[1][1])) / 2; if (Math.max(u, v) / Math.min(u, v) > CFG.maxAspect) chosen.splice(k, 1); }
+
+  // Zusammenführen: zwei Rahmen mit gemeinsamer Kante, wenn nur das Ganze ein übliches Format ergibt
+  const tolM = Math.max(w, h) * 0.03, dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+  for (let changed = true; changed;) {
+    changed = false;
+    outer: for (let i = 0; i < chosen.length; i++) for (let j = i + 1; j < chosen.length; j++) {
+      const A = chosen[i].q, Bq = chosen[j].q;
+      for (let k = 0; k < 4; k++) for (let l = 0; l < 4; l++) {
+        const a1 = A[k], a2 = A[(k + 1) % 4], b1 = Bq[l], b2 = Bq[(l + 1) % 4];
+        const same = (dist(a1, b2) < tolM && dist(a2, b1) < tolM) || (dist(a1, b1) < tolM && dist(a2, b2) < tolM);
+        if (!same) continue;
+        if (plausible(A) && plausible(Bq)) continue;
+        const U = [A[(k + 2) % 4], A[(k + 3) % 4], Bq[(l + 2) % 4], Bq[(l + 3) % 4]];
+        const Uo = orderCorners(U.map(p => p.slice()));
+        if (!plausible(Uo)) continue;
+        chosen.splice(j, 1); chosen[i] = { q: Uo, pts: grid6(Uo), cov: Math.min(chosen[i].cov, 1), area: polyArea(Uo) };
+        changed = true; break outer;
+      }
+    }
+  }
+
+  // Rückfall für runde oder unregelmäßige Fotos: Flächenmaske ohne bereits gefundene Fotos
+  const tC = 70 - 0.6 * sens, tT = 42 - 0.34 * sens;
+  let m = new Uint8Array(n);
+  for (let i = 0; i < n; i++) m[i] = (pageDist(i) > tC || tex[i] > tT) ? 1 : 0;
+  for (const K of chosen) {
+    const xs = K.q.map(p => p[0]), ys = K.q.map(p => p[1]);
+    const cx = xs.reduce((s, v) => s + v, 0) / 4, cy = ys.reduce((s, v) => s + v, 0) / 4;
+    const big = K.q.map(([x, y]) => { const L = Math.hypot(x - cx, y - cy) || 1; return [x + (x - cx) / L * 5, y + (y - cy) / L * 5]; });
+    for (let y = Math.max(0, Math.floor(Math.min(...ys)) - 6); y <= Math.min(h - 1, Math.ceil(Math.max(...ys)) + 6); y++)
+      for (let x = Math.max(0, Math.floor(Math.min(...xs)) - 6); x <= Math.min(w - 1, Math.ceil(Math.max(...xs)) + 6); x++)
+        if (pointInQuad(big, x, y)) m[y * w + x] = 0;
+  }
+  m = boxMorph(boxMorph(m, w, h, 2, false), w, h, 2, true);
+  const seen = new Uint8Array(n), st = new Int32Array(n); let sp = 0;
+  const push = i => { if (!seen[i] && !m[i]) { seen[i] = 1; st[sp++] = i; } };
+  for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
+  while (sp) { const i = st[--sp], x = i % w, y = (i / w) | 0; if (x > 0) push(i - 1); if (x < w - 1) push(i + 1); if (y > 0) push(i - w); if (y < h - 1) push(i + w); }
+  for (let i = 0; i < n; i++) if (!m[i] && !seen[i]) m[i] = 1;
+  const rr = Math.max(3, Math.round(Math.max(w, h) / 120));
+  m = boxMorph(boxMorph(m, w, h, rr, true), w, h, rr, false);
+  const lab = new Uint8Array(n), buf = new Int32Array(n), extra = [];
+  for (let s0 = 0; s0 < n; s0++) {
+    if (!m[s0] || lab[s0]) continue;
+    let top = 0, cnt = 0; buf[top++] = s0; lab[s0] = 1;
+    let x0 = w, x1 = 0, y0 = h, y1 = 0; const comp = [];
+    while (top) {
+      const i = buf[--top]; comp.push(i); cnt++; const x = i % w, y = (i / w) | 0;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      if (x > 0 && m[i - 1] && !lab[i - 1]) { lab[i - 1] = 1; buf[top++] = i - 1; }
+      if (x < w - 1 && m[i + 1] && !lab[i + 1]) { lab[i + 1] = 1; buf[top++] = i + 1; }
+      if (y > 0 && m[i - w] && !lab[i - w]) { lab[i - w] = 1; buf[top++] = i - w; }
+      if (y < h - 1 && m[i + w] && !lab[i + w]) { lab[i + w] = 1; buf[top++] = i + w; }
+    }
+    if (cnt < n * 0.012 || cnt > n * 0.8) continue;
+    const sides = (x0 <= 1) + (x1 >= w - 2) + (y0 <= 1) + (y1 >= h - 2); if (sides >= 2) continue;
+    if (chosen.some(K => { const cx = K.q.reduce((s, p) => s + p[0], 0) / 4, cy = K.q.reduce((s, p) => s + p[1], 0) / 4; return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1; })) continue;
+    const rmin = new Int32Array(y1 - y0 + 1).fill(w), rmax = new Int32Array(y1 - y0 + 1).fill(-1);
+    for (const i of comp) { const x = i % w, y = ((i / w) | 0) - y0; if (x < rmin[y]) rmin[y] = x; if (x > rmax[y]) rmax[y] = x; }
+    const pts = []; for (let y = 0; y < rmin.length; y++) if (rmax[y] >= 0) { pts.push([rmin[y], y + y0], [rmax[y] + 1, y + y0], [rmin[y], y + y0 + 1], [rmax[y] + 1, y + y0 + 1]); }
+    const hull = convexHull(pts), rect = minAreaRect(hull); if (!rect) continue;
+    const fill = cnt / rect.area, hullFill = cnt / polyArea(hull);
+    if (fill < 0.6 || hullFill < 0.85) continue;
+    const sa = Math.hypot(rect.c[1][0] - rect.c[0][0], rect.c[1][1] - rect.c[0][1]), sb = Math.hypot(rect.c[2][0] - rect.c[1][0], rect.c[2][1] - rect.c[1][1]);
+    if (Math.min(sa, sb) < minSide || Math.max(sa, sb) / Math.min(sa, sb) > 4) continue;
+    extra.push({ q: rect.c, area: rect.area });
+  }
+
+  const out = chosen.concat(extra).map(K => {
+    const q = orderCorners(K.q.map(p => p.slice()));
+    const ys = q.map(p => p[1]), xs = q.map(p => p[0]);
+    return { c: q.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), rot: 0,
+      cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h };
+  });
+  out.sort((a, b) => a.cy - b.cy);
+  const rows = [];
+  for (const q of out) { const row = rows.find(rw => Math.abs(rw[0].cy - q.cy) < Math.min(rw[0].hh, q.hh) / 2); row ? row.push(q) : rows.push([q]); }
+  return rows.flatMap(rw => rw.sort((a, b) => a.cx - b.cx)).map(q => ({ c: q.c, rot: 0 }));
+}
+
+// Feinjustierung jeder Kante in höherer Auflösung (Graustufen der Vorschau)
+function refineQuads(gray, W, H, quads, radius) {
+  const smp = (x, y) => { if (x < 0) x = 0; if (y < 0) y = 0; if (x > W - 1.001) x = W - 1.001; if (y > H - 1.001) y = H - 1.001; const xi = x | 0, yi = y | 0, fx = x - xi, fy = y - yi, i = yi * W + xi; return gray[i] * (1 - fx) * (1 - fy) + gray[i + 1] * fx * (1 - fy) + gray[i + W] * (1 - fx) * fy + gray[i + W + 1] * fx * fy; };
+  return quads.map(Q => {
+    const P = Q.c.map(([x, y]) => [x * W, y * H]);
+    const cx = P.reduce((s, p) => s + p[0], 0) / 4, cy = P.reduce((s, p) => s + p[1], 0) / 4;
+    const L = [];
+    for (let k = 0; k < 4; k++) {
+      const A = P[k], Bp = P[(k + 1) % 4], len = Math.hypot(Bp[0] - A[0], Bp[1] - A[1]);
+      const dx = (Bp[0] - A[0]) / len, dy = (Bp[1] - A[1]) / len; let nx = -dy, ny = dx;
+      const mx = (A[0] + Bp[0]) / 2, my = (A[1] + Bp[1]) / 2; if ((cx - mx) * nx + (cy - my) * ny < 0) { nx = -nx; ny = -ny; }
+      const fit = [];
+      for (const [f0, f1] of [[0.12, 0.42], [0.58, 0.88]]) {
+        let best = 0, bv = -1;
+        for (let d = -radius; d <= radius; d += 0.5) {
+          let s = 0;
+          for (let j = 0; j < 24; j++) {
+            const f = f0 + (f1 - f0) * j / 23, x = A[0] + dx * len * f + nx * d, y = A[1] + dy * len * f + ny * d;
+            s += Math.abs(smp(x + nx, y + ny) - smp(x - nx, y - ny));
+          }
+          if (s > bv) { bv = s; best = d; }
+        }
+        const fm = (f0 + f1) / 2; fit.push([A[0] + dx * len * fm + nx * best, A[1] + dy * len * fm + ny * best]);
+      }
+      // Linie durch beide Punkte, 1 px nach innen, damit kein Seitenrand mitkommt
+      L.push({ p: [fit[0][0] + nx, fit[0][1] + ny], q: [fit[1][0] + nx, fit[1][1] + ny] });
+    }
+    const ix = (l1, l2) => {
+      const x1 = l1.p[0], y1 = l1.p[1], x2 = l1.q[0], y2 = l1.q[1], x3 = l2.p[0], y3 = l2.p[1], x4 = l2.q[0], y4 = l2.q[1];
+      const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4); if (Math.abs(den) < 1e-9) return null;
+      const a = x1 * y2 - y1 * x2, b = x3 * y4 - y3 * x4;
+      return [(a * (x3 - x4) - (x1 - x2) * b) / den, (a * (y3 - y4) - (y1 - y2) * b) / den];
+    };
+    const NP = [0, 1, 2, 3].map(k => ix(L[(k + 3) % 4], L[k]));
+    if (NP.some((p, k) => !p || Math.hypot(p[0] - P[k][0], p[1] - P[k][1]) > radius * 3)) return Q;
+    return { c: NP.map(([x, y]) => [Math.min(1, Math.max(0, x / W)), Math.min(1, Math.max(0, y / H))]), rot: Q.rot };
+  });
+}
+
+// Ausrichtung: Himmel/Licht oben, Boden/Details unten. Jedes Foto stimmt ab, die Seite entscheidet gemeinsam.
+// Liefert rot (0 = oben bleibt oben, 1 = rechte Bildseite wird oben, 2 = unten, 3 = links) und die Sicherheit.
+function photoUpScores(rgba, w, h, q) {
+  const N = 40, P = q.map(([x, y]) => [x * w, y * h]);
+  const R = new Float32Array(N * N), G = new Float32Array(N * N), B = new Float32Array(N * N), L = new Float32Array(N * N);
+  for (let v = 0; v < N; v++) for (let u = 0; u < N; u++) {
+    const U = (u + .5) / N, V = (v + .5) / N;
+    const tx = P[0][0] + (P[1][0] - P[0][0]) * U, ty = P[0][1] + (P[1][1] - P[0][1]) * U, bx = P[3][0] + (P[2][0] - P[3][0]) * U, by = P[3][1] + (P[2][1] - P[3][1]) * U;
+    const x = Math.min(w - 1, Math.max(0, Math.round(tx + (bx - tx) * V))), y = Math.min(h - 1, Math.max(0, Math.round(ty + (by - ty) * V))), i = 4 * (y * w + x), k = v * N + u;
+    R[k] = rgba[i]; G[k] = rgba[i + 1]; B[k] = rgba[i + 2]; L[k] = 0.299 * R[k] + 0.587 * G[k] + 0.114 * B[k];
+  }
+  const T = new Float32Array(N * N);
+  for (let v = 1; v < N - 1; v++) for (let u = 1; u < N - 1; u++) { const k = v * N + u; T[k] = Math.abs(L[k + 1] - L[k - 1]) + Math.abs(L[k + N] - L[k - N]); }
+  // Bänder: 0 oben, 1 rechts, 2 unten, 3 links
+  const band = (side) => {
+    let n = 0, l = 0, bl = 0, t = 0;
+    for (let v = 1; v < N - 1; v++) for (let u = 1; u < N - 1; u++) {
+      const U = u / N, V = v / N;
+      const inB = side === 0 ? V < 0.3 : side === 1 ? U > 0.7 : side === 2 ? V > 0.7 : U < 0.3;
+      if (!inB) continue; const k = v * N + u; n++; l += L[k]; bl += B[k] - (R[k] + G[k]) / 2; t += T[k];
+    }
+    return { l: l / n, b: bl / n, t: t / n };
+  };
+  const S = [0, 1, 2, 3].map(band);
+  return [0, 1, 2, 3].map(s => {
+    const o = S[(s + 2) % 4];
+    return (S[s].l - o.l) / 40 + (S[s].b - o.b) / 15 + (o.t - S[s].t) / 20;
+  });
+}
+function pageOrientation(rgba, w, h, quads) {
+  if (!quads.length) return { rot: 0, conf: 0 };
+  const tot = [0, 0, 0, 0];
+  for (const q of quads) {
+    const s = photoUpScores(rgba, w, h, q.c);
+    // jede Stimme auf höchstens 1 begrenzen, damit ein einzelnes Foto nicht dominiert
+    const m = Math.max(...s.map(Math.abs)) || 1, k = Math.tanh(m / 3) / m;
+    for (let i = 0; i < 4; i++) tot[i] += s[i] * k;
+  }
+  let best = 0; for (let i = 1; i < 4; i++) if (tot[i] > tot[best]) best = i;
+  const sorted = tot.slice().sort((a, b) => b - a);
+  return { rot: best, conf: (sorted[0] - sorted[1]) / quads.length, tot };
+}
+
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const S = { pages: [], cur: -1, sel: -1, results: [], downloads: null, uid: 1 };
+const DET = 640, PREV = 1800, MAXPX = 12_000_000, JPEG_Q = 0.95;
+
+// ---------- Laden ----------
+function loadImg(src) {
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('Bild konnte nicht gelesen werden')); im.src = src; });
+}
+// Bild sparsam dekodieren (große iPhone-Fotos mit 24–48 MP): ImageBitmap lässt sich sofort wieder freigeben
+async function decodeFile(f) {
+  if (window.createImageBitmap) { try { const b = await createImageBitmap(f, { imageOrientation: 'from-image' }); return { img: b, w: b.width, h: b.height, close: () => b.close && b.close() }; } catch (e) {} }
+  const url = URL.createObjectURL(f); const im = await loadImg(url);
+  return { img: im, w: im.naturalWidth, h: im.naturalHeight, close: () => { im.src = ''; URL.revokeObjectURL(url); } };
+}
+function scaledCanvas(src, sw, sh, max) {
+  const k = Math.min(1, max / Math.max(sw, sh)), c = document.createElement('canvas');
+  c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+function grayOf(cv) {
+  const d = cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, cv.width, cv.height).data, g = new Float32Array(cv.width * cv.height);
+  for (let i = 0; i < g.length; i++) g[i] = 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2];
+  return g;
+}
+let worker = null, wid = 0; const pending = new Map();
+function getWorker() {
+  if (worker !== null) return worker;
+  try {
+    const src = document.getElementById('detectSrc').textContent + `
+self.onmessage = e => { const { id, data, w, h, sens } = e.data;
+  try { const q = detectQuads(data, w, h, sens); const o = pageOrientation(data, w, h, q); self.postMessage({ id, q, o }); }
+  catch (err) { self.postMessage({ id, err: String(err) }); } };`;
+    worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+    worker.onmessage = e => { const p = pending.get(e.data.id); if (p) { pending.delete(e.data.id); e.data.err ? p.rej(new Error(e.data.err)) : p.res(e.data); } };
+    worker.onerror = () => { worker = false; for (const p of pending.values()) p.rej(new Error('worker')); pending.clear(); };
+  } catch (e) { worker = false; }
+  return worker;
+}
+function detectAsync(data, w, h, sens) {
+  const wk = getWorker();
+  const sync = () => { const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q) }; };
+  if (!wk) return Promise.resolve(sync());
+  return new Promise((res, rej) => { const id = ++wid; pending.set(id, { res, rej }); wk.postMessage({ id, data, w, h, sens }); }).catch(() => sync());
+}
+async function runDetect(page, sens) {
+  const c = scaledCanvas(page.preview, page.preview.width, page.preview.height, DET);
+  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  const { q, o } = await detectAsync(d.data, c.width, c.height, sens);
+  // Kanten in der höher aufgelösten Vorschau nachschärfen
+  const quads = refineQuads(grayOf(page.preview), page.preview.width, page.preview.height, q, Math.max(3, page.preview.width / c.width * 2.5));
+  // Ausrichtung: alle Fotos der Seite stimmen gemeinsam ab; unsichere Seiten übernehmen die Lage der sicheren
+  page.rotAuto = o ? o.rot : 0; page.rotConf = o ? o.conf : 0; page.rot = 0;
+  for (const k of quads) k.rot = 0;
+  page.quads = quads;
+  resolveRotations(page);
+}
+const ROT_SURE = 0.15;
+function setPageRot(p, r) {
+  const d = ((r - (p.rot || 0)) % 4 + 4) % 4;
+  for (const q of p.quads) q.rot = (q.rot + d) % 4;
+  p.rot = r; p.quads = sortReading(p.quads, r);
+}
+// Fotos eines Albums werden meist gleich herum fotografiert: sichere Seiten (oder von Hand gedrehte) geben die Lage vor
+function resolveRotations(extra) {
+  const list = S.pages.slice(); if (extra && !list.includes(extra)) list.push(extra);
+  const votes = [0, 0, 0, 0];
+  for (const p of list) if (p.rotManual || (p.rotConf || 0) >= ROT_SURE) votes[p.rot !== undefined && p.rotManual ? p.rot : p.rotAuto] += p.rotManual ? 3 : 1;
+  const tot = votes.reduce((a, b) => a + b, 0); let prior = null;
+  if (tot) { let b = 0; for (let i = 1; i < 4; i++) if (votes[i] > votes[b]) b = i; prior = b; }
+  for (const p of list) {
+    if (p.rotManual || p.sample) continue;
+    const want = (p.rotConf || 0) >= ROT_SURE || prior === null ? (p.rotAuto || 0) : prior;
+    if (want !== p.rot) setPageRot(p, want);
+  }
+}
+// Leserichtung der richtig gedrehten Seite: Zeilen von oben nach unten, darin von links nach rechts
+function sortReading(quads, rot) {
+  const tf = ([x, y]) => rot === 1 ? [y, 1 - x] : rot === 2 ? [1 - x, 1 - y] : rot === 3 ? [1 - y, x] : [x, y];
+  const items = quads.map(q => { const p = q.c.map(tf), xs = p.map(v => v[0]), ys = p.map(v => v[1]); return { q, cx: (Math.min(...xs) + Math.max(...xs)) / 2, cy: (Math.min(...ys) + Math.max(...ys)) / 2, hh: Math.max(...ys) - Math.min(...ys) }; });
+  items.sort((a, b) => a.cy - b.cy);
+  const rows = [];
+  for (const it of items) { const row = rows.find(r => Math.abs(r[0].cy - it.cy) < Math.min(r[0].hh, it.hh) / 2); row ? row.push(it) : rows.push([it]); }
+  return rows.flatMap(r => r.sort((a, b) => a.cx - b.cx)).map(it => it.q);
+}
+const tick = () => new Promise(r => setTimeout(r, 30));
+function status(text, busy) { $('pageInfo').textContent = text; $('chip').classList.toggle('busy', !!busy); if (busy) $('chip').hidden = false; }
+let toastT = 0;
+function toast(msg, ms = 2600) { const t = $('cutInfo'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); if (ms) toastT = setTimeout(() => t.classList.remove('show'), ms); }
+async function addFiles(files) {
+  const list = [...files].filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+  list.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
+  if (S.pages.length && S.pages.every(p => p.sample)) { S.pages = []; S.results = []; renderGrid(); }
+  let n = 0;
+  for (const f of list) {
+    status(`Lese Seite ${++n} von ${list.length} …`, true);
+    try {
+      const dec = await decodeFile(f);
+      const preview = scaledCanvas(dec.img, dec.w, dec.h, PREV);
+      const iw = dec.w, ih = dec.h; dec.close();
+      status(`Erkenne Fotos auf Seite ${n} von ${list.length} …`, true); await tick();
+      const page = { id: S.uid++, name: f.name, file: f, w: iw, h: ih, preview, thumb: scaledCanvas(preview, preview.width, preview.height, 240).toDataURL('image/jpeg', .8), quads: [] };
+      await runDetect(page, +$('sens').value);
+      S.pages.push(page);
+      S.cur = S.pages.length - 1; S.sel = -1;
+      renderPages(); drawEditor();
+    } catch (e) { alertBox(`${f.name}: ${e.message}`); }
+  }
+  status('', false); renderPages(); drawEditor();
+  if (list.length) toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
+}
+$('inCam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+$('inPick').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+$('inDir').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+if (!('webkitdirectory' in document.createElement('input')) || /iPhone|iPad|Android/i.test(navigator.userAgent)) $('lblDir').hidden = true;
+
+function alertBox(msg) { toast(msg, 5000); }
+
+// ---------- Beispielseite ----------
+function makeSample() {
+  const W = 1800, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#2b2a27'; x.fillRect(0, 0, W, H);
+  for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * .03})`; x.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+  const scene = (w, h, sky, hill, sun) => {
+    const g = x.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]);
+    x.fillStyle = g; x.fillRect(-w / 2, -h / 2, w, h);
+    x.fillStyle = sun; x.beginPath(); x.arc(w * .22, -h * .18, h * .1, 0, 7); x.fill();
+    x.fillStyle = hill; x.beginPath(); x.moveTo(-w / 2, h / 2);
+    for (let i = 0; i <= 20; i++) x.lineTo(-w / 2 + w * i / 20, h * .12 - Math.sin(i * .7) * h * .12 - Math.cos(i * 1.9) * h * .05);
+    x.lineTo(w / 2, h / 2); x.fill();
+  };
+  const photo = (cx, cy, w, h, ang, sky, hill, sun) => {
+    x.save(); x.translate(cx, cy); x.rotate(ang);
+    x.fillStyle = '#f1ede3'; x.fillRect(-w / 2, -h / 2, w, h);
+    x.save(); x.beginPath(); x.rect(-w / 2 + 28, -h / 2 + 28, w - 56, h - 56); x.clip(); scene(w - 56, h - 56, sky, hill, sun); x.restore();
+    x.restore();
+  };
+  photo(470, 380, 700, 500, -0.05, ['#8fb4cf', '#e8d6b2'], '#4d6b3c', '#f6e7a8');
+  photo(1340, 360, 520, 620, 0.06, ['#c9a77d', '#f0dcc0'], '#6a5040', '#fff3d1');
+  x.save(); x.beginPath(); x.arc(520, 1010, 230, 0, 7); x.clip(); x.translate(520, 1010); scene(460, 460, ['#5b7f9e', '#c2d3d9'], '#2f4a3a', '#ffffff'); x.restore();
+  photo(1300, 1010, 560, 380, 0.03, ['#e0a879', '#7a4e6d'], '#2d2533', '#ffd9a0');
+  const page = { id: S.uid++, name: 'Beispielseite', sample: true, file: null, src: c, w: W, h: H, preview: c, thumb: scaledCanvas(c, W, H, 240).toDataURL('image/jpeg', .8), quads: [] };
+  S.pages.push(page); S.cur = 0;
+  return runDetect(page, 50);
+}
+
+// ---------- Seitenleiste ----------
+function renderPages() {
+  const el = $('pages'); el.innerHTML = '';
+  S.pages.forEach((p, i) => {
+    const b = document.createElement('button'); b.className = 'thumb' + (i === S.cur ? ' on' : '');
+    b.setAttribute('aria-label', `Seite ${i + 1}, ${p.quads.length} Fotos`);
+    b.innerHTML = `<img alt="" src="${thumbOf(p)}"><span class="n">${p.quads.length}</span>${p.sample ? '<span class="tag">Beispiel</span>' : ''}`;
+    b.onclick = () => { S.cur = i; S.sel = -1; renderPages(); drawEditor(); };
+    el.appendChild(b);
+  });
+  el.hidden = !S.pages.length;
+  updateSummary();
+}
+function updateSummary() {
+  const total = S.pages.reduce((s, p) => s + p.quads.length, 0);
+  const lab = total === 1 ? '1 Foto ausschneiden' : `${total} Fotos ausschneiden`;
+  $('bCut').lastChild.textContent = lab;
+  $('bCut').disabled = !total || S.cutting;
+  const any = S.results.length > 0 && !!S.downloads;
+  $('bEach').disabled = !any || S.cutting;
+  $('secOut').hidden = !S.results.length && !S.cutting;
+  updateSaveLabel();
+}
+// Hauptaktion in der Daumenleiste: erst ausschneiden, dann sichern
+function updateDock() {
+  const total = S.pages.reduce((s, p) => s + p.quads.length, 0), n = S.results.length, saveMode = n > 0 && !S.dirty;
+  $('dock').hidden = !S.pages.length;
+  $('mMainL').textContent = S.cutting ? 'Schneide aus …' : saveMode ? (S.saveShort || `${n} ${n === 1 ? 'Foto' : 'Fotos'} sichern`) : (total === 1 ? '1 Foto ausschneiden' : `${total} Fotos ausschneiden`);
+  $('mIco').innerHTML = `<use href="#${saveMode ? 'i-down' : 'i-cut'}"/>`;
+  $('mMain').classList.toggle('accent', !saveMode); $('mMain').classList.toggle('primary', saveMode);
+  $('mMain').disabled = S.cutting || (saveMode ? !S.downloads : !total);
+  $('mMain').onclick = saveMode ? saveAll : cutAll;
+}
+
+// ---------- Editor ----------
+const cv = $('cv'), ctx = cv.getContext('2d');
+let view = { w: 0, h: 0, dpr: 1 }, drag = null, loupe = null;
+const page = () => S.pages[S.cur];
+// Die Seite wird so gedreht angezeigt, dass die Fotos aufrecht stehen. Rahmen bleiben in Koordinaten des Originals.
+const toView = (p, [x, y]) => { const r = p.rot || 0; return r === 1 ? [y, 1 - x] : r === 2 ? [1 - x, 1 - y] : r === 3 ? [1 - y, x] : [x, y]; };
+const fromView = (p, [u, v]) => { const r = p.rot || 0; return r === 1 ? [1 - v, u] : r === 2 ? [1 - u, 1 - v] : r === 3 ? [v, 1 - u] : [u, v]; };
+function rotCanvas(src, r) {
+  if (!r) return src;
+  const c = document.createElement('canvas'), sw = src.width, sh = src.height;
+  c.width = r % 2 ? sh : sw; c.height = r % 2 ? sw : sh;
+  const x = c.getContext('2d'); x.translate(c.width / 2, c.height / 2); x.rotate(-r * Math.PI / 2); x.drawImage(src, -sw / 2, -sh / 2);
+  return c;
+}
+function viewCanvas(p) { const r = p.rot || 0; if (p._vrot !== r) { p._view = rotCanvas(p.preview, r); p._vrot = r; p._thumbR = null; } return p._view; }
+function thumbOf(p) { const r = p.rot || 0; if (p._thumbR !== r + 1) { const v = viewCanvas(p); p._thumbV = scaledCanvas(v, v.width, v.height, 240).toDataURL('image/jpeg', .8); p._thumbR = r + 1; } return p._thumbV; }
+
+function drawEditor() {
+  const p = page();
+  $('secEdit').hidden = !p; $('toolbar').hidden = !p; $('legend').hidden = !p; $('chip').hidden = !p && !$('chip').classList.contains('busy'); $('stage').classList.toggle('is-empty', !p);
+  $('emptyStage').hidden = !!p; cv.hidden = !p;
+  updateButtons();
+  if (!p) return;
+  if (!$('chip').classList.contains('busy')) status(`Seite ${S.cur + 1} von ${S.pages.length} · ${p.quads.length} ${p.quads.length === 1 ? 'Foto' : 'Fotos'}${p.sample ? ' · Beispiel' : ''}`, false);
+  $('pageName').textContent = p.sample ? 'Beispiel' : `Seite ${S.cur + 1}`;
+  const st = $('stage'), cs = getComputedStyle(st);
+  const stageW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const wide = window.innerWidth >= 980, maxH = Math.max(240, wide ? window.innerHeight - 290 : window.innerHeight * 0.6);
+  const pv = viewCanvas(p);
+  let w = stageW, h = w * pv.height / pv.width;
+  if (h > maxH) { h = maxH; w = h * pv.width / pv.height; }
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  }
+  view = { w, h, dpr };
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.drawImage(pv, 0, 0, w, h);
+  const AMB = '#f5bd3c';
+  // nicht erkannte Fläche leicht abdunkeln, damit die Fotos hervortreten
+  if (p.quads.length) {
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h);
+    p.quads.forEach(q => { const pts = q.c.map(c => toView(p, c)).map(([x, y]) => [x * w, y * h]); ctx.moveTo(...pts[0]); for (let i = 3; i >= 1; i--) ctx.lineTo(...pts[i]); ctx.closePath(); });
+    ctx.fillStyle = 'rgba(0,0,0,.38)'; ctx.fill('evenodd'); ctx.restore();
+  }
+  p.quads.forEach((q, qi) => {
+    const pts = q.c.map(c => toView(p, c)).map(([x, y]) => [x * w, y * h]), sel = qi === S.sel;
+    ctx.beginPath(); pts.forEach((pt, i) => i ? ctx.lineTo(...pt) : ctx.moveTo(...pt)); ctx.closePath();
+    if (sel) { ctx.fillStyle = 'rgba(245,189,60,.14)'; ctx.fill(); }
+    ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.stroke();
+    ctx.lineWidth = sel ? 2.5 : 1.75; ctx.strokeStyle = AMB; ctx.stroke();
+    // Lasche an der oberen Kante
+    const a = pts[q.rot], b = pts[(q.rot + 1) % 4], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    const ex = (b[0] - a[0]), ey = (b[1] - a[1]), el = Math.hypot(ex, ey) || 1, ux = ex / el, uy = ey / el;
+    const cx = pts.reduce((s, t) => s + t[0], 0) / 4, cy = pts.reduce((s, t) => s + t[1], 0) / 4;
+    let nx = -uy, ny = ux; if ((cx - mx) * nx + (cy - my) * ny > 0) { nx = -nx; ny = -ny; }
+    const tw = Math.min(26, el * 0.3), th = 7;
+    ctx.beginPath(); ctx.moveTo(mx - ux * tw, my - uy * tw); ctx.lineTo(mx + ux * tw, my + uy * tw); ctx.lineTo(mx + ux * (tw - th) + nx * th, my + uy * (tw - th) + ny * th); ctx.lineTo(mx - ux * (tw - th) + nx * th, my - uy * (tw - th) + ny * th); ctx.closePath();
+    ctx.fillStyle = AMB; ctx.fill();
+    // Eckgriffe
+    pts.forEach(pt => {
+      ctx.beginPath(); ctx.arc(pt[0], pt[1], sel ? 8 : 5.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.lineWidth = sel ? 3 : 2; ctx.strokeStyle = AMB; ctx.stroke();
+    });
+    // Nummer
+    const label = String(qi + 1);
+    ctx.font = '600 12px "Geist Mono", ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const bw = Math.max(22, ctx.measureText(label).width + 12);
+    ctx.fillStyle = sel ? AMB : 'rgba(17,17,19,.82)'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(cx - bw / 2, cy - 11, bw, 22, 11) : ctx.rect(cx - bw / 2, cy - 11, bw, 22); ctx.fill();
+    ctx.fillStyle = sel ? '#1d1500' : '#fff'; ctx.fillText(label, cx, cy + 0.5);
+  });
+  if (loupe) drawLoupe(p);
+}
+function norm(x, y) { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; }
+
+function drawLoupe(p) {
+  const R = 58, Z = 3, [nx, ny] = loupe, px = nx * view.w, py = ny * view.h;
+  const lx = px < view.w / 2 ? view.w - R - 10 : R + 10, ly = R + 10;
+  ctx.save(); ctx.beginPath(); ctx.arc(lx, ly, R, 0, 7); ctx.clip();
+  const pv = viewCanvas(p), sw = pv.width, sh = pv.height, srcR = R / Z * sw / view.w;
+  ctx.drawImage(pv, nx * sw - srcR, ny * sh - srcR, srcR * 2, srcR * 2, lx - R, ly - R, R * 2, R * 2);
+  ctx.strokeStyle = '#f5bd3c'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(lx - 14, ly); ctx.lineTo(lx + 14, ly); ctx.moveTo(lx, ly - 14); ctx.lineTo(lx, ly + 14); ctx.stroke();
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(lx, ly, R, 0, 7); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+}
+
+function evPos(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; }
+function inside(c, [x, y]) { let s = false; for (let i = 0, j = 3; i < 4; j = i++) { const [a, b] = c[i], [e, f] = c[j]; if ((b > y) !== (f > y) && x < (e - a) * (y - b) / (f - b) + a) s = !s; } return s; }
+
+cv.addEventListener('pointerdown', e => {
+  const p = page(); if (!p) return;
+  const pos = evPos(e), hit = 30 / view.w, hitY = 30 / view.h;
+  const vq = p.quads.map(q => q.c.map(c => toView(p, c)));
+  let best = null, bd = Infinity;
+  const order = S.sel >= 0 ? [S.sel, ...p.quads.keys()] : [...p.quads.keys()];
+  for (const qi of order) vq[qi].forEach((c, ci) => {
+    const d = Math.hypot((c[0] - pos[0]) / hit, (c[1] - pos[1]) / hitY);
+    if (d < 1 && d < bd - (qi === S.sel ? 0.3 : 0)) { bd = d; best = { qi, ci }; }
+  });
+  if (best) { S.sel = best.qi; drag = { type: 'corner', ...best }; loupe = vq[best.qi][best.ci].slice(); }
+  else {
+    const qi = [...p.quads.keys()].reverse().find(i => inside(vq[i], pos));
+    if (qi === undefined) { S.sel = -1; drag = null; }
+    else { S.sel = qi; drag = { type: 'move', qi, start: pos, orig: vq[qi].map(c => c.slice()) }; }
+  }
+  if (drag) cv.setPointerCapture(e.pointerId);
+  updateButtons(); drawEditor();
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return; const p = page(), pos = evPos(e), cl = v => Math.min(1, Math.max(0, v));
+  const q = p.quads[drag.qi];
+  if (drag.type === 'corner') { const v = [cl(pos[0]), cl(pos[1])]; q.c[drag.ci] = fromView(p, v); loupe = v; }
+  else { const dx = pos[0] - drag.start[0], dy = pos[1] - drag.start[1]; q.c = drag.orig.map(([x, y]) => fromView(p, [cl(x + dx), cl(y + dy)])); }
+  drawEditor();
+});
+const endDrag = () => { if (drag) { drag = null; loupe = null; markDirty(); drawEditor(); } };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+function updateButtons() {
+  const p = page(), has = p && S.sel >= 0 && S.sel < p.quads.length;
+  $('bRot').disabled = !has; $('bDel').disabled = !has; $('bMerge').disabled = !has || p.quads.length < 2;
+}
+function markDirty() { if (S.results.length) S.dirty = true; renderPages(); updateDock(); }
+$('sens').oninput = () => { $('sensOut').textContent = $('sens').value; };
+
+$('bAdd').onclick = () => {
+  const p = page(); if (!p) return;
+  const pv = viewCanvas(p), ar = pv.width / pv.height, w = 0.3, h = 0.3 * ar * 0.75;
+  const vc = [[.5 - w / 2, .5 - h / 2], [.5 + w / 2, .5 - h / 2], [.5 + w / 2, .5 + h / 2], [.5 - w / 2, .5 + h / 2]];
+  // Ecken im Original so ordnen, dass die obere Kante der Ansicht oben ist
+  const oc = vc.map(c => fromView(p, c)), r = p.rot || 0;
+  p.quads.push({ c: [0, 1, 2, 3].map(i => oc[(i - r + 4) % 4]), rot: r });
+  S.sel = p.quads.length - 1; markDirty(); drawEditor();
+};
+$('bRotPage').onclick = () => { const p = page(); if (!p) return; setPageRot(p, ((p.rot || 0) + 3) % 4); p.rotManual = true; resolveRotations(); S.sel = -1; renderPages(); drawEditor(); };
+// zwei Rahmen zu einem Foto verbinden (wenn die Erkennung ein Foto geteilt hat)
+$('bMerge').onclick = () => {
+  const p = page(); if (!p || S.sel < 0 || p.quads.length < 2) return;
+  const W = p.preview.width, H = p.preview.height, A = p.quads[S.sel];
+  const px = q => q.c.map(([x, y]) => [x * W, y * H]), cen = q => px(q).reduce((a, v) => [a[0] + v[0] / 4, a[1] + v[1] / 4], [0, 0]);
+  const gap = (a, b) => { let m = Infinity; for (const u of px(a)) for (const v of px(b)) m = Math.min(m, Math.hypot(u[0] - v[0], u[1] - v[1])); return m; };
+  let bi = -1, bd = Infinity; p.quads.forEach((q, i) => { if (i === S.sel) return; const d = gap(A, q); if (d < bd) { bd = d; bi = i; } });
+  if (bi < 0) return;
+  const B = p.quads[bi], rect = minAreaRect(convexHull([...px(A), ...px(B)]));
+  const oc = orderCorners(rect.c).map(([x, y]) => [Math.min(1, Math.max(0, x / W)), Math.min(1, Math.max(0, y / H))]);
+  const m = { c: oc, rot: p.rot || 0 };
+  p.quads = p.quads.filter((_, i) => i !== S.sel && i !== bi); p.quads.push(m); p.quads = sortReading(p.quads, p.rot || 0);
+  S.sel = p.quads.indexOf(m); markDirty(); drawEditor(); toast('Rahmen verbunden');
+};
+$('bDel').onclick = () => { const p = page(); if (S.sel < 0) return; p.quads.splice(S.sel, 1); S.sel = -1; markDirty(); drawEditor(); };
+$('bRot').onclick = () => { const q = page().quads[S.sel]; q.rot = (q.rot + 3) % 4; drawEditor(); };
+$('bDelPage').onclick = () => {
+  const p = page(); if (!p) return;
+  S.pages.splice(S.cur, 1); S.results = S.results.filter(r => r.pageId !== p.id); renderGrid();
+  S.cur = Math.min(S.cur, S.pages.length - 1); S.sel = -1; renderPages(); drawEditor();
+};
+$('bRedetect').onclick = async () => { const p = page(); if (!p) return; status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value); status('', false); S.sel = -1; markDirty(); drawEditor(); toast(`${p.quads.length} Fotos erkannt`); };
+window.addEventListener('resize', () => drawEditor());
+
+// ---------- Entzerren in voller Auflösung ----------
+function solve(A, b) {
+  const n = b.length;
+  for (let i = 0; i < n; i++) {
+    let m = i; for (let r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[m][i])) m = r;
+    [A[i], A[m]] = [A[m], A[i]]; [b[i], b[m]] = [b[m], b[i]];
+    for (let r = i + 1; r < n; r++) { const f = A[r][i] / A[i][i]; for (let c = i; c < n; c++) A[r][c] -= f * A[i][c]; b[r] -= f * b[i]; }
+  }
+  const x = new Array(n);
+  for (let i = n - 1; i >= 0; i--) { let s = b[i]; for (let c = i + 1; c < n; c++) s -= A[i][c] * x[c]; x[i] = s / A[i][i]; }
+  return x;
+}
+function homography(from, to) {
+  const A = [], b = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = from[i], [X, Y] = to[i];
+    A.push([x, y, 1, 0, 0, 0, -X * x, -X * y]); b.push(X);
+    A.push([0, 0, 0, x, y, 1, -Y * x, -Y * y]); b.push(Y);
+  }
+  return solve(A, b);
+}
+async function fullSource(p) {
+  if (p.src) return p.src;
+  const d = await decodeFile(p.file);
+  // Seitenmaße müssen zur Vorschau passen
+  if (d.w !== p.w || d.h !== p.h) { const c = scaledCanvas(d.img, d.w, d.h, Math.max(p.w, p.h)); d.close(); return c; }
+  return Object.assign(d.img, { _close: d.close });
+}
+function releaseSource(src) { if (src && src._close) src._close(); else if (src && src.getContext) { src.width = src.height = 0; } }
+async function cutQuad(p, src, q) {
+  const W = p.w, H = p.h;
+  const c = [0, 1, 2, 3].map(i => q.c[(i + q.rot) % 4]).map(([x, y]) => [x * W, y * H]);
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  let ow = Math.round(Math.max(d(c[0], c[1]), d(c[3], c[2]))), oh = Math.round(Math.max(d(c[0], c[3]), d(c[1], c[2])));
+  const k = Math.min(1, Math.sqrt(MAXPX / (ow * oh))); ow = Math.max(1, Math.round(ow * k)); oh = Math.max(1, Math.round(oh * k));
+  // nur den benötigten Ausschnitt der Originaldatei auf ein Canvas legen
+  const x0 = Math.max(0, Math.floor(Math.min(...c.map(t => t[0]))) - 2), y0 = Math.max(0, Math.floor(Math.min(...c.map(t => t[1]))) - 2);
+  const x1 = Math.min(W, Math.ceil(Math.max(...c.map(t => t[0]))) + 2), y1 = Math.min(H, Math.ceil(Math.max(...c.map(t => t[1]))) + 2);
+  let sw = x1 - x0, sh = y1 - y0, ks = Math.min(1, Math.sqrt(MAXPX / (sw * sh)));
+  const sc = document.createElement('canvas'); sc.width = Math.round(sw * ks); sc.height = Math.round(sh * ks);
+  const sx = sc.getContext('2d', { willReadFrequently: true }); sx.imageSmoothingQuality = 'high';
+  sx.drawImage(src, x0, y0, sw, sh, 0, 0, sc.width, sc.height);
+  const sd = sx.getImageData(0, 0, sc.width, sc.height).data, SW = sc.width, SH = sc.height;
+  const loc = c.map(([x, y]) => [(x - x0) * ks, (y - y0) * ks]);
+  const h = homography([[0, 0], [ow, 0], [ow, oh], [0, oh]], loc);
+  const oc = document.createElement('canvas'); oc.width = ow; oc.height = oh;
+  const ox = oc.getContext('2d'), od = ox.createImageData(ow, oh), o = od.data;
+  for (let v = 0; v < oh; v++) {
+    const vv = v + 0.5;
+    for (let u = 0; u < ow; u++) {
+      const uu = u + 0.5, den = h[6] * uu + h[7] * vv + 1;
+      let X = (h[0] * uu + h[1] * vv + h[2]) / den - 0.5, Y = (h[3] * uu + h[4] * vv + h[5]) / den - 0.5;
+      if (X < 0) X = 0; if (Y < 0) Y = 0; if (X > SW - 1) X = SW - 1; if (Y > SH - 1) Y = SH - 1;
+      const xi = X | 0, yi = Y | 0, fx = X - xi, fy = Y - yi, xj = Math.min(SW - 1, xi + 1), yj = Math.min(SH - 1, yi + 1);
+      const i00 = (yi * SW + xi) * 4, i10 = (yi * SW + xj) * 4, i01 = (yj * SW + xi) * 4, i11 = (yj * SW + xj) * 4, oi = (v * ow + u) * 4;
+      for (let ch = 0; ch < 3; ch++) {
+        const t = sd[i00 + ch] + (sd[i10 + ch] - sd[i00 + ch]) * fx, bt = sd[i01 + ch] + (sd[i11 + ch] - sd[i01 + ch]) * fx;
+        o[oi + ch] = t + (bt - t) * fy;
+      }
+      o[oi + 3] = 255;
+    }
+    if ((v & 255) === 255) await new Promise(r => setTimeout(r));
+  }
+  ox.putImageData(od, 0, 0);
+  sc.width = sc.height = 0;
+  const blob = await new Promise(r => oc.toBlob(r, 'image/jpeg', JPEG_Q));
+    oc.width = oc.height = 0;
+  return { blob, url: URL.createObjectURL(blob), w: ow, h: oh };
+}
+function safeName(s) { return (s || '').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim(); }
+const pad = n => String(n).padStart(2, '0');
+function names(pi, qi) {
+  const a = safeName($('album').value);
+  return { file: `${a ? a + '_' : ''}S${pad(pi + 1)}_F${pad(qi + 1)}.jpg` };
+}
+
+async function cutAll() {
+  const total = S.pages.reduce((s, p) => s + p.quads.length, 0); if (!total || S.cutting) return;
+  S.cutting = true; S.dirty = false; S.saveIdx = 0; updateDock(); S.results.forEach(r => URL.revokeObjectURL(r.url)); S.results = []; renderGrid();
+  $('prog').hidden = false; $('progBar').style.width = '0%';
+  let done = 0;
+  for (const [pi, p] of S.pages.entries()) {
+    if (!p.quads.length) continue;
+    let src = null;
+    try {
+      src = await fullSource(p);
+      for (const [qi, q] of p.quads.entries()) {
+        $('resSub').textContent = `Schneide ${++done} von ${total} …`;
+        const r = await cutQuad(p, src, q);
+        S.results.push({ pageId: p.id, pi, qi, ...r });
+        $('progBar').style.width = (done / total * 100) + '%';
+        renderGrid();
+      }
+    } catch (e) { toast(`Seite ${pi + 1}: ${e && e.message || e}`, 6000); }
+    if (!p.sample) releaseSource(src);
+  }
+  S.cutting = false; $('prog').hidden = true; renderGrid(); updateDock();
+  toast(`${total} Fotos fertig`);
+  if (window.innerWidth < 980) $('secOut').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+$('bCut').onclick = cutAll;
+
+function renderGrid() {
+  const g = $('grid'); g.innerHTML = '';
+
+  let bytes = 0;
+  S.results.forEach((r, i) => {
+    bytes += r.blob.size;
+    const n = names(r.pi, r.qi), card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `<div class="pic"><img alt="Foto ${r.qi + 1} von Seite ${r.pi + 1}" src="${r.url}"></div>
+      <div class="meta"><b></b><span>${r.w} × ${r.h} px · ${(r.blob.size / 1048576).toFixed(1)} MB</span></div>
+      <div class="acts"><button class="btn" data-a="save" title="Sichern" aria-label="Foto sichern" ${S.downloads ? '' : 'disabled'}><svg class="i"><use href="#i-down"/></svg></button><button class="btn" data-a="rot" title="Drehen" aria-label="Foto drehen"><svg class="i"><use href="#i-rot"/></svg></button></div>`;
+    card.querySelector('.meta b').textContent = n.file;
+    card.querySelector('[data-a=rot]').onclick = () => rotateResult(i);
+    card.querySelector('[data-a=save]').onclick = () => saveOne(i);
+    g.appendChild(card);
+  });
+  if (!S.cutting) $('resSub').textContent = S.results.length ? `${(bytes / 1048576).toFixed(1)} MB · JPG in voller Auflösung${S.dirty ? ' · Rahmen geändert, neu ausschneiden' : ''}` : '';
+  $('resTitle').textContent = S.results.length === 1 ? '1 Foto' : `${S.results.length} Fotos`;
+  const ex = names(0, 0).file, ex2 = names(0, 1).file;
+  $('nameEx').innerHTML = ''; const b1 = document.createElement('b'); b1.textContent = ex; $('nameEx').append(b1, `, ${ex2} …  (S = Seite, F = Foto)`);
+  updateSummary();
+}
+async function rotateResult(i) {
+  const r = S.results[i], p = S.pages.find(x => x.id === r.pageId); if (!p) return;
+  const q = p.quads[r.qi]; q.rot = (q.rot + 3) % 4;
+  const src = await fullSource(p); const old = r.url; Object.assign(r, await cutQuad(p, src, q)); if (!p.sample) releaseSource(src);
+  URL.revokeObjectURL(old); renderGrid(); if (p === page()) drawEditor();
+}
+$('album').oninput = () => renderGrid();
+
+// ---------- Speichern ----------
+async function save(filename, data) {
+  try { await S.downloads.save({ filename, data }); return 'ok'; }
+  catch (e) {
+    if (e && e.code === 'declined') return 'declined';
+    if (e && e.code === 'rate_limited' && !data._retried) { data._retried = 1; await new Promise(r => setTimeout(r, 1200)); return save(filename, data); }
+    return 'error';
+  }
+}
+async function saveOne(i) { const r = S.results[i]; await save(names(r.pi, r.qi).file, r.blob); }
+// ---------- Speicherort ----------
+const MOBILE = /iPhone|iPad|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const CAN_SHARE = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.jpg', { type: 'image/jpeg' })] })); } catch (e) { return false; } })();
+const CAN_DIR = 'showDirectoryPicker' in window;
+const TARGETS = MOBILE && CAN_SHARE
+  ? [['photos', 'Fotomediathek', 'i-photos', 'Es öffnet sich das Teilen-Menü – tippe auf „Bilder sichern“. Bei „Alle sichern“ kommen alle Fotos auf einmal.'],
+     ['files', 'Dateien', 'i-folder', 'Die Fotos werden heruntergeladen und landen in der Dateien-App im Ordner „Downloads“. Safari fragt bei jedem Foto kurz nach.']]
+  : CAN_DIR
+  ? [['downloads', 'Download-Ordner', 'i-down', 'Die Fotos landen im Download-Ordner. Der Browser fragt evtl. einmal, ob mehrere Downloads erlaubt sind.'],
+     ['folder', 'Ordner wählen', 'i-folder', 'Du wählst einmal einen Ordner, danach schreibt die App alle Fotos direkt hinein.']]
+  : [['downloads', 'Download-Ordner', 'i-down', 'Die Fotos landen im Download-Ordner. Der Browser fragt evtl. einmal, ob mehrere Downloads erlaubt sind.']];
+let target = TARGETS[0][0], dirHandle = null;
+try { const t = localStorage.getItem('albumschere.target'); if (TARGETS.some(x => x[0] === t)) target = t; } catch (e) {}
+function renderTargets() {
+  const box = $('target'); box.innerHTML = '';
+  $('targetWrap').hidden = TARGETS.length < 2;
+  for (const [id, label, icon] of TARGETS) {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(id === target));
+    b.innerHTML = `<svg class="i"><use href="#${icon}"/></svg>${label}`;
+    b.onclick = () => { target = id; try { localStorage.setItem('albumschere.target', id); } catch (e) {} renderTargets(); updateSummary(); };
+    box.appendChild(b);
+  }
+  $('saveNote').textContent = TARGETS.find(x => x[0] === target)[3];
+}
+function updateSaveLabel() {
+  const n = S.results.length;
+  $('bEach').lastChild.textContent = target === 'photos' ? 'In Fotomediathek sichern' : target === 'files' ? 'In Dateien sichern' : target === 'folder' ? 'In Ordner sichern' : 'Alle herunterladen';
+  S.saveShort = target === 'photos' ? `${n} in Fotos sichern` : target === 'files' ? `${n} in Dateien sichern` : `${n} sichern`; updateDock();
+}
+function download(filename, blob) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+async function getDir() {
+  if (dirHandle) { try { if ((await dirHandle.queryPermission({ mode: 'readwrite' })) === 'granted' || (await dirHandle.requestPermission({ mode: 'readwrite' })) === 'granted') return dirHandle; } catch (e) {} }
+  dirHandle = await window.showDirectoryPicker({ id: 'albumschere', mode: 'readwrite' }); return dirHandle;
+}
+async function writeToDir(dir, filename, blob) { const fh = await dir.getFileHandle(filename, { create: true }); const w = await fh.createWritable(); await w.write(blob); await w.close(); }
+async function saveFiles(list) {
+  try {
+    if (target === 'photos') { await navigator.share({ files: list.map(([n, b]) => new File([b], n, { type: 'image/jpeg' })) }); if (list.length > 1) toast(`${list.length} Fotos übergeben`); return 'ok'; }
+    if (target === 'folder') {
+      const dir = await getDir();
+      for (let i = 0; i < list.length; i++) { if (list.length > 1) toast(`Schreibe ${i + 1} von ${list.length} …`, 0); await writeToDir(dir, list[i][0], list[i][1]); }
+      toast(list.length > 1 ? `${list.length} Fotos in „${dir.name}“ gesichert` : `In „${dir.name}“ gesichert`); return 'ok';
+    }
+    for (let i = 0; i < list.length; i++) { if (list.length > 1) toast(`Lade ${i + 1} von ${list.length} …`, 0); download(list[i][0], list[i][1]); await new Promise(r => setTimeout(r, MOBILE ? 900 : 350)); }
+    if (list.length > 1) toast(`${list.length} Fotos heruntergeladen`); return 'ok';
+  } catch (e) { if (e && e.name === 'AbortError') return 'declined'; toast('Speichern ging nicht: ' + (e && e.message || e), 5000); return 'error'; }
+}
+async function saveTo({ filename, data }) { const r = await saveFiles([[filename, data]]); if (r !== 'ok') throw { code: r === 'declined' ? 'declined' : 'unavailable', message: r }; return { status: 'saved' }; }
+async function saveAll() { if (S.results.length) await saveFiles(S.results.map(r => [names(r.pi, r.qi).file, r.blob])); }
+$('bEach').onclick = saveAll;
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function makeZip(entries) {
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const now = new Date(), dt = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)), dd = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate());
+  for (const { path, blob } of entries) {
+    const data = new Uint8Array(await blob.arrayBuffer()), name = enc.encode(path), crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, dt, true); lh.setUint16(12, dd, true); lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true);
+    lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    parts.push(lh, name, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+    ch.setUint16(12, dt, true); ch.setUint16(14, dd, true); ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+    ch.setUint16(28, name.length, true); ch.setUint32(42, off, true);
+    central.push(ch, name);
+    off += 30 + name.length + data.length;
+  }
+  const csize = central.reduce((s, x) => s + x.byteLength, 0), end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true);
+  end.setUint32(12, csize, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...central, end], { type: 'application/zip' });
+}
+
+// ---------- Einstellungen-Sheet ----------
+function openSheet(on) { document.body.classList.toggle('sheet-open', on); $('scrim').hidden = !on; }
+$('bMenu').onclick = () => openSheet(true); $('bClose').onclick = () => openSheet(false); $('scrim').onclick = () => openSheet(false);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') openSheet(false); });
+// ---------- Start ----------
+renderTargets();
+renderPages(); drawEditor(); renderGrid();
+let dragN = 0;
+document.addEventListener('dragenter', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { dragN++; $('drop').hidden = false; } });
+document.addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; $('drop').hidden = true; } });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('drop').hidden = true; if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); });
+if (document.fonts) document.fonts.ready.then(() => drawEditor());
+(async () => {
+  try {
+    S.downloads = { save: saveTo };
+  } catch (e) { S.downloads = null; }
+  if (false) $('saveNote').textContent = 'Speichern per Knopf ist in dieser Ansicht nicht verfügbar. Halte ein fertiges Foto gedrückt und wähle „In Fotos sichern“, es hat die volle Auflösung.';
+  renderGrid();
+})();
+</script>
+
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+</body>
+</html>

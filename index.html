@@ -72,7 +72,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 .tips { display: flex; justify-content: center; gap: clamp(28px, 8vw, 80px); padding: 4px 0 2px; color: var(--ink); font-size: 14px }
 .tip { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center }
 .tip svg.i { width: 30px; height: 30px; color: var(--gold); stroke-width: 1.5 }
-.empty { display: grid; place-items: center; gap: 10px; text-align: center; color: var(--muted); min-height: 260px; padding: 28px 16px;
+.empty { display: grid; place-items: center; align-content: center; gap: 10px; text-align: center; color: var(--muted); min-height: 200px; padding: 28px 16px;
   border: 1.5px dashed #4a4436; border-radius: 10px; background: radial-gradient(500px 240px at 50% 40%, rgba(217,166,69,.07), rgba(217,166,69,0) 70%) }
 .empty svg.i { width: 40px; height: 40px; color: var(--gold); stroke-width: 1.4 }
 .empty b { color: var(--ink); font-size: 17px }
@@ -144,6 +144,13 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 .row { display: flex; gap: 8px; flex-wrap: wrap }
 .row > .btn { flex: 1 1 auto }
 
+
+/* Import-Rahmen: so hoch wie die Export-Spalte, das leere Feld füllt den Rest */
+.main.panel { gap: 14px; padding: 16px }
+.imp .work { flex: 1 1 auto }
+.imp .work:has(> .empty:not([hidden])) { display: flex }
+.imp .empty { flex: 1 1 auto }
+@media (min-width: 760px) { .app { align-items: stretch } .side { align-self: start } }
 /* Export-Spalte */
 .panel { background: rgba(31,31,33,.92); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px }
 .panel h2 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
@@ -245,7 +252,8 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
   <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere"><use href="#logoSym"/></svg><h1 class="vh">Albumschere</h1></header>
   <div class="topbar" id="topbar" hidden></div>
 
-  <main class="main">
+  <main class="main panel imp">
+    <h2>Import</h2>
     <nav class="src" aria-label="Albumseiten hinzufügen">
       <label class="tile on" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
       <label class="tile" for="inPick"><svg class="i"><use href="#i-img"/></svg>Auswählen</label>

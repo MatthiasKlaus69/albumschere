@@ -54,6 +54,8 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 @media (min-width: 1100px) { .app { grid-template-columns: minmax(0, 1fr) 330px } }
 .logo-img { display: block; aspect-ratio: 1336/476; height: auto; width: clamp(190px, 26vw, 300px); filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)) }
 
+.byline { font: 600 62px var(--f-ui); letter-spacing: .08em; fill: #c9cbcf; opacity: .9 }
+
 /* Quellen-Kacheln */
 .src { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 10px }
 .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 92px; padding: 12px 8px; border-radius: var(--r);
@@ -249,7 +251,7 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
 <input id="inDir" class="vh" type="file" webkitdirectory multiple>
 
 <div class="app">
-  <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere"><use href="#logoSym"/></svg><h1 class="vh">Albumschere</h1></header>
+  <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere by MS CUBE"><use href="#logoSym"/><text x="1296" y="408" text-anchor="end" class="byline">by MS CUBE</text></svg><h1 class="vh">Albumschere</h1></header>
   <div class="topbar" id="topbar" hidden></div>
 
   <main class="main panel imp">

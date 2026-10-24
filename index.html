@@ -44,7 +44,7 @@ svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none;
 /* Grundraster */
 .app { max-width: 1240px; margin: 0 auto; padding: 18px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
   display: grid; gap: 14px 18px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "main" "side" }
-.head { grid-area: head; display: flex; align-items: center; min-height: 64px }
+.head { grid-area: head; display: flex; align-items: center; justify-content: center; min-height: 64px }
 .main { grid-area: main; display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 .side { grid-area: side; display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 @media (min-width: 760px) {

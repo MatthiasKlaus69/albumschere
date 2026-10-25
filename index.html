@@ -419,7 +419,7 @@ function orderCorners(c) {
   return [0, 1, 2, 3].map(i => s[(i + k) % 4]);
 }
 
-var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1 }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
+var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1, texR: 1, paperSides: false, paperHoles: false, shrink: true, shrinkCol: 22, shrinkMax: 0.3, shrinkEdge: 0.6, shrinkRow: 0.75, holes2: true }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
 // ---- Kantenbasierte Mehrfach-Fotoerkennung ----
 // Ablauf nach dem Vorbild aktueller Dokumentscanner: Farbkanten -> Hough-Linien mit Belegungsprofil
 // -> Vierecke aus zwei Linienpaaren -> Bewertung -> gierige Auswahl; Rückfall über Flächenmaske für runde Fotos.
@@ -449,6 +449,8 @@ function detectQuads(rgba, w, h, sens) {
     mag[i] = Math.sqrt(bm); gxA[i] = gx; gyA[i] = gy;
   }
   const tex = boxBlurF(mag, w, h, 2);
+  // für die Seitenmaske feiner: schmale Papierstreifen zwischen dicht geklebten Fotos sollen glatt bleiben
+  const texS = CFG.texR === 2 ? tex : boxBlurF(mag, w, h, CFG.texR);
   // Albumseite: häufigste Farbe unter ruhigen Pixeln
   const hist = new Uint32Array(4096), bin = i => ((rgba[4 * i] >> 4) << 8) | ((rgba[4 * i + 1] >> 4) << 4) | (rgba[4 * i + 2] >> 4);
   for (let i = 0; i < n; i++) if (tex[i] < 14) hist[bin(i)]++;
@@ -471,7 +473,7 @@ function detectQuads(rgba, w, h, sens) {
   let PAGECOL = null; const lightArea = new Uint8Array(n); const PLAB = new Int32Array(n).fill(-1), PCOMPS = [];
   if (CFG.plMode === 'region') {
     // Albumseite = größte zusammenhängende glatte, helle, wenig bunte Fläche (wächst über Lichtverläufe, stoppt an Kanten)
-    const smooth = new Uint8Array(n); for (let i = 0; i < n; i++) smooth[i] = tex[i] < CFG.plTex ? 1 : 0;
+    const smooth = new Uint8Array(n); for (let i = 0; i < n; i++) smooth[i] = texS[i] < CFG.plTex ? 1 : 0;
     const lab = PLAB, stk = new Int32Array(n), comps = PCOMPS;
     for (let s0 = 0; s0 < n; s0++) {
       if (!smooth[s0] || lab[s0] >= 0) continue;
@@ -491,9 +493,13 @@ function detectQuads(rgba, w, h, sens) {
     if (best >= 0) PAGECOL = [comps[best].r, comps[best].g, comps[best].b];
     if (best >= 0) { const B0 = comps[best]; comps.forEach((c, k) => { if (c.ok && (k === best || (c.cnt >= B0.cnt * CFG.plRel && Math.hypot(c.r - B0.r, c.g - B0.g, c.b - B0.b) < 45))) keep[k] = 1; }); }
     for (let i = 0; i < n; i++) pageLike[i] = lab[i] >= 0 && keep[lab[i]] ? 1 : 0;
+    if (globalThis.DBGPL) globalThis.DBGPL.push({ pageLike: pageLike.slice(), tex: tex.slice(), comps: comps.map(c => ({ cnt: c.cnt, r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b), ok: c.ok })), best: PAGECOL });
     // alle großen glatten hellen Flächen (Seite, Tisch) – für die Prüfung, ob ein Foto auf der Seite liegt
     const bigL = comps.map(c => c.ok && c.cnt >= n * CFG.plAll); for (let i = 0; i < n; i++) lightArea[i] = lab[i] >= 0 && bigL[lab[i]] ? 1 : 0;
   } else for (let i = 0; i < n; i++) pageLike[i] = (tex[i] < CFG.plTex && pageDist(i) < CFG.plDist) ? 1 : 0;
+  // alles helle, glatte, wenig bunte Papier (Albumseite, weitere Seiten, Zwischenblätter)
+  const paperAll = new Uint8Array(n); for (let i = 0; i < n; i++) paperAll[i] = pageLike[i] || lightArea[i] ? 1 : 0;
+  const PM = CFG.paperSides ? paperAll : pageLike, PH = CFG.paperHoles ? paperAll : pageLike;
 
   // Kanten mit Non-Maximum-Suppression
   const tEdge = CFG.tEdgeBase - 0.9 * sens;
@@ -677,6 +683,7 @@ function detectQuads(rgba, w, h, sens) {
     cands.length = 0; for (const C of keep) cands.push(C);
   }
   const allC = cands.slice();
+  if (globalThis.DBGA) globalThis.DBGA.list = allC;
 
   // Bewertung: kein Seitenhintergrund im Inneren, keine durchgehende Trennkante
   const grid = (q, m0 = 0) => { const pts = []; for (let v = 0; v < 10; v++) for (let u = 0; u < 10; u++) { const U = m0 + (1 - 2 * m0) * (u + .5) / 10, V = m0 + (1 - 2 * m0) * (v + .5) / 10; const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; pts.push([tx + (bx - tx) * V, ty + (by - ty) * V]); } return pts; };
@@ -743,7 +750,7 @@ function detectQuads(rgba, w, h, sens) {
   };
   // Direkt innerhalb jeder Kante liegt Bildinhalt; ein Streifen Albumseite dort heißt: Rahmen zu groß
   const looseSide = q => {
-    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? pageLike[y * w + x] : 0; };
+    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? PM[y * w + x] : 0; };
     for (let side = 0; side < 4; side++) {
       let c = 0, n0 = 0;
       for (const dpt of [0.03, 0.06, 0.09]) for (let j = 0; j < 16; j++) {
@@ -757,7 +764,7 @@ function detectQuads(rgba, w, h, sens) {
   };
   // Ein Foto wird nie von einem durchgehenden Streifen leerer Albumseite durchzogen
   const corridor = q => {
-    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? pageLike[y * w + x] : 0; };
+    const at = (U, V) => { const tx = q[0][0] + (q[1][0] - q[0][0]) * U, ty = q[0][1] + (q[1][1] - q[0][1]) * U, bx = q[3][0] + (q[2][0] - q[3][0]) * U, by = q[3][1] + (q[2][1] - q[3][1]) * U; const x = Math.round(tx + (bx - tx) * V), y = Math.round(ty + (by - ty) * V); return x >= 0 && y >= 0 && x < w && y < h ? PM[y * w + x] : 0; };
     for (let dir = 0; dir < 2; dir++) for (let k = 3; k <= 45; k += 2) {
       const s0 = k / 48; let miss = 0;
       for (let j = 0; j < 30 && miss <= 4; j++) { const t = 0.03 + 0.94 * j / 29; if (!(dir ? at(s0, t) : at(t, s0))) miss++; }
@@ -1014,10 +1021,10 @@ function detectQuads(rgba, w, h, sens) {
     const hole = new Uint8Array(n);
     // Seitenumriss: Zeilen- und Spaltenspanne der Seitenfläche, innerhalb davon alles Nicht-Seite
     const rowL = new Int32Array(h).fill(w), rowR = new Int32Array(h).fill(-1);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (pageLike[y * w + x]) { if (x < rowL[y]) rowL[y] = x; rowR[y] = x; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (PH[y * w + x]) { if (x < rowL[y]) rowL[y] = x; rowR[y] = x; }
     const colT = new Int32Array(w).fill(h), colB = new Int32Array(w).fill(-1);
-    for (let x = 0; x < w; x++) for (let y = 0; y < h; y++) if (pageLike[y * w + x]) { if (y < colT[x]) colT[x] = y; colB[x] = y; }
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (!pageLike[i] && x > rowL[y] && x < rowR[y] && y > colT[x] && y < colB[x]) hole[i] = 1; }
+    for (let x = 0; x < w; x++) for (let y = 0; y < h; y++) if (PH[y * w + x]) { if (y < colT[x]) colT[x] = y; colB[x] = y; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (!PH[i] && x > rowL[y] && x < rowR[y] && y > colT[x] && y < colB[x]) hole[i] = 1; }
     const hr = Math.max(2, Math.round(Math.max(w, h) * CFG.holeOpen));
     let hm = boxMorph(boxMorph(hole, w, h, hr, true), w, h, hr, false);
     const lab = new Uint8Array(n), stk = new Int32Array(n), props = [];
@@ -1266,6 +1273,35 @@ function detectQuads(rgba, w, h, sens) {
     for (const K of all) { const { cnt, tot } = ringLabels(K.q); for (const [L, c] of cnt) votes.set(L, (votes.get(L) || 0) + c / tot); }
     let pageL = -1, bv = 0; for (const [L, v] of votes) if (v > bv) { bv = v; pageL = L; }
     if (pageL >= 0) pageOK = q => { const { cnt, tot } = ringLabels(q); return (cnt.get(pageL) || 0) / tot >= CFG.voteMin; };
+  }
+  // Ränder einziehen: liegt innerhalb einer Rahmenkante ein glatter Streifen in derselben Farbe wie das Papier
+  // direkt außerhalb, gehört er zur Seite – die Kante rückt bis zur ersten durchgehenden Fotokante nach innen
+  if (CFG.shrink) {
+    const L0 = i => 0.299 * Rb[i] + 0.587 * Gb[i] + 0.114 * Bb[i];
+    for (const K of chosen.concat(extra)) {
+      for (let pass = 0; pass < 2; pass++) for (let k = 0; k < 4; k++) {
+        const q = K.q, A = q[k], B = q[(k + 1) % 4], len = Math.hypot(B[0] - A[0], B[1] - A[1]); if (len < 10) continue;
+        const cx = q.reduce((a2, p) => a2 + p[0], 0) / 4, cy = q.reduce((a2, p) => a2 + p[1], 0) / 4;
+        let nx = -(B[1] - A[1]) / len, ny = (B[0] - A[0]) / len; if ((cx - (A[0] + B[0]) / 2) * nx + (cy - (A[1] + B[1]) / 2) * ny < 0) { nx = -nx; ny = -ny; }
+        const opp = q[(k + 2) % 4], depth = Math.abs((opp[0] - A[0]) * nx + (opp[1] - A[1]) * ny);
+        const at = (f, d) => { const X0 = Math.round(A[0] + (B[0] - A[0]) * f + nx * d), Y0 = Math.round(A[1] + (B[1] - A[1]) * f + ny * d); return X0 >= 0 && Y0 >= 0 && X0 < w && Y0 < h ? Y0 * w + X0 : -1; };
+        // Papierfarbe direkt außerhalb
+        let or = 0, og = 0, ob = 0, on = 0; for (let j = 0; j < 20; j++) { const f = 0.1 + 0.8 * j / 19; for (const d of [-3, -5]) { const i = at(f, d); if (i < 0) continue; or += Rb[i]; og += Gb[i]; ob += Bb[i]; on++; } }
+        if (on < 10) continue; or /= on; og /= on; ob /= on; const outPaper = 0.299 * or + 0.587 * og + 0.114 * ob >= CFG.plLum;
+        const paperRow = d => { let ok = 0, tot = 0; for (let j = 0; j < 24; j++) { const i = at(0.08 + 0.84 * j / 23, d); if (i < 0) continue; tot++; if (texS[i] < CFG.plTex && (outPaper ? Math.hypot(Rb[i] - or, Gb[i] - og, Bb[i] - ob) < CFG.shrinkCol : paperAll[i])) ok++; } return tot ? ok / tot : 0; };
+        const maxD = Math.min(depth * CFG.shrinkMax, depth - 8); let d0 = 0;
+        let run = 0; for (let d = 1; d <= maxD; d++) { if (paperRow(d) >= CFG.shrinkRow) { d0 = d; run++; } else if (d > 5 && d - d0 > 2) break; }
+        if (run < 3) continue;
+        if (globalThis.DBGK) console.log('shrink', k, 'outPaper', outPaper, 'd0', d0, 'row1', paperRow(2).toFixed(2), 'maxD', Math.round(maxD));
+        if (d0 < 3) continue;
+        // an der neuen Stelle muss eine Kante liegen
+        let best = -1, bc = 0;
+        for (let d = d0; d <= d0 + 4 && d < maxD + 4; d++) { let hit = 0, tot = 0; for (let j = 0; j < 30; j++) { const f = 0.08 + 0.84 * j / 29; tot++; for (const o of [0, 1, -1]) { const i = at(f, d + o); if (i >= 0 && edge[i]) { hit++; break; } } } if (hit / tot > bc) { bc = hit / tot; best = d; } }
+        if (best < 0 || bc < CFG.shrinkEdge) continue;
+        K.q = q.map((p, i2) => i2 === k || i2 === (k + 1) % 4 ? [p[0] + nx * best, p[1] + ny * best] : p);
+        K.pts = grid6(K.q); K.area = polyArea(K.q);
+      }
+    }
   }
   // Prüfer 1: Farbhistogramm innen gegen Außenring (χ²-Abstand, 8x8x8 Bins; Puybareau/Tropin 2020)
   const chi2 = q => {
@@ -1571,6 +1607,125 @@ function grabLeakFast(rgba, w, h, q, iters, maxPx, cache) {
   }
   return grabLeak(im.d, im.W, im.H, q.map(([x, y]) => [x / s, y / s]), iters);
 }
+// ---- Zweites Verfahren: Fotos als Aussparungen im Albumpapier ----
+// Papier = hell, wenig bunt, lokal glatt. Was ringsum von Papier umschlossen ist und rechteckig aussieht, ist ein Foto.
+// Nach dem Vorbild der Hintergrund-Segmentierung in Scan-Werkzeugen (Hintergrundmodell + Zusammenhangskomponenten
+// + kleinstes umschließendes Rechteck), ergänzt um ein lokal angepasstes Papiermodell für Handyfotos.
+function paperHoles(rgba, w, h, P) {
+  P = Object.assign({ chroma: 34, lumF: 0.80, tex: 22, minComp: 0.03, open: 2, minArea: 0.012, fill: 0.86, ring: 0.6, maxAsp: 1.95, pre: 1, colorModel: true, colTol: 0.03, edgeT: 45, fillLo: 0.55, supMin: 0.8, hull: true }, P || {});
+  const n = w * h, L = new Float32Array(n), C = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const r = rgba[4 * i], g = rgba[4 * i + 1], b = rgba[4 * i + 2]; L[i] = 0.299 * r + 0.587 * g + 0.114 * b; C[i] = Math.max(r, g, b) - Math.min(r, g, b); }
+  // lokaler Gradient (3x3) als Glätte-Maß
+  const T = new Float32Array(n), Lb = P.pre ? boxBlurF(L, w, h, P.pre) : L;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; T[i] = Math.abs(Lb[i + 1] - Lb[i - 1]) + Math.abs(Lb[i + w] - Lb[i - w]); }
+  const Ts = boxBlurF(T, w, h, 1);
+  // Papierhelligkeit: obere Mode der glatten, unbunten Pixel; Beleuchtung über grobe Helligkeitskarte ausgleichen
+  const hist = new Uint32Array(256); for (let i = 0; i < n; i++) if (Ts[i] < P.tex && C[i] < P.chroma) hist[Math.min(255, L[i] | 0)]++;
+  let tot = 0; for (let v = 0; v < 256; v++) tot += hist[v]; if (tot < n * 0.05) return [];
+  // hellster Bereich mit nennenswertem Anteil
+  let acc = 0, p90 = 255; for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc > tot * 0.25) { p90 = v; break; } }
+  const G = 16, gw = Math.ceil(w / G), gh = Math.ceil(h / G), gm = new Float32Array(gw * gh);
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++) { const vals = []; for (let y = gy * G; y < Math.min(h, gy * G + G); y++) for (let x = gx * G; x < Math.min(w, gx * G + G); x++) { const i = y * w + x; if (Ts[i] < P.tex && C[i] < P.chroma && L[i] > p90 * 0.55) vals.push(L[i]); }
+    vals.sort((a, b) => a - b); gm[gy * gw + gx] = vals.length > G * G * 0.15 ? vals[(vals.length * 0.6) | 0] : 0; }
+  // Lücken in der Helligkeitskarte aus Nachbarn füllen
+  for (let it = 0; it < 30; it++) { let ch = false; for (let k = 0; k < gw * gh; k++) if (!gm[k]) { const gx = k % gw, gy = (k / gw) | 0; let s = 0, c = 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = gx + dx, Y = gy + dy; if (X >= 0 && Y >= 0 && X < gw && Y < gh && gm[Y * gw + X]) { s += gm[Y * gw + X]; c++; } } if (c) { gm[k] = s / c; ch = true; } } if (!ch) break; }
+  const paper = new Uint8Array(n);
+  if (P.colorModel) {
+    // Papierfarbe(n): häufigste Farbtöne glatter Pixel (warmes Licht, cremefarbenes Papier), Helligkeit darf schwanken
+    const hb = new Map();
+    for (let i = 0; i < n; i += 2) { if (Ts[i] >= P.tex || L[i] < 70) continue; const r = rgba[4 * i], g = rgba[4 * i + 1], b = rgba[4 * i + 2], sm = r + g + b + 1;
+      const k = (Math.round(r / sm * 60) << 12) | (Math.round(g / sm * 60) << 6) | Math.round(b / sm * 60); hb.set(k, (hb.get(k) || 0) + 1); }
+    const top = [...hb.entries()].sort((a2, b2) => b2[1] - a2[1]); const cols = []; let cov = 0, totS = 0; for (const [, c] of top) totS += c;
+    for (const [k, c] of top) { if (cols.length >= 4 || c < totS * 0.04) break; const cr = (k >> 12) / 60, cg = ((k >> 6) & 63) / 60, cb = (k & 63) / 60;
+      if (cols.some(([r2, g2, b2]) => Math.hypot(r2 - cr, g2 - cg, b2 - cb) < 0.03)) continue; cols.push([cr, cg, cb]); cov += c; }
+    for (let i = 0; i < n; i++) { if (Ts[i] >= P.tex || L[i] < 70) continue; const r = rgba[4 * i], g = rgba[4 * i + 1], b = rgba[4 * i + 2], sm = r + g + b + 1;
+      for (const [cr, cg, cb] of cols) if (Math.hypot(r / sm - cr, g / sm - cg, b / sm - cb) < P.colTol) { paper[i] = 1; break; } }
+  } else
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x, ref = gm[Math.min(gh - 1, (y / G) | 0) * gw + Math.min(gw - 1, (x / G) | 0)] || p90;
+    paper[i] = Ts[i] < P.tex && C[i] < P.chroma && L[i] > ref * P.lumF && L[i] > 90 ? 1 : 0; }
+  // nur große Papierflächen behalten
+  const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n); let nl = 0; const sizes = [];
+  for (let s0 = 0; s0 < n; s0++) { if (!paper[s0] || lab[s0] >= 0) continue; let top = 0, cnt = 0; stk[top++] = s0; lab[s0] = nl;
+    while (top) { const i = stk[--top]; cnt++; const x = i % w; for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w]) if (j >= 0 && j < n && paper[j] && lab[j] < 0) { lab[j] = nl; stk[top++] = j; } }
+    sizes.push(cnt); nl++; }
+  const bigP = new Uint8Array(n); for (let i = 0; i < n; i++) bigP[i] = lab[i] >= 0 && sizes[lab[i]] >= n * P.minComp ? 1 : 0;
+  // Seitenfläche: konvexe Hülle jeder großen Papierfläche – so zählen auch Fotos, die bis an den Seitenrand reichen
+  const hullM = new Uint8Array(n);
+  if (P.hull) {
+    for (let c = 0; c < nl; c++) { if (sizes[c] < n * P.minComp) continue;
+      const rL = new Int32Array(h).fill(w), rR = new Int32Array(h).fill(-1);
+      for (let i = 0; i < n; i++) if (lab[i] === c) { const x = i % w, y = (i / w) | 0; if (x < rL[y]) rL[y] = x; if (x > rR[y]) rR[y] = x; }
+      const pts = []; for (let y = 0; y < h; y++) if (rR[y] >= 0) pts.push([rL[y], y], [rR[y], y]);
+      const hl = convexHull(pts); if (!hl || hl.length < 3) continue;
+      let y0 = h, y1 = 0; for (const [, y] of hl) { if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(h - 1, Math.ceil(y1)); y++) { const xs = [];
+        for (let k = 0; k < hl.length; k++) { const [ax, ay] = hl[k], [bx, by] = hl[(k + 1) % hl.length]; if ((ay <= y && by > y) || (by <= y && ay > y)) xs.push(ax + (y - ay) * (bx - ax) / (by - ay)); }
+        xs.sort((a2, b2) => a2 - b2); for (let k = 0; k + 1 < xs.length; k += 2) for (let x = Math.max(0, Math.ceil(xs[k])); x <= Math.min(w - 1, Math.floor(xs[k + 1])); x++) hullM[y * w + x] = 1; }
+    }
+  }
+  let np = new Uint8Array(n); for (let i = 0; i < n; i++) np[i] = bigP[i] || (P.hull && !hullM[i]) ? 0 : 1;
+  if (P.open) np = boxMorph(boxMorph(np, w, h, P.open, true), w, h, P.open, false);
+  const lab2 = new Int32Array(n).fill(-1), out = [];
+  for (let s0 = 0; s0 < n; s0++) {
+    if (!np[s0] || lab2[s0] >= 0) continue;
+    let top = 0; stk[top++] = s0; lab2[s0] = s0; const comp = []; let border = false;
+    while (top) { const i = stk[--top]; comp.push(i); const x = i % w, y = (i / w) | 0; if ((x < 2 || y < 2 || x > w - 3 || y > h - 3) && !P.hull) border = true;
+      for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w]) if (j >= 0 && j < n && np[j] && lab2[j] < 0) { lab2[j] = s0; stk[top++] = j; } }
+    if (border || comp.length < n * P.minArea || comp.length > n * 0.6) continue;
+    // Umgebung: Anteil Papier in einem Ring um die Komponente
+    let rp = 0, rt = 0; const inC = new Set(comp);
+    for (let k = 0; k < comp.length; k += 3) { const i = comp[k], x = i % w, y = (i / w) | 0;
+      for (const [dx, dy] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= w || Y >= h) continue; const j = Y * w + X; if (np[j]) continue; if (P.hull && !hullM[j]) continue; rt++; rp += bigP[j]; } }
+    if (!rt || rp / rt < P.ring) continue;
+    // kleinstes umschließendes Rechteck
+    let y0 = h, y1 = 0; for (const i of comp) { const y = (i / w) | 0; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    const rmin = new Int32Array(y1 - y0 + 1).fill(w), rmax = new Int32Array(y1 - y0 + 1).fill(-1);
+    for (const i of comp) { const x = i % w, y = ((i / w) | 0) - y0; if (x < rmin[y]) rmin[y] = x; if (x > rmax[y]) rmax[y] = x; }
+    const pts = []; for (let y = 0; y < rmin.length; y++) if (rmax[y] >= 0) pts.push([rmin[y], y + y0], [rmax[y] + 1, y + y0], [rmin[y], y + y0 + 1], [rmax[y] + 1, y + y0 + 1]);
+    const rect = minAreaRect(convexHull(pts)); if (!rect) continue;
+    const fill = comp.length / rect.area, q = orderCorners(rect.c.map(p => p.slice()));
+    const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]), u = (d(q[0], q[1]) + d(q[3], q[2])) / 2, v = (d(q[0], q[3]) + d(q[1], q[2])) / 2, asp = Math.max(u, v) / Math.max(1, Math.min(u, v));
+    // Kantenbeleg der vier Rechteckseiten (Helligkeitssprung quer zur Seite)
+    const sideSup = [];
+    for (let k = 0; k < 4; k++) { const A = q[k], B = q[(k + 1) % 4], len = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1, nx = -(B[1] - A[1]) / len, ny = (B[0] - A[0]) / len; let hit = 0, tt = 0;
+      for (let j = 0; j < 40; j++) { const f = 0.05 + 0.9 * j / 39; let best = 0; for (let o = -3; o <= 3; o++) { const x = A[0] + (B[0] - A[0]) * f + nx * o, y = A[1] + (B[1] - A[1]) * f + ny * o;
+          const X1 = Math.round(x + nx * 2), Y1 = Math.round(y + ny * 2), X2 = Math.round(x - nx * 2), Y2 = Math.round(y - ny * 2); if (X1 < 0 || Y1 < 0 || X2 < 0 || Y2 < 0 || X1 >= w || X2 >= w || Y1 >= h || Y2 >= h) continue;
+          const i1 = 4 * (Y1 * w + X1), i2 = 4 * (Y2 * w + X2), dlt = Math.abs(rgba[i1] - rgba[i2]) + Math.abs(rgba[i1 + 1] - rgba[i2 + 1]) + Math.abs(rgba[i1 + 2] - rgba[i2 + 2]); if (dlt > best) best = dlt; }
+        tt++; if (best > P.edgeT) hit++; }
+      sideSup.push(hit / tt); }
+    const minSup = Math.min(...sideSup);
+    out.push({ q, fill, asp, area: rect.area, cnt: comp.length, ring: rp / rt, sup: minSup, ok: asp <= P.maxAsp && (fill >= P.fill || (fill >= P.fillLo && minSup >= P.supMin)) });
+  }
+  if (globalThis.DBGPH) globalThis.DBGPH.push({ paper: bigP, out });
+  return out;
+}
+// ---- Zusammenführung: Linien-Verfahren + Papier-Aussparungen ----
+const detectQuadsLines = detectQuads;
+detectQuads = function (rgba, w, h, sens) {
+  const v1 = detectQuadsLines(rgba, w, h, sens).map(z => z.c.map(([x, y]) => [x * w, y * h]));
+  if (CFG.holes2 === false) return v1.map(q => ({ c: q.map(([x, y]) => [x / w, y / h]), rot: 0 }));
+  const v2 = paperHoles(rgba, w, h, CFG.ph || {});
+  const ptIn = (c, x, y) => { let s = false; for (let i = 0, j = 3; i < 4; j = i++) { const [a, b] = c[i], [e, f] = c[j]; if ((b > y) !== (f > y) && x < (e - a) * (y - b) / (f - b) + a) s = !s; } return s; };
+  const inside = (A, B) => { let k = 0, t = 0; for (let v = 0; v < 6; v++) for (let u = 0; u < 6; u++) { const U = (u + .5) / 6, V = (v + .5) / 6; const tx = A[0][0] + (A[1][0] - A[0][0]) * U, ty = A[0][1] + (A[1][1] - A[0][1]) * U, bx = A[3][0] + (A[2][0] - A[3][0]) * U, by = A[3][1] + (A[2][1] - A[3][1]) * U; t++; if (ptIn(B, tx + (bx - tx) * V, ty + (by - ty) * V)) k++; } return k / t; };
+  const iou = (A, B) => { const xs = [...A, ...B].map(p => p[0]), ys = [...A, ...B].map(p => p[1]); const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys); let i = 0, u = 0; const st = Math.max(0.5, (x1 - x0) / 60); for (let y = y0; y <= y1; y += st) for (let x = x0; x <= x1; x += st) { const a = ptIn(A, x, y), b = ptIn(B, x, y); if (a && b) i++; if (a || b) u++; } return u ? i / u : 0; };
+  const holes = v2.filter(o => o.ok).map(o => o.q), drop = new Set(), useH = new Set();
+  // Behälter: ein Linien-Rahmen mit mehreren Aussparungen darin ist eine Seite oder Karte, kein Foto
+  v1.forEach((K, i) => { const inH = holes.map((H, j) => j).filter(j => inside(holes[j], K) > 0.85); if (inH.length >= 2) { drop.add(i); inH.forEach(j => useH.add(j)); } });
+  holes.forEach((H, j) => {
+    if (useH.has(j)) return;
+    const ov = v1.map((K, i) => i).filter(i => !drop.has(i) && (inside(v1[i], H) > 0.5 || inside(H, v1[i]) > 0.5));
+    if (!ov.length) { useH.add(j); return; }
+    if (ov.length >= 2) return; // mehrere Linien-Rahmen in einer Aussparung: aneinanderstoßende Fotos – die Kanten entscheiden
+    if (iou(v1[ov[0]], H) > 0.9) return;
+    drop.add(ov[0]); useH.add(j);
+  });
+  const all = v1.filter((K, i) => !drop.has(i)).concat(holes.filter((H, j) => useH.has(j)));
+  const out = all.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
+    return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
+  out.sort((a, b) => a.cy - b.cy); const rows = [];
+  for (const q of out) { const row = rows.find(rw => Math.abs(rw[0].cy - q.cy) < Math.min(rw[0].hh, q.hh) / 2); row ? row.push(q) : rows.push([q]); }
+  return rows.flatMap(rw => rw.sort((a, b) => a.cx - b.cx)).map(q => ({ c: q.c, rot: 0 }));
+};
 
 </script>
 <script>

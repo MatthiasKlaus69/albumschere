@@ -318,8 +318,8 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
       <div class="field" id="targetWrap" hidden>Speichern in<div class="seg" id="target" role="radiogroup" aria-label="Speicherort"></div></div>
       <div class="dirrow" id="dirRow" hidden><span id="dirName"></span><button type="button" class="link" id="bDir">Ordner wählen</button></div>
       <p class="hint" id="saveNote"></p>
-      <button class="link" id="bReset"><svg class="i"><use href="#i-new"/></svg>Neues Album beginnen</button>
-      <p class="hint" id="appVer" style="opacity:.6;margin-top:6px">Version 32</p>
+      <button class="link" id="bReset"><svg class="i"><use href="#i-new"/></svg>Alle Bilder löschen</button>
+      <p class="hint" id="appVer" style="opacity:.6;margin-top:6px">Version 34</p>
     </section>
     <section class="panel" id="secEdit">
       <h2>Erkennung <span class="preview-name" id="pageName"></span></h2>
@@ -1969,7 +1969,10 @@ detectQuads = function (rgba, w, h, sens) {
   const C = LRN.preselect(L, extra, CFG.lrnN || 600);
   const sc = C.map(c => LRN.score(globalThis.LRN_MODEL, LRN.features(L, c, L.v1, L.comb)));
   const sel = LRN.select(C, sc, CFG.lrnThr || 0);
+  if (CFG.ovalFix !== false) ovalFix(L, sel);
+  if (CFG.splitFrames !== false) splitFrames(L, sel);
   if (CFG.gapFill !== false) for (const g of gapFill(L, sel)) sel.push(g);
+  if (CFG.splitFrames !== false) splitFrames(L, sel);
   globalThis.LAST = null;
   const out = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
@@ -2005,14 +2008,17 @@ function gapFill(L, sel) {
   const med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
   const mArea = med(dims.map(d => d[0] * d[1])), mShort = med(dims.map(d => Math.min(d[0], d[1])));
   const sumR = (M, x0, y0, x1, y1) => { let s = 0, n = 0; for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) { s += M[y * w + x]; n++; } return n ? s / n : 0; };
-  const np = new Uint8Array(w * h); for (let i = 0; i < np.length; i++) np[i] = paperAll[i] ? 0 : 1;
+  const np = growPaperNP(L);
   const fr = b => sumR(np, ...b);
+  // Anteil des Bildinhalts der Box, der schon in erkannten Fotos liegt (Ovale: Nachbarrahmen überdecken nur Papierecken)
+  const covNP = bb => { let c = 0, t = 0; for (let y = Math.max(0, bb[1]); y <= Math.min(h - 1, bb[3]); y++) for (let x = Math.max(0, bb[0]); x <= Math.min(w - 1, bb[2]); x++) { const i = y * w + x; if (np[i]) { t++; if (cov[i]) c++; } } return t ? c / t : 1; };
   // Seitenfarbe (Mittel aller Papierpixel): auch abgetrennte Papierstreifen zwischen Fotos zählen als Seite
   let pr = 0, pg = 0, pb = 0, pc = 0; for (let i = 0; i < paperAll.length; i++) if (paperAll[i]) { pr += L.Rb[i]; pg += L.Gb[i]; pb += L.Bb[i]; pc++; }
   if (pc) { pr /= pc; pg /= pc; pb /= pc; }
   const pL = 0.299 * pr + 0.587 * pg + 0.114 * pb, pCh = Math.max(pr, pg, pb) - Math.min(pr, pg, pb);
   const pageish = i => { if (paperAll[i]) return true; if (!pc) return false; const r = L.Rb[i], g = L.Gb[i], bb = L.Bb[i];
     return Math.abs(0.299 * r + 0.587 * g + 0.114 * bb - pL) < 50 && Math.max(r, g, bb) - Math.min(r, g, bb) < pCh + 15; };
+  const PG = new Uint8Array(w * h); for (let i = 0; i < PG.length; i++) PG[i] = pageish(i) ? 1 : 0;
   const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
   const hCov = (y, x0, x1) => { let hit = 0, n = 0; for (let x = x0; x <= x1; x++, n++) for (let o = -1; o <= 1; o++) { const yy = y + o; if (yy < 0 || yy >= h || x < 0 || x >= w) continue; const i = yy * w + x; if (edge[i] && angOk(i, 90)) { hit++; break; } } return n ? hit / n : 0; };
   const vCov = (x, y0, y1) => { let hit = 0, n = 0; for (let y = y0; y <= y1; y++, n++) for (let o = -1; o <= 1; o++) { const xx = x + o; if (xx < 0 || xx >= w || y < 0 || y >= h) continue; const i = y * w + xx; if (edge[i] && angOk(i, 0)) { hit++; break; } } return n ? hit / n : 0; };
@@ -2027,7 +2033,7 @@ function gapFill(L, sel) {
     for (let k = 0; k < 300 && b[2] - b[0] > 8 && fr([b[0], b[1], b[0], b[3]]) < T; k++) b[0]++;
     for (let k = 0; k < 300 && b[2] - b[0] > 8 && fr([b[2], b[1], b[2], b[3]]) < T; k++) b[2]--;
     if (CFG.gapDbg) console.log('loch', b.join(','), 'belegt', sumR(cov, ...b).toFixed(2), 'inhalt', fr(b).toFixed(2));
-    if (sumR(cov, ...b) > 0.1 || fr(b) < 0.5) continue;
+    if (covNP(b) > 0.2 || fr(b) < 0.5) continue;
     G.push(b);
   }
   // 2. Teilflächen eines Fotos (z. B. heller Bildteil) zusammenführen
@@ -2040,36 +2046,55 @@ function gapFill(L, sel) {
       const U = [Math.min(A[0], B[0]), Math.min(A[1], B[1]), Math.max(A[2], B[2]), Math.max(A[3], B[3])];
       if (sumR(cov, ...U) < 0.03 && fr(U) >= 0.5 && Math.max(0, ix) * Math.max(0, iy) > 0) { G[a] = U; G.splice(c, 1); ch = true; } } }
   G.sort((a, b) => ar(b) - ar(a));
+  // 1b. unabhängig von Löchern: freie Bildflächen in der Seitenhülle, zu große Flächen schrittweise stärker erodiert
+  const hull = pageHullMask(L);
+  const extra = [];
+  for (const bx of freeComps(L, cov, hull, np, mArea)) { if (CFG.gapDbg) console.log('komp', bx.join(','), 'belegt', covNP(bx).toFixed(2), 'inhalt', fr(bx).toFixed(2));
+    if (covNP(bx) <= 0.2 && fr(bx) >= 0.5) extra.push(bx); }
+  // 1c. Platz für ein weiteres Foto gleicher Größe
+  for (const bx of sizeSearch(L, cov, dims, np, hull)) { if (CFG.gapDbg) console.log('groesse', bx.join(',')); bx.size = true; extra.push(bx); }
+  for (const bx of ovalSearch(L, cov, dims, np, hull)) { if (CFG.gapDbg) console.log('oval', bx.join(','), bx.sc); bx.oval = true; extra.push(bx); }
+  { const comps = extra.filter(e => !e.size && !e.oval).concat(extra.filter(e => e.oval)), sizes = extra.filter(e => e.size);
+    const H = G.filter(g => !comps.some(c => Math.abs(g[0] - c[0]) + Math.abs(g[1] - c[1]) + Math.abs(g[2] - c[2]) + Math.abs(g[3] - c[3]) < 10));
+    G = comps.concat(H, sizes.filter(b => !comps.concat(H).some(g => Math.abs(g[0] - b[0]) + Math.abs(g[1] - b[1]) + Math.abs(g[2] - b[2]) + Math.abs(g[3] - b[3]) < 10))); }
+  // Lücken nur innerhalb der Fläche, die die erkannten Fotos aufspannen (plus Rand): nicht auf der Nachbarseite
+  const fb = [Infinity, Infinity, -Infinity, -Infinity]; for (const q of sel) for (const [x, y] of q) { fb[0] = Math.min(fb[0], x); fb[1] = Math.min(fb[1], y); fb[2] = Math.max(fb[2], x); fb[3] = Math.max(fb[3], y); }
+  const mg = 0.5 * mShort; fb[0] -= mg; fb[1] -= mg; fb[2] += mg; fb[3] += mg;
   const out = [];
   for (const b of G) {
     const bw = b[2] - b[0], bh = b[3] - b[1];
     if (CFG.gapDbg) console.log('kand', b.join(','), 'mShort', mShort.toFixed(0), 'mArea', mArea.toFixed(0), 'belegt', sumR(cov, ...b).toFixed(2));
     if (Math.min(bw, bh) < 0.4 * mShort || bw * bh < 0.25 * mArea || Math.max(bw, bh) / Math.min(bw, bh) > 3.2) continue;
-    if (sumR(cov, ...b) > 0.3) continue;
+    if (covNP(b) > 0.3) continue;
     // 3. Kanten suchen: jede Seite entlang ihrer Normalen verschieben; gerade Kante mit Papier dahinter
     const free = bb => sumR(cov, ...bb) < 0.03 && bb[0] >= 1 && bb[1] >= 1 && bb[2] <= w - 2 && bb[3] <= h - 2;
+    let nb = b.slice();
+    for (let pass = 0; pass < (b.oval ? 0 : 2); pass++) { const b = nb.slice(), bw = b[2] - b[0], bh = b[3] - b[1];
     const iy0 = b[1] + ((bh * 0.1) | 0), iy1 = b[3] - ((bh * 0.1) | 0), ix0 = b[0] + ((bw * 0.1) | 0), ix1 = b[2] - ((bw * 0.1) | 0);
     const sides = [
-      [0, -1, d => { const x = b[0] - d; return [vCov(x, iy0, iy1), sumR(paperAll, x - 4, b[1], x - 2, b[3])]; }, bw],
-      [2, +1, d => { const x = b[2] + d; return [vCov(x, iy0, iy1), sumR(paperAll, x + 2, b[1], x + 4, b[3])]; }, bw],
-      [1, -1, d => { const y = b[1] - d; return [hCov(y, ix0, ix1), sumR(paperAll, b[0], y - 4, b[2], y - 2)]; }, bh],
-      [3, +1, d => { const y = b[3] + d; return [hCov(y, ix0, ix1), sumR(paperAll, b[0], y + 2, b[2], y + 4)]; }, bh]];
-    const nb = b.slice();
+      [0, -1, d => { const x = b[0] - d; return [vCov(x, iy0, iy1), sumR(PG, x - 4, b[1], x - 2, b[3]), sumR(cov, x - 4, iy0, x - 2, iy1)]; }, bw],
+      [2, +1, d => { const x = b[2] + d; return [vCov(x, iy0, iy1), sumR(PG, x + 2, b[1], x + 4, b[3]), sumR(cov, x + 2, iy0, x + 4, iy1)]; }, bw],
+      [1, -1, d => { const y = b[1] - d; return [hCov(y, ix0, ix1), sumR(PG, b[0], y - 4, b[2], y - 2), sumR(cov, ix0, y - 4, ix1, y - 2)]; }, bh],
+      [3, +1, d => { const y = b[3] + d; return [hCov(y, ix0, ix1), sumR(PG, b[0], y + 2, b[2], y + 4), sumR(cov, ix0, y + 2, ix1, y + 4)]; }, bh]];
     for (const [k, sg, f, len] of sides) {
       let best = null; const ext = Math.round(0.6 * len), inn = Math.round(0.35 * len);
-      for (let d = 0; d <= ext; d++) { const [c, pp] = f(d); const t = nb.slice(); t[k] = b[k] + sg * d;
-        if (d > 3 && !free(t)) break; if (c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
+      for (let d = 0; d <= ext; d++) { const [c, pp, cv] = f(d); const t = nb.slice(); t[k] = b[k] + sg * d;
+        if (d > 3 && !free(t)) break; if (cv >= 0.5 || c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
         const s = c + (pp >= 0.5 ? 0.15 : 0) - 0.002 * d; if (!best || s > best.s) best = { s, v: t[k] }; }
-      for (let d = -1; d >= -inn; d--) { const [c, pp] = f(d); if (c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
-        const s = c + (pp >= 0.5 ? 0.15 : 0) - 0.004 * -d - (sumR(cov, ...b) > 0.03 ? -0.2 : 0.1); if (!best || s > best.s) best = { s, v: b[k] + sg * d }; }
+      for (let d = -1; d >= -inn; d--) { const [c, pp, cv] = f(d); if (cv >= 0.5 || c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
+        const v = b[k] + sg * d, strip = k === 0 ? sumR(PG, b[0], iy0, v - 2, iy1) : k === 2 ? sumR(PG, v + 2, iy0, b[2], iy1) : k === 1 ? sumR(PG, ix0, b[1], ix1, v - 2) : sumR(PG, ix0, v + 2, ix1, b[3]);
+        const s = c + (pp >= 0.5 ? 0.15 : 0) - 0.004 * -d + (strip >= 0.6 ? 0.15 : sumR(cov, ...b) > 0.03 ? 0.2 : -0.1); if (!best || s > best.s) best = { s, v }; }
+      if (CFG.gapDbg) console.log('seite', b.join(','), k, best ? best.v + ' s=' + best.s.toFixed(2) : '-', [0, 4, 8, 11, -6].map(d => d + ':' + f(d).map(v => v.toFixed(2)).join('/')).join(' '));
       if (best) nb[k] = best.v;
     }
-    if (fr(nb) < 0.5 || sumR(cov, ...nb) > 0.04) continue;
+    }
+    if (fr(nb) < 0.5 || covNP(nb) > 0.1 || sumR(cov, ...nb) > 0.3) continue;
     // 4. muss in der Albumseite liegen: mindestens 3 Seiten grenzen an Papier oder erkannte Fotos
-    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (pageish(i) || cov[i]) pp++; } return n ? pp / n : 0; };
+    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (pageish(i) || !np[i] || cov[i]) pp++; } return n ? pp / n : 0; };
     const rs = [ring(nb[0] - 8, nb[1], nb[0] - 3, nb[3]), ring(nb[2] + 3, nb[1], nb[2] + 8, nb[3]), ring(nb[0], nb[1] - 8, nb[2], nb[1] - 3), ring(nb[0], nb[3] + 3, nb[2], nb[3] + 8)];
     if (CFG.gapDbg) console.log('rand', nb.join(','), rs.map(v => v.toFixed(2)).join(' '));
     if (rs.filter(v => v >= 0.35).length < 3) continue;
+    if (nb[0] < fb[0] || nb[1] < fb[1] || nb[2] > fb[2] || nb[3] > fb[3]) continue;
     if (nb[0] <= 2 || nb[1] <= 2 || nb[2] >= w - 3 || nb[3] >= h - 3) continue; // am Bildrand: kein sicheres Foto
     // Bildinhalt statt Zwischenblatt/Druck: echtes Foto hat Kontrastumfang und dunkle Anteile
     const st = gapStats(L, nb); if (CFG.gapDbg) console.log('stat', nb.join(','), JSON.stringify(st));
@@ -2086,7 +2111,216 @@ function gapStats(L, b) {
   for (let y = b[1] + 2; y <= b[3] - 2; y++) for (let x = b[0] + 2; x <= b[2] - 2; x++) { const i = y * w + x, r = Rb[i], g = Gb[i], bb = Bb[i];
     H[Math.min(255, Math.round(0.299 * r + 0.587 * g + 0.114 * bb))]++; n++; const mx = Math.max(r, g, bb); sat += mx ? (mx - Math.min(r, g, bb)) / mx : 0; }
   const pc = p => { let c = 0; for (let v = 0; v < 256; v++) { c += H[v]; if (c >= p * n) return v; } return 255; };
-  return { p5: pc(0.05), p50: pc(0.5), p95: pc(0.95), sat: +(sat / Math.max(1, n)).toFixed(2) };
+  let e = 0; for (let y = b[1] + 3; y <= b[3] - 3; y++) for (let x = b[0] + 3; x <= b[2] - 3; x++) if (L.edge[y * w + x]) e++;
+  return { p5: pc(0.05), p50: pc(0.5), p95: pc(0.95), sat: +(sat / Math.max(1, n)).toFixed(2), ed: +(e / Math.max(1, n)).toFixed(3) };
+}
+
+// Konvexe Hülle der Albumseite (aus den Seitenpixeln) als Maske
+function pageHullMask(L) {
+  const { w, h, pageLike } = L, M = new Uint8Array(w * h);
+  const pts = []; for (let y = 0; y < h; y += 2) { let x0 = -1, x1 = -1; for (let x = 0; x < w; x++) if (pageLike[y * w + x]) { if (x0 < 0) x0 = x; x1 = x; } if (x0 >= 0) pts.push([x0, y], [x1, y]); }
+  if (pts.length < 6) return M;
+  pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  const hull = lo.slice(0, -1).concat(up.slice(0, -1));
+  for (let y = 0; y < h; y++) { let a = Infinity, b = -Infinity;
+    for (let i = 0; i < hull.length; i++) { const p = hull[i], q = hull[(i + 1) % hull.length]; if ((p[1] - y) * (q[1] - y) > 0 || p[1] === q[1]) continue; const x = p[0] + (y - p[1]) * (q[0] - p[0]) / (q[1] - p[1]); a = Math.min(a, x); b = Math.max(b, x); }
+    for (let x = Math.max(0, Math.ceil(a)); x <= Math.min(w - 1, Math.floor(b)); x++) M[y * w + x] = 1; }
+  return M;
+}
+// freie Bildflächen (Nicht-Papier, nicht erkannt, in der Seite); zu große Komponenten werden stärker erodiert und geteilt
+function freeComps(L, cov, hull, np, mArea) {
+  const { w, h } = L, n = w * h, out = [];
+  const base = new Uint8Array(n); for (let i = 0; i < n; i++) base[i] = np[i] && hull[i] && !cov[i] ? 1 : 0;
+  const erode = (M, r, bb) => { const T = new Uint8Array(n), E = new Uint8Array(n);
+    for (let y = bb[1]; y <= bb[3]; y++) for (let x = bb[0]; x <= bb[2]; x++) { let ok = 1; for (let d = -r; d <= r && ok; d++) { const xx = x + d; if (xx < 0 || xx >= w || !M[y * w + xx]) ok = 0; } T[y * w + x] = ok; }
+    for (let y = bb[1]; y <= bb[3]; y++) for (let x = bb[0]; x <= bb[2]; x++) { let ok = 1; for (let d = -r; d <= r && ok; d++) { const yy = y + d; if (yy < 0 || yy >= h || !T[yy * w + x]) ok = 0; } E[y * w + x] = ok; }
+    return E; };
+  const label = (E, bb) => { const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), cs = [];
+    for (let y = bb[1]; y <= bb[3]; y++) for (let x = bb[0]; x <= bb[2]; x++) { const s0 = y * w + x; if (!E[s0] || lab[s0] >= 0) continue;
+      const id = cs.length; let top = 0, c = 0, x0 = w, y0 = h, x1 = 0, y1 = 0; stk[top++] = s0; lab[s0] = id;
+      while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy;
+        for (const j of [xx > 0 ? i - 1 : -1, xx < w - 1 ? i + 1 : -1, i - w, i + w]) if (j >= 0 && j < n && E[j] && lab[j] < 0) { lab[j] = id; stk[top++] = j; } }
+      cs.push({ c, b: [x0, y0, x1, y1], id }); }
+    return { lab, cs }; };
+  const rec = (M, r, bb, depth) => { const E = erode(M, r, bb), { lab, cs } = label(E, bb);
+    for (const C of cs) { if (C.c < 150) continue; const b = [Math.max(0, C.b[0] - r), Math.max(0, C.b[1] - r), Math.min(w - 1, C.b[2] + r), Math.min(h - 1, C.b[3] + r)];
+      const A = (b[2] - b[0]) * (b[3] - b[1]);
+      if (CFG.gapDbg) console.log('rec', depth, r, b.join(','), 'px', C.c, 'A', A, 'mArea', Math.round(mArea));
+      if (A > 1.7 * mArea && depth < 4) { const S = new Uint8Array(n); for (let y = C.b[1]; y <= C.b[3]; y++) for (let x = C.b[0]; x <= C.b[2]; x++) { const i = y * w + x; if (lab[i] === C.id) S[i] = 1; }
+        // Teilmaske wieder auf Originalgröße bringen (Dilatation r) und mit Ausgangsmaske schneiden, dann stärker erodieren
+        const D = new Uint8Array(n); for (let y = b[1]; y <= b[3]; y++) for (let x = b[0]; x <= b[2]; x++) { const i = y * w + x; if (!M[i]) continue; let hit = 0; for (let dy = -r; dy <= r && !hit; dy++) for (let dx = -r; dx <= r && !hit; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < w && yy < h && S[yy * w + xx]) hit = 1; } D[i] = hit; }
+        rec(D, r + 3, b, depth + 1); }
+      else { // Rahmen aus der zurückgewachsenen Fläche (Dilatation r innerhalb der Maske), nicht aus der erodierten
+        if (depth === 0) { out.push(b); continue; }
+        let X0 = w, Y0 = h, X1 = 0, Y1 = 0; const m = new Uint8Array(n); for (let y = C.b[1]; y <= C.b[3]; y++) for (let x = C.b[0]; x <= C.b[2]; x++) { const i = y * w + x; if (lab[i] === C.id) m[i] = 1; }
+        const RR = r + 1;
+        for (let y = Math.max(0, C.b[1] - RR); y <= Math.min(h - 1, C.b[3] + RR); y++) for (let x = Math.max(0, C.b[0] - RR); x <= Math.min(w - 1, C.b[2] + RR); x++) { if (!M[y * w + x]) continue;
+          let hit = 0; for (let dy = -RR; dy <= RR && !hit; dy += 2) for (let dx = -RR; dx <= RR && !hit; dx += 2) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < w && yy < h && m[yy * w + xx]) hit = 1; }
+          if (hit) { if (x < X0) X0 = x; if (x > X1) X1 = x; if (y < Y0) Y0 = y; if (y > Y1) Y1 = y; } }
+        out.push(X1 > X0 ? [X0, Y0, X1, Y1] : b); } } };
+  rec(base, 3, [0, 0, w - 1, h - 1], 0);
+  return out;
+}
+function sizeSearch(L, cov, dims, np, hull) {
+  const { w, h } = L, W1 = w + 1, I = new Float64Array(W1 * (h + 1)), C = new Float64Array(W1 * (h + 1));
+  for (let y = 0; y < h; y++) { let a = 0, c = 0; for (let x = 0; x < w; x++) { const i = y * w + x; a += np[i] && !cov[i] && hull[i] ? 1 : 0; c += cov[i]; I[(y + 1) * W1 + x + 1] = I[y * W1 + x + 1] + a; C[(y + 1) * W1 + x + 1] = C[y * W1 + x + 1] + c; } }
+  const S = (A, x0, y0, x1, y1) => A[(y1 + 1) * W1 + x1 + 1] - A[y0 * W1 + x1 + 1] - A[(y1 + 1) * W1 + x0] + A[y0 * W1 + x0];
+  const sz = []; for (const [a, b] of dims) for (const [p, q] of [[a, b], [b, a]]) { const P = Math.round(p * 0.92), Q = Math.round(q * 0.92); if (!sz.some(([u, v]) => Math.abs(u - P) < 6 && Math.abs(v - Q) < 6)) sz.push([P, Q]); }
+  const cand = [], dMin = CFG.gapDens || 0.72;
+  for (const [sw, sh] of sz) { if (sw < 20 || sh < 20) continue;
+    for (let y = 2; y + sh < h - 2; y += 3) for (let x = 2; x + sw < w - 2; x += 3) {
+      const A = sw * sh, d = S(I, x, y, x + sw - 1, y + sh - 1) / A; if (d < dMin) continue;
+      if (S(C, x, y, x + sw - 1, y + sh - 1) / A > 0.06) continue;
+      cand.push({ b: [x, y, x + sw - 1, y + sh - 1], d: d + 0.00001 * A }); } }
+  cand.sort((a, b) => b.d - a.d); const out = [];
+  for (const c of cand) { const b = c.b; if (out.some(o => { const ix = Math.min(o[2], b[2]) - Math.max(o[0], b[0]), iy = Math.min(o[3], b[3]) - Math.max(o[1], b[1]); return ix > 0 && iy > 0; })) continue; out.push(b); if (out.length >= 12) break; }
+  return out;
+}
+
+// Rahmen teilen, deren Bildinhalt in mehrere durch Papier getrennte, fotogroße Flächen zerfällt (z. B. zwei Ovale in einem Rahmen)
+function splitFrames(L, sel) {
+  const { w, h } = L, n = w * h, NP = growPaperNP(L);
+  const dims = sel.map(q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; });
+  const med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
+  const mShort = med(dims.map(b => Math.min(b[2] - b[0], b[3] - b[1])));
+  for (let k = sel.length - 1; k >= 0; k--) {
+    const b = dims[k].map(Math.round), r = 3;
+    const M = new Uint8Array(n); let tot = 0;
+    for (let y = Math.max(0, b[1]); y <= Math.min(h - 1, b[3]); y++) for (let x = Math.max(0, b[0]); x <= Math.min(w - 1, b[2]); x++) { const i = y * w + x; if (NP[i]) { M[i] = 1; tot++; } }
+    // Erosion r
+    const E = new Uint8Array(n);
+    for (let y = b[1] + r; y <= b[3] - r; y++) for (let x = b[0] + r; x <= b[2] - r; x++) { let ok = 1; for (let dy = -r; dy <= r && ok; dy++) for (let dx = -r; dx <= r && ok; dx++) if (!M[(y + dy) * w + x + dx]) ok = 0; E[y * w + x] = ok; }
+    const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), cs = [];
+    for (let y = b[1]; y <= b[3]; y++) for (let x = b[0]; x <= b[2]; x++) { const s0 = y * w + x; if (!E[s0] || lab[s0] >= 0) continue;
+      let top = 0, c = 0, x0 = w, y0 = h, x1 = 0, y1 = 0; stk[top++] = s0; lab[s0] = cs.length;
+      while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy;
+        for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < n && E[j] && lab[j] < 0) { lab[j] = cs.length; stk[top++] = j; } }
+      cs.push({ c, b: [x0 - r, y0 - r, x1 + r, y1 + r] }); }
+    const A = (b[2] - b[0]) * (b[3] - b[1]);
+    const big = cs.filter(C => C.c > 0.12 * A && Math.min(C.b[2] - C.b[0], C.b[3] - C.b[1]) > 0.45 * mShort);
+    if (CFG.gapDbg && cs.length > 1) console.log('teil', b.join(','), big.map(C => C.b.join(':') + '/' + C.c).join(' '));
+    if (big.length < 2) continue;
+    // Teile müssen sich (fast) nicht überlappen und zusammen den Großteil des Inhalts tragen
+    let ok = true; for (let i = 0; i < big.length && ok; i++) for (let j = i + 1; j < big.length && ok; j++) { const P = big[i].b, Q = big[j].b, ix = Math.min(P[2], Q[2]) - Math.max(P[0], Q[0]), iy = Math.min(P[3], Q[3]) - Math.max(P[1], Q[1]); if (ix > 0 && iy > 0 && ix * iy > 0.25 * Math.min((P[2] - P[0]) * (P[3] - P[1]), (Q[2] - Q[0]) * (Q[3] - Q[1]))) ok = false; }
+    if (!ok || big.reduce((s, C) => s + C.c, 0) < 0.45 * tot) continue;
+    sel.splice(k, 1, ...big.map(C => [[C.b[0], C.b[1]], [C.b[2], C.b[1]], [C.b[2], C.b[3]], [C.b[0], C.b[3]]]));
+  }
+}
+
+// Ovale Fotos: Ellipsenschablone in den Größen der erkannten Fotos; innen Bildinhalt, in den Ecken Papier, nicht erkannt
+function ovalSearch(L, cov, dims, np, hull) {
+  const { w, h, paperAll } = L, out = [], cand = [];
+  const sz = []; for (const [a, b] of dims) for (const f of [0.85, 1, 1.12]) for (const [p, q] of [[a, b], [b, a]]) { const P = Math.round(p * f), Q = Math.round(q * f); if (P >= 24 && Q >= 24 && !sz.some(([u, v]) => Math.abs(u - P) < 5 && Math.abs(v - Q) < 5)) sz.push([P, Q]); }
+  for (const [sw, sh] of sz) {
+    // Stichproben-Punkte innerhalb der Ellipse und in den Ecken (relativ)
+    const inP = [], coP = [];
+    for (let v = 0; v < 12; v++) for (let u = 0; u < 12; u++) { const x = (u + 0.5) / 12, y = (v + 0.5) / 12, e = ((x - 0.5) / 0.5) ** 2 + ((y - 0.5) / 0.5) ** 2; if (e < 0.75) inP.push([x, y]); else if (e > 1.25) coP.push([x, y]); }
+    for (let y = 2; y + sh < h - 2; y += 3) for (let x = 2; x + sw < w - 2; x += 3) {
+      let ni = 0, ci = 0, hi = 0; for (const [u, v] of inP) { const i = Math.round(y + v * sh) * w + Math.round(x + u * sw); if (!hull[i]) { hi++; continue; } if (cov[i]) ci++; else if (np[i]) ni++; }
+      if (hi > 0.1 * inP.length || ci > 0.08 * inP.length) continue; const dE = ni / inP.length; if (dE < 0.6) continue;
+      let pc = 0; for (const [u, v] of coP) { const i = Math.round(y + v * sh) * w + Math.round(x + u * sw); if (!np[i] || cov[i]) pc++; } const dC = pc / coP.length; if (dC < 0.45) continue;
+      cand.push({ b: [x, y, x + sw - 1, y + sh - 1], s: dE + dC }); } }
+  cand.sort((a, b) => b.s - a.s);
+  for (const c of cand) { const b = c.b; if (out.some(o => { const ix = Math.min(o[2], b[2]) - Math.max(o[0], b[0]), iy = Math.min(o[3], b[3]) - Math.max(o[1], b[1]); return ix > 0 && iy > 0 && ix * iy > 0.15 * Math.min((o[2] - o[0]) * (o[3] - o[1]), (b[2] - b[0]) * (b[3] - b[1])); })) continue; b.sc = c.s.toFixed(2); out.push(b); if (out.length >= 12) break; }
+  return out;
+}
+
+// Papier wachsen lassen: von sicherem Papier aus über papierfarbene Pixel, Kanten (leicht verbreitert) sind Barrieren.
+// Ergebnis: Maske "kein Papier" (Bildinhalt).
+function growPaperNP(L) {
+  const { w, h, paperAll, edge, Rb, Gb, Bb } = L, n = w * h;
+  let pr = 0, pg = 0, pb = 0, pc = 0; for (let i = 0; i < n; i++) if (paperAll[i]) { pr += Rb[i]; pg += Gb[i]; pb += Bb[i]; pc++; }
+  const np = new Uint8Array(n); if (!pc || CFG.growPaper === false) { for (let i = 0; i < n; i++) np[i] = paperAll[i] ? 0 : 1; return np; }
+  pr /= pc; pg /= pc; pb /= pc; const pL = 0.299 * pr + 0.587 * pg + 0.114 * pb, pCh = Math.max(pr, pg, pb) - Math.min(pr, pg, pb);
+  const bar = new Uint8Array(n); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; if (edge[i]) { bar[i] = bar[i - 1] = bar[i + 1] = bar[i - w] = bar[i + w] = 1; } }
+  const ok = i => { const r = Rb[i], g = Gb[i], b = Bb[i]; return !bar[i] && Math.abs(0.299 * r + 0.587 * g + 0.114 * b - pL) < (CFG.growLum || 45) && Math.max(r, g, b) - Math.min(r, g, b) < pCh + 14; };
+  const P = new Uint8Array(n), stk = new Int32Array(n); let top = 0;
+  for (let i = 0; i < n; i++) if (paperAll[i]) { P[i] = 1; stk[top++] = i; }
+  while (top) { const i = stk[--top], x = i % w;
+    if (x > 0 && !P[i - 1] && ok(i - 1)) { P[i - 1] = 1; stk[top++] = i - 1; }
+    if (x < w - 1 && !P[i + 1] && ok(i + 1)) { P[i + 1] = 1; stk[top++] = i + 1; }
+    if (i >= w && !P[i - w] && ok(i - w)) { P[i - w] = 1; stk[top++] = i - w; }
+    if (i < n - w && !P[i + w] && ok(i + w)) { P[i + w] = 1; stk[top++] = i + w; } }
+  for (let i = 0; i < n; i++) np[i] = P[i] ? 0 : 1;
+  return np;
+}
+
+// Ovale: geschlossene, elliptische Bildflächen (nach Papierwachstum) ersetzen ungenaue Rahmen
+function ovalFix(L, sel) {
+  if (!sel.length) return;
+  const { w, h } = L, n = w * h, np = growPaperNP(L);
+  const box = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const B = sel.map(box), med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
+  const mArea = med(B.map(b => (b[2] - b[0]) * (b[3] - b[1])));
+  const fb = [Infinity, Infinity, -Infinity, -Infinity]; for (const b of B) { fb[0] = Math.min(fb[0], b[0]); fb[1] = Math.min(fb[1], b[1]); fb[2] = Math.max(fb[2], b[2]); fb[3] = Math.max(fb[3], b[3]); }
+  const iou = (a, b) => { const ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])), I = ix * iy; return I / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - I); };
+  // nur innerhalb der Seite: konvexe Hülle des Papiers im Fotobereich (der dunkle Seitenrand gehört nicht dazu)
+  const inP = new Uint8Array(n); { const g = 24, pts = [];
+    for (let y = Math.max(0, Math.floor(fb[1] - g)); y <= Math.min(h - 1, Math.ceil(fb[3] + g)); y += 2) { let a = -1, b = -1; for (let x = Math.max(0, Math.floor(fb[0] - g)); x <= Math.min(w - 1, Math.ceil(fb[2] + g)); x++) if (!np[y * w + x]) { if (a < 0) a = x; b = x; } if (a >= 0) pts.push([a, y], [b, y]); }
+    pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+    const H = lo.slice(0, -1).concat(up.slice(0, -1));
+    for (let y = 0; y < h; y++) { let a = Infinity, b = -Infinity; for (let i = 0; i < H.length; i++) { const p = H[i], q = H[(i + 1) % H.length]; if ((p[1] - y) * (q[1] - y) > 0 || p[1] === q[1]) continue; const x = p[0] + (y - p[1]) * (q[0] - p[0]) / (q[1] - p[1]); a = Math.min(a, x); b = Math.max(b, x); }
+      for (let x = Math.max(0, Math.ceil(a) + 2); x <= Math.min(w - 1, Math.floor(b) - 2); x++) inP[y * w + x] = 1; } }
+  const npP = new Uint8Array(n); for (let i = 0; i < n; i++) npP[i] = np[i] && inP[i] ? 1 : 0;
+  const ovals = [];
+  for (const r of [2, 4, 6, 9, 12]) {
+    const mg = 20; const X0 = Math.max(r, Math.floor(fb[0] - mg)), Y0 = Math.max(r, Math.floor(fb[1] - mg)), X1 = Math.min(w - 1 - r, Math.ceil(fb[2] + mg)), Y1 = Math.min(h - 1 - r, Math.ceil(fb[3] + mg));
+    const T = new Uint8Array(n), E = new Uint8Array(n);
+    for (let y = Y0 - r; y <= Y1 + r; y++) for (let x = X0; x <= X1; x++) { let ok = 1; for (let d = -r; d <= r && ok; d++) if (!npP[y * w + x + d]) ok = 0; T[y * w + x] = ok; }
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let ok = 1; for (let d = -r; d <= r && ok; d++) if (!T[(y + d) * w + x]) ok = 0; E[y * w + x] = ok; }
+    const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n); let cid = 0;
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (!E[s0] || lab[s0] >= 0) continue;
+      let top = 0, c = 0, x0 = w, y0 = h, x1 = 0, y1 = 0, edgeT = false; const bd = []; const id = ++cid; stk[top++] = s0; lab[s0] = id;
+      while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy;
+        if (xx <= X0 || yy <= Y0 || xx >= X1 || yy >= Y1) edgeT = true;
+        if (!E[i - 1] || !E[i + 1] || !E[i - w] || !E[i + w]) bd.push([xx, yy]);
+        for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < n && E[j] && lab[j] < 0) { lab[j] = id; stk[top++] = j; } }
+      const bw = x1 - x0 + 1, bh = y1 - y0 + 1, f = c / (bw * bh); let o = [x0 - r, y0 - r, x1 + r, y1 + r]; const A = (o[2] - o[0]) * (o[3] - o[1]);
+      if (CFG.gapDbg && c > 300) console.log('rohkomp r' + r, o.join(','), 'px', c, 'A/mArea', (A / mArea).toFixed(2), 'rand', edgeT, 'fuell', f.toFixed(2));
+      if (edgeT || A < 0.35 * mArea || A > 2.2 * mArea || Math.max(bw, bh) / Math.min(bw, bh) > 1.8) continue;
+      if (CFG.gapDbg) console.log('ovalkomp r' + r, o.join(','), 'fuell', f.toFixed(2));
+      if (f < (CFG.ovalFmin || 0.58) || f > (CFG.ovalFmax || 0.86)) continue;
+      { // Ellipsenform: innen fast voll, Ecken außerhalb der eingeschriebenen Ellipse fast leer (Rechteckfotos haben Bildinhalt in den Ecken)
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, ax = (x1 - x0) / 2 + 0.5, ay = (y1 - y0) / 2 + 0.5; let ii = 0, it = 0, ci = 0, ct = 0;
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const e = ((x - cx) / ax) ** 2 + ((y - cy) / ay) ** 2, on = lab[y * w + x] === id;
+          if (e < 0.8) { it++; if (on) ii++; } else if (e > 1.25) { ct++; if (on) ci++; } }
+        const fin = it ? ii / it : 0, fco = ct ? ci / ct : 1;
+        if (CFG.gapDbg) console.log('  form', fin.toFixed(2), fco.toFixed(2));
+        if (fin < (CFG.ovalIn || 0.8) || fco > (CFG.ovalCo || 0.25)) continue; }
+      // robuste Ellipsenanpassung an den Rand: eingedrückte Stellen (Papierfarbe im Bild) werden ergänzt
+      const el = fitEllipseRobust(bd); if (el) { const e = [el.cx - el.a - r, el.cy - el.b - r, el.cx + el.a + r, el.cy + el.b + r].map(Math.round);
+        if (e[0] <= o[0] + 2 && e[1] <= o[1] + 2 && e[2] >= o[2] - 2 && e[3] >= o[3] - 2 && (e[2] - e[0]) * (e[3] - e[1]) < 1.35 * A) o = e; }
+      if (CFG.gapDbg) console.log('  ellipse', o.join(','));
+      if (ovals.some(v => iou(v, o) > 0.3)) continue; ovals.push(o); } }
+  if (ovals.length < 2) return; // nur Seiten mit mehreren Ovalen
+  for (const o of ovals) {
+    const hits = []; B.forEach((b, k) => { const v = iou(o, b); if (v > 0.25) hits.push([k, v]); });
+    if (hits.some(([, v]) => v >= (CFG.ovalKeep || 0.75))) continue; // vorhandener Rahmen passt ausreichend: behalten
+    for (const [k] of hits.sort((a, b) => b[0] - a[0])) { sel.splice(k, 1); B.splice(k, 1); }
+    sel.push([[o[0], o[1]], [o[2], o[1]], [o[2], o[3]], [o[0], o[3]]]); B.push(o.slice());
+  }
+}
+
+// achsenparallele Ellipse  A x² + C y² + D x + E y = 1  (kleinste Quadrate), Punkte innen (Einbuchtungen) iterativ verwerfen
+function fitEllipseRobust(P) {
+  if (P.length < 20) return null;
+  let pts = P.slice(); const mx = pts.reduce((s, p) => s + p[0], 0) / pts.length, my = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+  const solve = Q => { const M = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], v = [0, 0, 0, 0];
+    for (const [x0, y0] of Q) { const x = x0 - mx, y = y0 - my, r = [x * x, y * y, x, y]; for (let i = 0; i < 4; i++) { v[i] += r[i]; for (let j = 0; j < 4; j++) M[i][j] += r[i] * r[j]; } }
+    for (let i = 0; i < 4; i++) { let p = i; for (let k = i + 1; k < 4; k++) if (Math.abs(M[k][i]) > Math.abs(M[p][i])) p = k; [M[i], M[p]] = [M[p], M[i]]; [v[i], v[p]] = [v[p], v[i]]; if (Math.abs(M[i][i]) < 1e-12) return null;
+      for (let k = 0; k < 4; k++) if (k !== i) { const f = M[k][i] / M[i][i]; for (let j = i; j < 4; j++) M[k][j] -= f * M[i][j]; v[k] -= f * v[i]; } }
+    const [A, C, D, E] = v.map((x, i) => x / M[i][i]); if (A <= 0 || C <= 0) return null;
+    const cx = -D / (2 * A), cy = -E / (2 * C), G = 1 + A * cx * cx + C * cy * cy; if (G <= 0) return null;
+    return { A, C, cx, cy, a: Math.sqrt(G / A), b: Math.sqrt(G / C) }; };
+  let el = solve(pts);
+  for (let it = 0; it < 3 && el; it++) { const d = pts.map(p => { const x = p[0] - mx - el.cx, y = p[1] - my - el.cy; return [(x / el.a) ** 2 + (y / el.b) ** 2, p]; });
+    d.sort((u, v) => u[0] - v[0]); pts = d.slice(Math.floor(d.length * 0.15)).map(u => u[1]); el = solve(pts); }
+  if (!el) return null; return { cx: el.cx + mx, cy: el.cy + my, a: el.a, b: el.b };
 }
 
 </script>
@@ -2767,7 +3001,7 @@ function clearAll(btn) {
   openSheet(false); renderPages(); drawEditor(); renderGrid(); updateDock(); window.scrollTo(0, 0); toast('Alles geleert – bereit für die nächste Serie');
 }
 function armUI(on) {
-  $('bReset').lastChild.textContent = on ? 'Wirklich alles verwerfen?' : 'Neues Album beginnen';
+  $('bReset').lastChild.textContent = on ? 'Wirklich alle Bilder löschen?' : 'Alle Bilder löschen';
   $('bClear').lastChild.textContent = on ? 'Wirklich leeren?' : 'Neu'; $('bClear').classList.toggle('armed', on);
 }
 $('bReset').onclick = () => clearAll(); $('bClear').onclick = () => clearAll();

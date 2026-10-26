@@ -319,16 +319,15 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
       <div class="dirrow" id="dirRow" hidden><span id="dirName"></span><button type="button" class="link" id="bDir">Ordner wählen</button></div>
       <p class="hint" id="saveNote"></p>
       <button class="link" id="bReset"><svg class="i"><use href="#i-new"/></svg>Neues Album beginnen</button>
+      <p class="hint" id="appVer" style="opacity:.6;margin-top:6px">Version 32</p>
     </section>
     <section class="panel" id="secEdit">
       <h2>Erkennung <span class="preview-name" id="pageName"></span></h2>
-      <div class="range"><label for="sens" class="hint" style="white-space:nowrap">Empfindlichkeit</label><input id="sens" type="range" min="0" max="100" value="50"><output id="sensOut">50</output></div>
+      <input id="sens" type="hidden" value="50">
       <div class="row">
         <button class="btn" id="bRedetect"><svg class="i"><use href="#i-scan"/></svg>Neu erkennen</button>
         <button class="btn ghost danger" id="bDelPage"><svg class="i"><use href="#i-x"/></svg>Seite entfernen</button>
       </div>
-      <p class="hint" id="learnInfo"></p>
-      <button class="link" id="bLearnReset" style="margin-top:0">Gelerntes zurücksetzen</button>
     </section>
   </aside>
 </div>
@@ -422,7 +421,7 @@ function orderCorners(c) {
   return [0, 1, 2, 3].map(i => s[(i + k) % 4]);
 }
 
-var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1, texR: 1, paperSides: false, paperHoles: false, shrink: true, shrinkCol: 22, shrinkMax: 0.3, shrinkEdge: 0.6, shrinkRow: 0.75, holes2: true, cmpEdge: 0.05, multiHoles: true }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
+var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1, texR: 1, paperSides: false, paperHoles: false, shrink: true, shrinkCol: 22, shrinkMax: 0.3, shrinkEdge: 0.6, shrinkRow: 0.75, holes2: true, cmpEdge: 0.05, multiHoles: true, plLumG: 70, plChromaG: 18 }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
 // ---- Kantenbasierte Mehrfach-Fotoerkennung ----
 // Ablauf nach dem Vorbild aktueller Dokumentscanner: Farbkanten -> Hough-Linien mit Belegungsprofil
 // -> Vierecke aus zwei Linienpaaren -> Bewertung -> gierige Auswahl; Rückfall über Flächenmaske für runde Fotos.
@@ -489,7 +488,7 @@ function detectQuads(rgba, w, h, sens) {
         if (i < n - w && smooth[i + w] && lab[i + w] < 0) { lab[i + w] = id; stk[top++] = i + w; }
       }
       const r = sr / cnt, g = sg / cnt, b = sb / cnt, L = 0.299 * r + 0.587 * g + 0.114 * b, ch = Math.max(r, g, b) - Math.min(r, g, b);
-      comps.push({ cnt, r, g, b, ok: L > CFG.plLum && ch < CFG.plChroma });
+      comps.push({ cnt, r, g, b, ok: (L > CFG.plLum && ch < CFG.plChroma) || (L > (CFG.plLumG || 999) && ch < CFG.plChromaG) });
     }
     let best = -1; comps.forEach((c, k) => { if (c.ok && (best < 0 || c.cnt > comps[best].cnt)) best = k; });
     const keep = new Uint8Array(comps.length);
@@ -1970,6 +1969,7 @@ detectQuads = function (rgba, w, h, sens) {
   const C = LRN.preselect(L, extra, CFG.lrnN || 600);
   const sc = C.map(c => LRN.score(globalThis.LRN_MODEL, LRN.features(L, c, L.v1, L.comb)));
   const sel = LRN.select(C, sc, CFG.lrnThr || 0);
+  if (CFG.gapFill !== false) for (const g of gapFill(L, sel)) sel.push(g);
   globalThis.LAST = null;
   const out = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
@@ -1991,6 +1991,102 @@ function trainUser(X, y) {
   if (!X.length || !y.some(v => v)) return null;
   const M = globalThis.LRN_MODEL, base = X.map(f => { let s = M.init; for (const T of M.trees) s += M.lr * LRN.tree(T, f); return s; });
   return LRN.fit(X, y, base, 20, 2, 0.1);
+}
+
+// ---- Lückensuche: Albumseite bestimmen, unbedeckte Bildflächen finden, dann die Kanten suchen ----
+function gapFill(L, sel) {
+  const { w, h, paperAll, edge, eAng } = L; if (!sel.length || !L.holes) return [];
+  const cov = new Uint8Array(w * h); // bereits erkannte Fotos
+  const fillQ = (q, M) => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]);
+    for (let y = Math.max(0, Math.floor(Math.min(...ys))); y <= Math.min(h - 1, Math.ceil(Math.max(...ys))); y++)
+      for (let x = Math.max(0, Math.floor(Math.min(...xs))); x <= Math.min(w - 1, Math.ceil(Math.max(...xs))); x++) if (inPoly(q, x + 0.5, y + 0.5)) M[y * w + x] = 1; };
+  for (const q of sel) fillQ(q, cov);
+  const dims = sel.map(q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)]; });
+  const med = a => a.slice().sort((x, y) => x - y)[a.length >> 1];
+  const mArea = med(dims.map(d => d[0] * d[1])), mShort = med(dims.map(d => Math.min(d[0], d[1])));
+  const sumR = (M, x0, y0, x1, y1) => { let s = 0, n = 0; for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) { s += M[y * w + x]; n++; } return n ? s / n : 0; };
+  const np = new Uint8Array(w * h); for (let i = 0; i < np.length; i++) np[i] = paperAll[i] ? 0 : 1;
+  const fr = b => sumR(np, ...b);
+  // Seitenfarbe (Mittel aller Papierpixel): auch abgetrennte Papierstreifen zwischen Fotos zählen als Seite
+  let pr = 0, pg = 0, pb = 0, pc = 0; for (let i = 0; i < paperAll.length; i++) if (paperAll[i]) { pr += L.Rb[i]; pg += L.Gb[i]; pb += L.Bb[i]; pc++; }
+  if (pc) { pr /= pc; pg /= pc; pb /= pc; }
+  const pL = 0.299 * pr + 0.587 * pg + 0.114 * pb, pCh = Math.max(pr, pg, pb) - Math.min(pr, pg, pb);
+  const pageish = i => { if (paperAll[i]) return true; if (!pc) return false; const r = L.Rb[i], g = L.Gb[i], bb = L.Bb[i];
+    return Math.abs(0.299 * r + 0.587 * g + 0.114 * bb - pL) < 50 && Math.max(r, g, bb) - Math.min(r, g, bb) < pCh + 15; };
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
+  const hCov = (y, x0, x1) => { let hit = 0, n = 0; for (let x = x0; x <= x1; x++, n++) for (let o = -1; o <= 1; o++) { const yy = y + o; if (yy < 0 || yy >= h || x < 0 || x >= w) continue; const i = yy * w + x; if (edge[i] && angOk(i, 90)) { hit++; break; } } return n ? hit / n : 0; };
+  const vCov = (x, y0, y1) => { let hit = 0, n = 0; for (let y = y0; y <= y1; y++, n++) for (let o = -1; o <= 1; o++) { const xx = x + o; if (xx < 0 || xx >= w || y < 0 || y >= h) continue; const i = y * w + xx; if (edge[i] && angOk(i, 0)) { hit++; break; } } return n ? hit / n : 0; };
+  // 1. unbedeckte Flächen mit Bildinhalt (Nicht-Papier), eng zugeschnitten
+  let G = [];
+  for (const o of L.holes) {
+    const xs = o.q.map(p => p[0]), ys = o.q.map(p => p[1]);
+    const b = [Math.round(Math.min(...xs)), Math.round(Math.min(...ys)), Math.round(Math.max(...xs)), Math.round(Math.max(...ys))];
+    const T = CFG.gapTrim || 0.12;
+    for (let k = 0; k < 300 && b[3] - b[1] > 8 && fr([b[0], b[1], b[2], b[1]]) < T; k++) b[1]++;
+    for (let k = 0; k < 300 && b[3] - b[1] > 8 && fr([b[0], b[3], b[2], b[3]]) < T; k++) b[3]--;
+    for (let k = 0; k < 300 && b[2] - b[0] > 8 && fr([b[0], b[1], b[0], b[3]]) < T; k++) b[0]++;
+    for (let k = 0; k < 300 && b[2] - b[0] > 8 && fr([b[2], b[1], b[2], b[3]]) < T; k++) b[2]--;
+    if (CFG.gapDbg) console.log('loch', b.join(','), 'belegt', sumR(cov, ...b).toFixed(2), 'inhalt', fr(b).toFixed(2));
+    if (sumR(cov, ...b) > 0.1 || fr(b) < 0.5) continue;
+    G.push(b);
+  }
+  // 2. Teilflächen eines Fotos (z. B. heller Bildteil) zusammenführen
+  const ar = b => (b[2] - b[0]) * (b[3] - b[1]);
+  for (let ch = true; ch;) { ch = false;
+    for (let a = 0; a < G.length && !ch; a++) for (let c = a + 1; c < G.length && !ch; c++) {
+      const A = G[a], B = G[c], ix = Math.min(A[2], B[2]) - Math.max(A[0], B[0]), iy = Math.min(A[3], B[3]) - Math.max(A[1], B[1]);
+      if (ix < -3 || iy < -3) continue;
+      if (Math.max(0, ix) * Math.max(0, iy) > 0.7 * Math.min(ar(A), ar(B))) { G[a] = ar(A) >= ar(B) ? A : B; G.splice(c, 1); ch = true; continue; }
+      const U = [Math.min(A[0], B[0]), Math.min(A[1], B[1]), Math.max(A[2], B[2]), Math.max(A[3], B[3])];
+      if (sumR(cov, ...U) < 0.03 && fr(U) >= 0.5 && Math.max(0, ix) * Math.max(0, iy) > 0) { G[a] = U; G.splice(c, 1); ch = true; } } }
+  G.sort((a, b) => ar(b) - ar(a));
+  const out = [];
+  for (const b of G) {
+    const bw = b[2] - b[0], bh = b[3] - b[1];
+    if (CFG.gapDbg) console.log('kand', b.join(','), 'mShort', mShort.toFixed(0), 'mArea', mArea.toFixed(0), 'belegt', sumR(cov, ...b).toFixed(2));
+    if (Math.min(bw, bh) < 0.4 * mShort || bw * bh < 0.25 * mArea || Math.max(bw, bh) / Math.min(bw, bh) > 3.2) continue;
+    if (sumR(cov, ...b) > 0.3) continue;
+    // 3. Kanten suchen: jede Seite entlang ihrer Normalen verschieben; gerade Kante mit Papier dahinter
+    const free = bb => sumR(cov, ...bb) < 0.03 && bb[0] >= 1 && bb[1] >= 1 && bb[2] <= w - 2 && bb[3] <= h - 2;
+    const iy0 = b[1] + ((bh * 0.1) | 0), iy1 = b[3] - ((bh * 0.1) | 0), ix0 = b[0] + ((bw * 0.1) | 0), ix1 = b[2] - ((bw * 0.1) | 0);
+    const sides = [
+      [0, -1, d => { const x = b[0] - d; return [vCov(x, iy0, iy1), sumR(paperAll, x - 4, b[1], x - 2, b[3])]; }, bw],
+      [2, +1, d => { const x = b[2] + d; return [vCov(x, iy0, iy1), sumR(paperAll, x + 2, b[1], x + 4, b[3])]; }, bw],
+      [1, -1, d => { const y = b[1] - d; return [hCov(y, ix0, ix1), sumR(paperAll, b[0], y - 4, b[2], y - 2)]; }, bh],
+      [3, +1, d => { const y = b[3] + d; return [hCov(y, ix0, ix1), sumR(paperAll, b[0], y + 2, b[2], y + 4)]; }, bh]];
+    const nb = b.slice();
+    for (const [k, sg, f, len] of sides) {
+      let best = null; const ext = Math.round(0.6 * len), inn = Math.round(0.35 * len);
+      for (let d = 0; d <= ext; d++) { const [c, pp] = f(d); const t = nb.slice(); t[k] = b[k] + sg * d;
+        if (d > 3 && !free(t)) break; if (c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
+        const s = c + (pp >= 0.5 ? 0.15 : 0) - 0.002 * d; if (!best || s > best.s) best = { s, v: t[k] }; }
+      for (let d = -1; d >= -inn; d--) { const [c, pp] = f(d); if (c < 0.55 || (pp < 0.5 && c < 0.75)) continue;
+        const s = c + (pp >= 0.5 ? 0.15 : 0) - 0.004 * -d - (sumR(cov, ...b) > 0.03 ? -0.2 : 0.1); if (!best || s > best.s) best = { s, v: b[k] + sg * d }; }
+      if (best) nb[k] = best.v;
+    }
+    if (fr(nb) < 0.5 || sumR(cov, ...nb) > 0.04) continue;
+    // 4. muss in der Albumseite liegen: mindestens 3 Seiten grenzen an Papier oder erkannte Fotos
+    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (pageish(i) || cov[i]) pp++; } return n ? pp / n : 0; };
+    const rs = [ring(nb[0] - 8, nb[1], nb[0] - 3, nb[3]), ring(nb[2] + 3, nb[1], nb[2] + 8, nb[3]), ring(nb[0], nb[1] - 8, nb[2], nb[1] - 3), ring(nb[0], nb[3] + 3, nb[2], nb[3] + 8)];
+    if (CFG.gapDbg) console.log('rand', nb.join(','), rs.map(v => v.toFixed(2)).join(' '));
+    if (rs.filter(v => v >= 0.35).length < 3) continue;
+    if (nb[0] <= 2 || nb[1] <= 2 || nb[2] >= w - 3 || nb[3] >= h - 3) continue; // am Bildrand: kein sicheres Foto
+    // Bildinhalt statt Zwischenblatt/Druck: echtes Foto hat Kontrastumfang und dunkle Anteile
+    const st = gapStats(L, nb); if (CFG.gapDbg) console.log('stat', nb.join(','), JSON.stringify(st));
+    if (st.p5 > (CFG.gapP5 || 90)) continue; // keine dunklen Bildanteile: Zwischenblatt, Druck, Papier
+    if (Math.max(nb[2] - nb[0], nb[3] - nb[1]) / Math.max(1, Math.min(nb[2] - nb[0], nb[3] - nb[1])) > 2.5) continue;
+    const q = [[nb[0], nb[1]], [nb[2], nb[1]], [nb[2], nb[3]], [nb[0], nb[3]]];
+    out.push(q); fillQ(q, cov);
+  }
+  return out;
+}
+function inPoly(q, x, y) { let c = false; for (let i = 0, j = q.length - 1; i < q.length; j = i++) { const [xi, yi] = q[i], [xj, yj] = q[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function gapStats(L, b) {
+  const { w, Rb, Gb, Bb } = L, H = new Uint32Array(256); let n = 0, sat = 0;
+  for (let y = b[1] + 2; y <= b[3] - 2; y++) for (let x = b[0] + 2; x <= b[2] - 2; x++) { const i = y * w + x, r = Rb[i], g = Gb[i], bb = Bb[i];
+    H[Math.min(255, Math.round(0.299 * r + 0.587 * g + 0.114 * bb))]++; n++; const mx = Math.max(r, g, bb); sat += mx ? (mx - Math.min(r, g, bb)) / mx : 0; }
+  const pc = p => { let c = 0; for (let v = 0; v < 256; v++) { c += H[v]; if (c >= p * n) return v; } return 255; };
+  return { p5: pc(0.05), p50: pc(0.5), p95: pc(0.95), sat: +(sat / Math.max(1, n)).toFixed(2) };
 }
 
 </script>
@@ -2068,7 +2164,7 @@ async function remember(p) {
   const e = { h: p.hash, a: p.aspect, q: p.quads.map(q => q.c.map(([x, y]) => [x, y])), qr: p.quads.map(q => q.rot), r: p.rot || 0, t: Date.now() };
   void e;
   // nur wirklich korrigierte Seiten zum Nachtrainieren verwenden
-  if (p.detSnap && p.detSnap !== snapOf(p) && p.quads.length) learnFrom(p);
+  // kein Nachlernen: die Erkennung arbeitet immer gleich, ohne gespeichertes Wissen
   updateLearnInfo();
 }
 let learnBusy = Promise.resolve();
@@ -2089,8 +2185,8 @@ function learnFrom(p) {
     } catch (e) { /* Lernen ist optional */ }
   });
 }
-async function resetLearned() { LEARN.mem = []; LEARN.rows = []; LEARN.trees = null; globalThis.LRN_USER = null; await LS.set('memory', []); await LS.set('rows', []); await LS.set('trees', null);
-  const wk = getWorker(); if (wk) wk.postMessage({ type: 'user', trees: null }); updateLearnInfo(); toast('Gelerntes zurückgesetzt'); }
+async function resetLearned(silent) { LEARN.mem = []; LEARN.rows = []; LEARN.trees = null; globalThis.LRN_USER = null; await LS.set('memory', []); await LS.set('rows', []); await LS.set('trees', null);
+  const wk = getWorker(); if (wk) wk.postMessage({ type: 'user', trees: null }); updateLearnInfo(); if (!silent) toast('Gelerntes zurückgesetzt'); }
 function detectAsync(data, w, h, sens) {
   const wk = getWorker();
   const sync = () => { const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q) }; };
@@ -2382,7 +2478,7 @@ $('bUndo').onclick = () => {
   const st = p.undo.pop(); p.quads = st.quads; p.rot = st.rot; p.rotManual = st.rotManual; p._vrot = undefined; p._thumbR = null;
   S.sel = -1; markDirty(); drawEditor(); toast('Rückgängig gemacht');
 };
-$('sens').oninput = () => { $('sensOut').textContent = $('sens').value; };
+
 
 $('bAdd').onclick = () => {
   const p = page(); if (!p) return; snap();
@@ -2689,7 +2785,7 @@ $('bMenu').onclick = () => openSheet(true); $('bClose').onclick = () => openShee
 document.addEventListener('keydown', e => { if (e.key === 'Escape') openSheet(false); });
 // ---------- Start ----------
 renderTargets(); $('bDir').onclick = () => chooseDir();
-loadLearned(); $('bLearnReset').onclick = () => resetLearned();
+resetLearned(true);
 renderPages(); drawEditor(); renderGrid();
 let dragN = 0;
 document.addEventListener('dragenter', e => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { dragN++; $('drop').hidden = false; } });

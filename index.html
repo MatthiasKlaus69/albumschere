@@ -217,6 +217,125 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
 @media (min-width: 760px) { body.has-pages .toast { bottom: 24px } }
 .toast.show { opacity: 1; transform: translate(-50%, 0) }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+
+/* ===== HMI v35: horizontale Menüleiste, volle Arbeitsfläche, senkrechte Werkzeugleiste ===== */
+.app { max-width: 1680px; grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "head" "menu" "save" "work" "foot" !important; gap: 10px; align-items: start }
+.menu { grid-area: menu; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 4px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px;
+  background: rgba(31,31,33,.92); box-shadow: inset 0 1px 0 rgba(255,255,255,.03) }
+.mlabel { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); padding: 0 10px 0 6px }
+.msep { width: 1px; align-self: stretch; background: var(--line); margin: 4px 10px }
+.mgrow { flex: 1 1 auto }
+.mbtn { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px; border-radius: 9px; border: 1px solid transparent; background: transparent;
+  color: var(--ink); font-weight: 600; font-size: 14.5px; cursor: pointer; white-space: nowrap; user-select: none; -webkit-user-select: none; transition: background .15s, border-color .15s }
+.mbtn svg.i { color: var(--gold) }
+.mbtn:hover { background: rgba(255,255,255,.06); border-color: var(--line) }
+.mbtn:active { transform: scale(.98) }
+.mbtn:disabled { opacity: .4; cursor: default; background: transparent; border-color: transparent; transform: none }
+.mbtn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
+.mrestart { color: var(--gold); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; border-color: rgba(217,166,69,.45) }
+.mrestart:hover { background: rgba(217,166,69,.12); border-color: var(--gold) }
+.mrestart.armed { background: var(--gold); color: var(--gold-ink) } .mrestart.armed svg.i { color: var(--gold-ink) }
+.mname { display: inline-grid; gap: 2px; margin: 0 6px }
+.mname input { width: 150px; height: 32px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--line); background: #141415; font: 600 14px var(--f-mono); color: var(--ink); box-shadow: inset 0 1px 3px rgba(0,0,0,.4) }
+.mname input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px }
+.mname small { font-size: 10.5px; color: var(--dim); padding-left: 2px }
+.savebar { grid-area: save; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; padding: 0 6px; min-height: 0 }
+.savebar .dlrow { flex: 0 0 220px }
+.savebar .bar0, #prog[hidden] ~ .spin { display: none }
+.savebar #prog:not([hidden]) { display: block }
+.savebar .hint { flex: 1 1 300px }
+.savebar .field { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted) }
+.savebar .seg button { min-height: 30px; font-size: 12.5px }
+.savebar .dirrow { padding: 2px 10px; font-size: 12.5px }
+.work { grid-area: work; min-height: calc(100vh - 250px); padding: 12px }
+.work > .empty { flex: 1 1 auto; min-height: calc(100vh - 290px) }
+.stage { display: flex; align-items: stretch; gap: 10px; padding: 10px; place-items: initial }
+.cvwrap { position: relative; flex: 1 1 auto; min-width: 0; overflow: auto; display: grid; place-items: center; padding: 44px 6px 6px; scrollbar-width: thin; scrollbar-color: #5a5650 transparent }
+.cvwrap.zoomed { place-items: start; cursor: grab }
+.cvwrap.panning { cursor: grabbing }
+.stage .toolbar { position: static; transform: none; flex: none; flex-direction: column; align-items: stretch; align-self: flex-start; gap: 2px; padding: 6px; width: 104px; border-radius: 14px; position: sticky; top: 10px }
+.stage .tool { grid-auto-flow: row; min-width: 0; width: 100%; height: auto; min-height: 50px; padding: 6px 4px; font-size: 11px; text-align: center; line-height: 1.15 }
+.stage .sep { width: auto; height: 1px; margin: 4px 6px }
+.foot { grid-area: foot; display: flex; justify-content: center; font-size: 12px; color: var(--dim); opacity: .7; padding: 4px 0 10px }
+.side, .o-exp { display: none !important }
+@media (max-width: 759px) {
+  .menu { padding: 6px; gap: 4px } .mlabel { width: 100%; padding: 4px 6px 0 } .msep, .mgrow { display: none }
+  .mbtn { min-height: 40px; padding: 0 10px; font-size: 13.5px } .mname input { width: 130px }
+  .savebar .dlrow { flex-basis: 100% }
+  .work { min-height: 0 } .work > .empty { min-height: 260px }
+  .stage { flex-direction: column; padding: 6px }
+  .stage .toolbar { width: auto; flex-direction: row; overflow-x: auto; position: static; align-self: stretch }
+  .stage .tool { min-width: 52px; min-height: 48px } .stage .tool span { display: none }
+  .stage .sep { width: 1px; height: 30px; margin: 0 3px; align-self: center }
+}
+
+/* ===== HMI v36 ===== */
+.menu { position: relative; gap: 6px }
+.menu .mprog { position: absolute; left: 12px; right: 12px; bottom: 3px; min-height: 0; gap: 8px; pointer-events: none }
+.menu .mprog .bar0 { display: none }
+.menu .mprog .progress { height: 3px }
+.menu .mprog .pct { font-size: 10.5px; line-height: 1 } .menu .mprog .spin { display: none }
+.savebar { display: none !important }
+.cvwrap { padding: 6px }
+.tcol { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 132px; position: sticky; top: 10px; align-self: flex-start }
+.tcol .chip { position: static; max-width: none; height: auto; min-height: 30px; padding: 6px 10px; border-radius: 10px; white-space: normal; line-height: 1.25; font-size: 12.5px }
+.stage .tcol .toolbar { width: auto; position: static }
+.mbar { display: none !important } body.has-pages { padding-bottom: 0 !important }
+body.has-pages .toast { bottom: 24px }
+@media (max-width: 759px) {
+  .menu { display: grid; grid-auto-flow: column; grid-template-rows: auto auto; grid-template-columns: 1fr 1.25fr 1fr; gap: 8px 8px; padding: 10px 10px 12px; align-items: center }
+  .menu .mgrow { display: none }
+  .menu .mbtn { min-height: 40px; padding: 0 6px; font-size: 13.5px; gap: 6px; justify-content: flex-start }
+  .menu .mbtn svg.i { width: 18px; height: 18px }
+  .menu .mname { margin: 0 } .menu .mname input { width: 100%; height: 34px; font-size: 13px } .menu .mname small { font-size: 10px }
+  .menu .mrestart { justify-content: center }
+  .stage { flex-direction: row; padding: 6px; gap: 6px }
+  .tcol { width: 74px; gap: 6px }
+  .tcol .chip { font-size: 10.5px; padding: 5px 6px; text-align: center }
+  .stage .tcol .toolbar { flex-direction: column; overflow: visible; padding: 4px }
+  .stage .tool { min-width: 0; min-height: 44px; padding: 4px 2px } .stage .tool span { display: block; font-size: 9.5px }
+  .stage .tool svg.i { width: 20px; height: 20px }
+  .stage .sep { width: auto; height: 1px; margin: 3px 4px }
+}
+
+/* v36 Feinschliff */
+.tcol { width: 150px }
+.stage .tcol .toolbar { align-self: stretch }
+@media (max-width: 759px) {
+  .menu { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; padding: 8px }
+  .menu .mbtn { white-space: normal; line-height: 1.15; font-size: 12.5px; padding: 0 4px; min-height: 40px; text-align: left }
+  .menu .mrestart { letter-spacing: .04em; font-size: 12px; padding: 0 4px; text-align: center }
+  .menu .mname input { min-width: 0 }
+  .tcol { width: 74px }
+}
+
+/* Umschalter Fotos/Dateien (nur iPhone/iPad) */
+.mtarget { display: flex; align-items: center }
+.mtarget .seg button { min-height: 34px; font-size: 13px; padding: 0 10px }
+@media (max-width: 759px) { .menu .mtarget { grid-column: 1 / -1; grid-row: 3 } .menu .mtarget .seg { width: 100% } }
+
+/* Menüpunkte optisch gleichwertig: gleiche Kachel, gleiche Höhe, gleiche Schrift */
+.menu { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 10px 12px 12px }
+.menu .mgrow { display: none }
+.menu .mbtn, .menu .mname { height: 58px; margin: 0; border-radius: 10px; border: 1px solid var(--line); background: linear-gradient(180deg, #2a2a2c, #1f1f21);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 8px rgba(0,0,0,.25); color: var(--ink); font-size: 14.5px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  justify-content: center; padding: 0 10px; white-space: nowrap }
+.menu .mbtn svg.i { color: var(--gold); width: 20px; height: 20px }
+.menu .mbtn:hover { border-color: #55555a; background: linear-gradient(180deg, #303033, #242426) }
+.menu .mrestart { color: var(--ink); border-color: var(--line) } .menu .mrestart svg.i { color: var(--gold) }
+.menu .mrestart.armed { background: var(--gold); color: var(--gold-ink); border-color: var(--gold-hi) } .menu .mrestart.armed svg.i { color: var(--gold-ink) }
+.menu .mname { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 3px; padding: 6px 10px }
+.menu .mname input { width: 100%; height: 28px; border: 0; background: #141415; border-radius: 6px; text-align: center; font: 600 14px var(--f-mono) }
+.menu .mname small { text-align: center; font-size: 10.5px; color: var(--muted); padding: 0 }
+.menu .mtarget, .menu .dirrow { grid-column: 1 / -1 }
+@media (max-width: 1000px) { .menu .mbtn, .menu .mname { font-size: 13px; padding: 0 6px; gap: 6px } }
+@media (max-width: 759px) {
+  .menu { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; grid-template-rows: none; gap: 6px; padding: 8px }
+  .menu .mbtn, .menu .mname { height: 52px; font-size: 12.5px; white-space: normal; line-height: 1.15; text-align: center; padding: 0 4px; flex-direction: column; gap: 3px }
+  .menu .mbtn svg.i { width: 18px; height: 18px }
+  .menu .mname { padding: 4px 6px } .menu .mname input { height: 26px; font-size: 12.5px } .menu .mname small { font-size: 9.5px }
+  .menu .mtarget { grid-row: auto }
+}
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -244,6 +363,8 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
   <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
   <symbol id="i-new" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></symbol>
+  <symbol id="i-zin" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></symbol>
+  <symbol id="i-zout" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M7.5 10.5h6"/></symbol>
   <symbol id="i-photos" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.9 2.9M15.5 15.5l2.9 2.9M5.6 18.4l2.9-2.9M15.5 8.5l2.9-2.9"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
 </svg>
@@ -256,85 +377,74 @@ body.has-pages .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) }
   <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere by MS CUBE"><use href="#logoSym"/><text x="1296" y="408" text-anchor="end" class="byline">by MS CUBE</text></svg><h1 class="vh">Albumschere</h1></header>
   <div class="topbar" id="topbar" hidden></div>
 
-  <main class="main panel imp">
-    <h2>Import</h2>
-    <nav class="src" aria-label="Albumseiten hinzufügen">
-      <label class="tile on" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
-      <label class="tile" for="inPick"><svg class="i"><use href="#i-img"/></svg>Auswählen</label>
-      <label class="tile" for="inDir" id="lblDir"><svg class="i"><use href="#i-folder"/></svg>Ordner</label>
-    </nav>
+  <nav class="menu" id="menu" aria-label="Menü">
+    <label class="mbtn" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
+    <label class="mbtn" for="inPick"><svg class="i"><use href="#i-img"/></svg>Auswählen</label>
+    <label class="mname" for="album"><input id="album" type="text" value="" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Dateiname beginnt mit"><small>Dateiname beginnt mit</small></label>
+    <button class="mbtn" id="bCut"><svg class="i"><use href="#i-cut"/></svg>Ausschneiden</button>
+    <button class="mbtn" id="bEach" disabled><svg class="i"><use href="#i-down"/></svg>Speichern unter</button>
+    <span class="mgrow" aria-hidden="true"></span>
+    <button class="mbtn mrestart" id="bReset"><svg class="i"><use href="#i-new"/></svg>Neustart</button>
+    <div class="mtarget" id="targetWrap" hidden><div class="seg" id="target" role="radiogroup" aria-label="Speicherort"></div></div>
+    <div class="dirrow" id="dirRow" hidden><span id="dirName"></span><button type="button" class="link" id="bDir">Ordner wählen</button></div>
+    <div class="dlrow mprog"><div class="progress" id="prog" hidden><i id="progBar"></i></div><div class="bar0"></div><span class="pct" id="progPct" hidden>0 %</span><span class="spin" aria-hidden="true"></span></div>
+  </nav>
+  <div class="savebar" id="sheet" hidden>
+    <div class="sheet-head"><span class="grab"></span><b>Einstellungen</b><button id="bClose" aria-label="Schließen"></button></div>
+    <div class="preview-name" id="nameEx"></div>
+    <p class="hint" id="saveNote"></p>
+  </div>
 
-    <section class="work" aria-label="Arbeitsfläche">
-      <div class="empty" id="emptyStage" hidden>
-        <svg class="i"><use href="#i-img"/></svg>
-        <b>Noch keine Albumseite</b>
-        <p>Fotografiere eine Albumseite oder wähle Fotos aus. Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</p>
-      </div>
-      <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
-        <div class="chip" id="chip"><span class="dot"></span><span id="pageInfo"></span></div>
+  <main class="work" aria-label="Arbeitsfläche">
+    <div class="empty" id="emptyStage" hidden>
+      <svg class="i"><use href="#i-img"/></svg>
+      <b>Noch keine Albumseite</b>
+      <p>Fotografiere eine Albumseite oder wähle Fotos aus. Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</p>
+    </div>
+    <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
+      <div class="cvwrap" id="cvwrap">
         <button class="glass-btn" id="bClear" aria-label="Alles leeren"><svg class="i"><use href="#i-new"/></svg><span>Neu</span></button>
         <button class="glass-btn" id="bMenu" aria-label="Einstellungen"></button>
         <canvas id="cv"></canvas>
-        <div class="toolbar" id="toolbar" role="toolbar" aria-label="Rahmen bearbeiten">
-          <button class="tool" id="bUndo" title="Rückgängig" disabled><svg class="i"><use href="#i-undo"/></svg><span>Zurück</span></button>
-          <button class="tool" id="bAdd" title="Rahmen hinzufügen"><svg class="i"><use href="#i-frame"/></svg><span>Rahmen</span></button>
-          <button class="tool" id="bRot" title="Ausgewähltes Foto drehen" disabled><svg class="i"><use href="#i-rot"/></svg><span>Drehen</span></button>
-          <button class="tool" id="bMerge" title="Mit dem Nachbarrahmen zu einem Foto verbinden" disabled><svg class="i"><use href="#i-merge"/></svg><span>Verbinden</span></button>
-          <button class="tool warn" id="bDel" title="Ausgewählten Rahmen löschen" disabled><svg class="i"><use href="#i-trash"/></svg><span>Löschen</span></button>
-          <span class="sep"></span>
-          <button class="tool" id="bRotPage" title="Ganze Seite um 90° drehen"><svg class="i"><use href="#i-page"/></svg><span>Seite</span></button>
-        </div>
-      </section>
-      <div class="strip" id="strip">
-        <div class="pages" id="pages" aria-label="Albumseiten"></div>
       </div>
-      <div class="row" id="addRow" hidden></div>
-      <p class="legend" id="legend">Ecke ziehen passt an · Rahmen antippen für Drehen, Verbinden, Löschen</p>
+      <div class="tcol">
+      <div class="chip" id="chip"><span class="dot"></span><span id="pageInfo"></span></div>
+      <div class="toolbar" id="toolbar" role="toolbar" aria-label="Bearbeiten" aria-orientation="vertical">
+        <button class="tool" id="bUndo" title="Rückgängig" disabled><svg class="i"><use href="#i-undo"/></svg><span>Zurück</span></button>
+        <button class="tool" id="bAdd" title="Rahmen hinzufügen"><svg class="i"><use href="#i-frame"/></svg><span>Rahmen</span></button>
+        <button class="tool" id="bRot" title="Ausgewähltes Foto drehen" disabled><svg class="i"><use href="#i-rot"/></svg><span>Drehen</span></button>
+        <button class="tool" id="bMerge" title="Mit dem Nachbarrahmen zu einem Foto verbinden" disabled><svg class="i"><use href="#i-merge"/></svg><span>Verbinden</span></button>
+        <button class="tool warn" id="bDel" title="Ausgewählten Rahmen löschen" disabled><svg class="i"><use href="#i-trash"/></svg><span>Löschen</span></button>
+        <button class="tool" id="bRotPage" title="Ganze Seite um 90° drehen"><svg class="i"><use href="#i-page"/></svg><span>Seite drehen</span></button>
+        <span class="sep"></span>
+        <button class="tool" id="bRedetect" title="Fotos auf dieser Seite neu erkennen"><svg class="i"><use href="#i-scan"/></svg><span>Neu erkennen</span></button>
+        <button class="tool warn" id="bDelPage" title="Diese Albumseite entfernen"><svg class="i"><use href="#i-x"/></svg><span>Seite löschen</span></button>
+        <span class="sep"></span>
+        <button class="tool" id="bZoomIn" title="Vergrößern"><svg class="i"><use href="#i-zin"/></svg><span>Zoom +</span></button>
+        <button class="tool" id="bZoomOut" title="Verkleinern" disabled><svg class="i"><use href="#i-zout"/></svg><span>Zoom −</span></button>
+      </div>
+      </div>
+    </section>
+    <div class="strip" id="strip">
+      <div class="pages" id="pages" aria-label="Albumseiten"></div>
+    </div>
+    <div class="row" id="addRow" hidden></div>
+    <p class="legend" id="legend" hidden></p>
 
-      <section class="results" id="secOut" aria-live="polite">
-        <div class="results-head">
-          <div><h3 id="resTitle">Ergebnis</h3><p id="resSub"></p></div>
-          <button class="btn" id="bEach2"><svg class="i"><use href="#i-down"/></svg>Alle herunterladen</button>
-        </div>
-        <div class="gridwrap"><div class="grid" id="grid"></div></div>
-      </section>
+    <section class="results" id="secOut" aria-live="polite">
+      <div class="results-head">
+        <div><h3 id="resTitle">Ergebnis</h3><p id="resSub"></p></div>
+        <button class="btn" id="bEach2"><svg class="i"><use href="#i-down"/></svg>Speichern unter</button>
+      </div>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-
-  <aside class="side" id="sheet" aria-label="Export">
-    <div class="sheet-head"><span class="grab"></span><b>Einstellungen</b><button id="bClose" aria-label="Schließen"></button></div>
-    <section class="panel o-exp">
-      <h2>Export</h2>
-      <label class="field" for="album">Dateinamen beginnen mit
-        <input id="album" type="text" value="" autocomplete="off" autocapitalize="off" spellcheck="false">
-      </label>
-      <div class="preview-name" id="nameEx"></div>
-      <div class="sep-line"></div>
-      <button class="btn full" id="bCut"><svg class="i"><use href="#i-cut"/></svg>Alles ausschneiden</button>
-      <div class="dlbox">
-        <button class="btn full" id="bEach" disabled><svg class="i"><use href="#i-down"/></svg>Alle herunterladen</button>
-        <div class="dlrow"><div class="progress" id="prog" hidden><i id="progBar"></i></div><div class="bar0"></div><span class="pct" id="progPct" hidden>0 %</span><span class="spin" aria-hidden="true"></span></div>
-      </div>
-      <div class="field" id="targetWrap" hidden>Speichern in<div class="seg" id="target" role="radiogroup" aria-label="Speicherort"></div></div>
-      <div class="dirrow" id="dirRow" hidden><span id="dirName"></span><button type="button" class="link" id="bDir">Ordner wählen</button></div>
-      <p class="hint" id="saveNote"></p>
-      <button class="link" id="bReset"><svg class="i"><use href="#i-new"/></svg>Alle Bilder löschen</button>
-      <p class="hint" id="appVer" style="opacity:.6;margin-top:6px">Version 34</p>
-    </section>
-    <section class="panel" id="secEdit">
-      <h2>Erkennung <span class="preview-name" id="pageName"></span></h2>
-      <input id="sens" type="hidden" value="50">
-      <div class="row">
-        <button class="btn" id="bRedetect"><svg class="i"><use href="#i-scan"/></svg>Neu erkennen</button>
-        <button class="btn ghost danger" id="bDelPage"><svg class="i"><use href="#i-x"/></svg>Seite entfernen</button>
-      </div>
-    </section>
-  </aside>
+  <footer class="foot"><span id="appVer">Version 36</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
   <button class="btn" id="mCut"><svg class="i"><use href="#i-cut"/></svg><span id="mCutL">Ausschneiden</span></button>
-  <button class="btn accent" id="mSave" disabled><svg class="i"><use href="#i-down"/></svg><span id="mSaveL">Herunterladen</span></button>
+  <button class="btn accent" id="mSave" disabled><svg class="i"><use href="#i-down"/></svg><span id="mSaveL">Speichern</span></button>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="dock" id="dock" hidden><button id="mMain"><svg class="i" id="mIco"></svg><span id="mMainL"></span></button></div>
@@ -2501,7 +2611,7 @@ async function addFiles(files) {
   if (dupes) toast(dupes === 1 ? 'Diese Seite ist schon geladen' : `${dupes} Seiten sind schon geladen`);
   if (!list.length) return;
   list.sort((a, b) => a.name.localeCompare(b.name, 'de', { numeric: true }));
-  let n = 0;
+  let n = 0; const first = S.pages.length;
   for (const f of list) {
     status(`Lese Seite ${++n} von ${list.length} …`, true);
     try {
@@ -2517,13 +2627,15 @@ async function addFiles(files) {
       renderPages(); drawEditor();
     } catch (e) { alertBox(`${f.name}: ${e.message}`); }
   }
+  // nach dem Einlesen auf die zuerst eingelesene Seite springen
+  if (S.pages.length > first) { S.cur = first; S.sel = -1; S.zoom = 1; }
   status('', false); renderPages(); drawEditor();
   toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
 }
 $('inCam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 $('inPick').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 $('inDir').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
-if (!('webkitdirectory' in document.createElement('input')) || /iPhone|iPad|Android/i.test(navigator.userAgent)) $('lblDir').hidden = true;
+if (!('webkitdirectory' in document.createElement('input')) || /iPhone|iPad|Android/i.test(navigator.userAgent)) { if ($('lblDir')) $('lblDir').hidden = true; }
 
 function alertBox(msg) { toast(msg, 5000); }
 
@@ -2534,7 +2646,7 @@ function renderPages() {
     const b = document.createElement('button'); b.className = 'thumb' + (i === S.cur ? ' on' : '');
     b.setAttribute('aria-label', `Seite ${i + 1}, ${p.quads.length} Fotos`);
     b.innerHTML = `<img alt="" src="${thumbOf(p)}"><span class="n">${p.quads.length}</span>${p.sample ? '<span class="tag">Beispiel</span>' : ''}`;
-    b.onclick = () => { S.cur = i; S.sel = -1; renderPages(); drawEditor(); };
+    b.onclick = () => { S.cur = i; S.sel = -1; S.zoom = 1; renderPages(); drawEditor(); };
     el.appendChild(b);
   });
   el.hidden = !S.pages.length;
@@ -2543,7 +2655,7 @@ function renderPages() {
 function updateSummary() {
   const total = pendingCount(), more = S.results.length > 0;
   const lab = total === 1 ? (more ? '1 weiteres Foto ausschneiden' : '1 Foto ausschneiden') : (more ? `${total} weitere Fotos ausschneiden` : `${total} Fotos ausschneiden`);
-  $('bCut').lastChild.textContent = total ? (more ? `Weitere ausschneiden (${total})` : `Alles ausschneiden (${total})`) : (S.results.length ? 'Alles ausgeschnitten' : 'Alles ausschneiden');
+  $('bCut').lastChild.textContent = total ? `Ausschneiden (${total})` : (S.results.length ? 'Ausgeschnitten' : 'Ausschneiden');
   $('bCut').disabled = !total || S.cutting;
   const any = S.results.length > 0 && !!S.downloads;
   $('bEach').disabled = $('bEach2').disabled = !any || S.cutting;
@@ -2585,19 +2697,21 @@ function thumbOf(p) { const r = p.rot || 0; if (p._thumbR !== r + 1) { const t =
 
 function drawEditor() {
   const p = page();
-  $('secEdit').hidden = !p; $('toolbar').hidden = !p; $('legend').hidden = !p; $('chip').hidden = !p && !$('chip').classList.contains('busy'); $('stage').classList.toggle('is-empty', !p);
+  $('secEdit').hidden = !p; $('toolbar').hidden = !p; $('legend').hidden = true; $('chip').hidden = !p && !$('chip').classList.contains('busy'); $('stage').classList.toggle('is-empty', !p);
   $('emptyStage').hidden = !!p; cv.hidden = !p; $('bClear').hidden = !S.pages.length;
   updateButtons();
   if (!p) return;
   if (!$('chip').classList.contains('busy')) status(`Seite ${S.cur + 1} von ${S.pages.length} · ${p.quads.length} ${p.quads.length === 1 ? 'Foto' : 'Fotos'}${p.sample ? ' · Beispiel' : ''}`, false);
   $('pageName').textContent = p.sample ? 'Beispiel' : `Seite ${S.cur + 1}`;
-  const st = $('stage'), cs = getComputedStyle(st);
+  const st = $('cvwrap'), cs = getComputedStyle(st);
   const stageW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const wide = window.innerWidth >= 980, maxH = Math.max(240, wide ? window.innerHeight - 290 : window.innerHeight * 0.6);
+  const wide = window.innerWidth >= 760, maxH = Math.max(260, wide ? window.innerHeight - 330 : window.innerHeight * 0.6);
   dropViews(p); const pv = viewCanvas(p);
   let w = stageW, h = w * pv.height / pv.width;
   if (h > maxH) { h = maxH; w = h * pv.width / pv.height; }
-  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const Z = S.zoom || 1; w *= Z; h *= Z;
+  st.classList.toggle('zoomed', Z > 1); $('bZoomOut').disabled = Z <= 1; $('bZoomIn').disabled = Z >= ZMAX;
+  const dpr = Math.min(3, window.devicePixelRatio || 1, 8000 / Math.max(w, h));
   if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
   }
@@ -2668,14 +2782,15 @@ cv.addEventListener('pointerdown', e => {
   if (best) { S.sel = best.qi; drag = { type: 'corner', ...best, start: pos, moved: false }; loupe = vq[best.qi][best.ci].slice(); }
   else {
     const qi = [...p.quads.keys()].reverse().find(i => inside(vq[i], pos));
-    if (qi === undefined) { S.sel = -1; drag = null; }
+    if (qi === undefined) { S.sel = -1; drag = (S.zoom || 1) > 1 ? { type: 'pan', x: e.clientX, y: e.clientY, sl: $('cvwrap').scrollLeft, st: $('cvwrap').scrollTop, moved: false } : null; if (drag) $('cvwrap').classList.add('panning'); }
     else { S.sel = qi; drag = { type: 'move', qi, start: pos, orig: vq[qi].map(c => c.slice()), moved: false }; }
   }
   if (drag) cv.setPointerCapture(e.pointerId);
   updateButtons(); drawEditor();
 });
 cv.addEventListener('pointermove', e => {
-  if (!drag) return; const p = page(), pos = evPos(e), cl = v => Math.min(1, Math.max(0, v));
+  if (!drag) return; if (drag.type === 'pan') { const W = $('cvwrap'); W.scrollLeft = drag.sl - (e.clientX - drag.x); W.scrollTop = drag.st - (e.clientY - drag.y); return; }
+  const p = page(), pos = evPos(e), cl = v => Math.min(1, Math.max(0, v));
   const q = p.quads[drag.qi];
   if (!drag.moved) {
     // kleine Bewegungen beim Antippen ignorieren
@@ -2692,7 +2807,7 @@ cv.addEventListener('pointermove', e => {
   }
   drawEditor();
 });
-const endDrag = () => { if (drag) { const moved = drag.moved; drag = null; loupe = null; if (moved) markDirty(); drawEditor(); } };
+const endDrag = () => { $('cvwrap').classList.remove('panning'); if (drag && drag.type === 'pan') { drag = null; return; } if (drag) { const moved = drag.moved; drag = null; loupe = null; if (moved) markDirty(); drawEditor(); } };
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 
 function updateButtons() {
@@ -2743,10 +2858,23 @@ $('bRot').onclick = () => { if (S.sel < 0) return; snap(); const q = page().quad
 $('bDelPage').onclick = () => {
   const p = page(); if (!p) return;
   S.pages.splice(S.cur, 1); S.results.filter(r => r.pageId === p.id).forEach(r => URL.revokeObjectURL(r.url)); S.results = S.results.filter(r => r.pageId !== p.id); reindex(); renderGrid(); updateDock();
-  S.cur = Math.min(S.cur, S.pages.length - 1); S.sel = -1; renderPages(); drawEditor();
+  S.cur = Math.min(S.cur, S.pages.length - 1); S.sel = -1; S.zoom = 1; renderPages(); drawEditor();
 };
 $('bRedetect').onclick = async () => { const p = page(); if (!p) return; snap(); status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value, true); status('', false); S.sel = -1; markDirty(); drawEditor(); toast(`${p.quads.length} Fotos erkannt`); };
 window.addEventListener('resize', () => drawEditor());
+// ---------- Zoom ----------
+const ZSTEPS = [1, 1.5, 2, 3, 4], ZMAX = 4;
+function setZoom(z) {
+  const p = page(); if (!p) return; const wrap = $('cvwrap'), old = S.zoom || 1;
+  const cx = (wrap.scrollLeft + wrap.clientWidth / 2) / Math.max(1, view.w), cy = (wrap.scrollTop + wrap.clientHeight / 2) / Math.max(1, view.h);
+  S.zoom = z; drawEditor();
+  if (z > 1) { wrap.scrollLeft = cx * view.w - wrap.clientWidth / 2; wrap.scrollTop = cy * view.h - wrap.clientHeight / 2; }
+  if (old !== z) toast(`Zoom ${Math.round(z * 100)} %`, 900);
+}
+$('bZoomIn').onclick = () => setZoom(ZSTEPS.find(z => z > (S.zoom || 1)) || ZMAX);
+$('bZoomOut').onclick = () => setZoom([...ZSTEPS].reverse().find(z => z < (S.zoom || 1)) || 1);
+$('cvwrap').addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey) || !page()) return; e.preventDefault(); (e.deltaY < 0 ? $('bZoomIn') : $('bZoomOut')).click(); }, { passive: false });
+
 
 // ---------- Entzerren in voller Auflösung ----------
 function solve(A, b) {
@@ -2921,21 +3049,23 @@ const CAN_SHARE = (() => { try { return !!(navigator.canShare && navigator.canSh
 const CAN_DIR = 'showDirectoryPicker' in window;
 const IS_SAFARI = /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg|CriOS|FxiOS/.test(navigator.userAgent);
 const TARGETS = MOBILE && CAN_SHARE
-  ? [['photos', 'Fotomediathek', 'i-photos', 'Es öffnet sich das Teilen-Menü – tippe auf „Bilder sichern“. Bei „Alle sichern“ kommen alle Fotos auf einmal.'],
-     ['files', 'Dateien', 'i-folder', 'Es öffnet sich das Teilen-Menü – tippe auf „In Dateien sichern“ und wähle dort den Ordner. Bei „Alle“ geht das für alle Fotos auf einmal.']]
+  ? [['photos', 'In Fotos speichern', 'i-photos', 'Es öffnet sich das Teilen-Menü – tippe auf „Bilder sichern“. Bei „Alle sichern“ kommen alle Fotos auf einmal.'],
+     ['files', 'In Dateien speichern', 'i-folder', 'Es öffnet sich das Teilen-Menü – tippe auf „In Dateien sichern“ und wähle dort den Ordner. Bei „Alle“ geht das für alle Fotos auf einmal.']]
   : CAN_DIR
   ? [['downloads', 'Download-Ordner', 'i-down', 'Die Fotos landen im Download-Ordner. Der Browser fragt evtl. einmal, ob mehrere Downloads erlaubt sind.'],
      ['folder', 'Ordner wählen', 'i-folder', 'Du wählst einmal einen Ordner, danach schreibt die App alle Fotos direkt hinein.']]
   : [['downloads', 'Download-Ordner', 'i-down', IS_SAFARI ? 'Die Fotos landen im Download-Ordner von Safari. Safari kann keinen Ordner direkt beschreiben – ändern lässt er sich unter Safari → Einstellungen → Allgemein → „Speicherort für Downloads“ (dort auch „Bei jedem Download fragen“). Mit Chrome oder Edge kannst du hier direkt einen Ordner wählen.' : 'Die Fotos landen im Download-Ordner des Browsers. Ändern lässt er sich in den Einstellungen des Browsers.']];
-let target = TARGETS[0][0], dirHandle = null;
+// „Speichern unter“: Chrome/Edge → Ordnerwahl, iPhone/iPad → Teilen-Menü (In Dateien sichern), sonst Download-Ordner
+let target = MOBILE && CAN_SHARE ? 'photos' : CAN_DIR ? 'folder' : 'downloads', dirHandle = null;
+if (MOBILE && CAN_SHARE) try { const t = localStorage.getItem('albumschere.target'); if (t === 'photos' || t === 'files') target = t; } catch (e) {}
 const dirDB = (mode, val) => new Promise(r => { try { const q = indexedDB.open('albumschere-dir', 1); q.onupgradeneeded = () => q.result.createObjectStore('kv');
   q.onsuccess = () => { try { const t = q.result.transaction('kv', mode ? 'readwrite' : 'readonly'), st = t.objectStore('kv'); if (mode) { st.put(val, 'dir'); t.oncomplete = () => r(true); } else { const g = st.get('dir'); g.onsuccess = () => r(g.result || null); g.onerror = () => r(null); } } catch (e) { r(null); } }; q.onerror = () => r(null); } catch (e) { r(null); } });
 if (CAN_DIR) dirDB().then(h => { if (h) { dirHandle = h; renderTargets(); } });
-async function chooseDir() { try { const h = await window.showDirectoryPicker({ id: 'albumschere', mode: 'readwrite', startIn: dirHandle || 'pictures' }); dirHandle = h; await dirDB(true, h); target = 'folder'; try { localStorage.setItem('albumschere.target', 'folder'); } catch (e) {} renderTargets(); updateSummary(); toast(`Fotos werden in „${h.name}“ gesichert`); return h; } catch (e) { if (e && e.name === 'AbortError') return null; throw e; } }
-try { const t = localStorage.getItem('albumschere.target'); if (TARGETS.some(x => x[0] === t)) target = t; } catch (e) {}
+async function chooseDir() { try { const h = await window.showDirectoryPicker({ id: 'albumschere', mode: 'readwrite', startIn: dirHandle || 'pictures' }); dirHandle = h; await dirDB(true, h); target = 'folder'; try { localStorage.setItem('albumschere.target', 'folder'); } catch (e) {} renderTargets(); updateSummary(); return h; } catch (e) { if (e && e.name === 'AbortError') return null; throw e; } }
+
 function renderTargets() {
   const box = $('target'); box.innerHTML = '';
-  $('targetWrap').hidden = TARGETS.length < 2;
+  $('targetWrap').hidden = !(MOBILE && CAN_SHARE);
   for (const [id, label, icon] of TARGETS) {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(id === target));
     b.innerHTML = `<svg class="i"><use href="#${icon}"/></svg>${label}`;
@@ -2943,13 +3073,13 @@ function renderTargets() {
     box.appendChild(b);
   }
   $('saveNote').textContent = TARGETS.find(x => x[0] === target)[3];
-  $('dirRow').hidden = target !== 'folder';
+  $('dirRow').hidden = true;
   $('dirName').textContent = dirHandle ? `Ordner: „${dirHandle.name}“` : 'Noch kein Ordner gewählt';
   $('bDir').textContent = dirHandle ? 'Ordner ändern' : 'Ordner wählen';
 }
 function updateSaveLabel() {
   const n = S.results.length;
-  $('bEach').lastChild.textContent = target === 'photos' ? 'In Fotomediathek sichern' : target === 'files' ? 'In Dateien sichern' : target === 'folder' ? 'In Ordner sichern' : 'Alle herunterladen';
+  $('bEach').lastChild.textContent = 'Speichern unter'; if ($('bEach2')) $('bEach2').lastChild.textContent = 'Speichern unter';
   S.saveShort = target === 'photos' ? `${n} in Fotos sichern` : target === 'files' ? `${n} in Dateien sichern` : `${n} sichern`; updateDock();
 }
 function download(filename, blob) {
@@ -2957,31 +3087,29 @@ function download(filename, blob) {
   a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-async function getDir() {
-  if (dirHandle) { try { if ((await dirHandle.queryPermission({ mode: 'readwrite' })) === 'granted' || (await dirHandle.requestPermission({ mode: 'readwrite' })) === 'granted') return dirHandle; } catch (e) {} }
-  const h = await chooseDir(); if (!h) throw { name: 'AbortError' }; return h;
-}
+async function getDir() { const h = await chooseDir(); if (!h) throw { name: 'AbortError' }; return h; }
 async function writeToDir(dir, filename, blob) { const fh = await dir.getFileHandle(filename, { create: true }); const w = await fh.createWritable(); await w.write(blob); await w.close(); }
-async function saveFiles(list) {
+async function saveFiles(list, single) {
   try {
     if (target === 'photos' || (target === 'files' && CAN_SHARE)) { await navigator.share({ files: list.map(([n, b]) => new File([b], n, { type: 'image/jpeg' })) }); if (list.length > 1) toast(`${list.length} Fotos übergeben`); return 'ok'; }
-    if (target === 'folder') {
+    if (target === 'folder' && !single) {
       const dir = await getDir();
       for (let i = 0; i < list.length; i++) { if (list.length > 1) toast(`Schreibe ${i + 1} von ${list.length} …`, 0); await writeToDir(dir, list[i][0], list[i][1]); }
       toast(list.length > 1 ? `${list.length} Fotos in „${dir.name}“ gesichert` : `In „${dir.name}“ gesichert`); return 'ok';
     }
+    if (!CAN_DIR && !MOBILE && !single && !S.dlHint) { S.dlHint = 1; toast(IS_SAFARI ? 'Safari speichert in den Download-Ordner. Ordnerwahl: Safari → Einstellungen → Allgemein → „Bei jedem Download fragen“, oder Chrome/Edge verwenden.' : 'Dieser Browser speichert in den Download-Ordner. Ordnerwahl: Einstellungen → „Immer fragen, wo Dateien gespeichert werden“, oder Chrome/Edge verwenden.', 6000); await new Promise(r => setTimeout(r, 3000)); }
     for (let i = 0; i < list.length; i++) { if (list.length > 1) toast(`Lade ${i + 1} von ${list.length} …`, 0); download(list[i][0], list[i][1]); await new Promise(r => setTimeout(r, MOBILE ? 900 : 350)); }
     if (list.length > 1) toast(`${list.length} Fotos heruntergeladen`); return 'ok';
   } catch (e) { if (e && e.name === 'AbortError') return 'declined'; toast('Speichern ging nicht: ' + (e && e.message || e), 5000); return 'error'; }
 }
-async function saveTo({ filename, data }) { const r = await saveFiles([[filename, data]]); if (r !== 'ok') throw { code: r === 'declined' ? 'declined' : 'unavailable', message: r }; return { status: 'saved' }; }
+async function saveTo({ filename, data }) { const r = await saveFiles([[filename, data]], true); if (r !== 'ok') throw { code: r === 'declined' ? 'declined' : 'unavailable', message: r }; return { status: 'saved' }; }
 async function saveAll() { if (!S.results.length) return; if (await saveFiles(S.results.map(r => [names(r.pi, r.qi).file, r.blob])) === 'ok') { S.results.forEach(r => r.saved = true); renderGrid(); if (target !== 'photos') toast(`Alle ${S.results.length} Fotos gesichert`); } }
 $('bEach').onclick = saveAll; $('bEach2').onclick = () => $('bEach').click();
 // iPhone-Aktionsleiste: spiegelt die beiden Hauptknöpfe
 function syncBar() {
   const total = pendingCount();
   $('mCut').disabled = $('bCut').disabled; $('mCutL').textContent = S.cutting ? 'Schneide aus …' : total ? `Ausschneiden (${total})` : 'Ausgeschnitten';
-  $('mSave').disabled = $('bEach').disabled; $('mSaveL').textContent = S.saveShort || 'Alle herunterladen';
+  $('mSave').disabled = $('bEach').disabled; $('mSaveL').textContent = S.saveShort || 'Speichern unter';
   $('mCut').classList.toggle('accent', !!total); $('mSave').classList.toggle('accent', !total);
 }
 $('mCut').onclick = () => $('bCut').click(); $('mSave').onclick = () => $('bEach').click();
@@ -3001,7 +3129,7 @@ function clearAll(btn) {
   openSheet(false); renderPages(); drawEditor(); renderGrid(); updateDock(); window.scrollTo(0, 0); toast('Alles geleert – bereit für die nächste Serie');
 }
 function armUI(on) {
-  $('bReset').lastChild.textContent = on ? 'Wirklich alle Bilder löschen?' : 'Alle Bilder löschen';
+  $('bReset').lastChild.textContent = on ? 'Wirklich neu starten?' : 'Neustart'; $('bReset').classList.toggle('armed', on);
   $('bClear').lastChild.textContent = on ? 'Wirklich leeren?' : 'Neu'; $('bClear').classList.toggle('armed', on);
 }
 $('bReset').onclick = () => clearAll(); $('bClear').onclick = () => clearAll();
@@ -3009,8 +3137,10 @@ document.addEventListener('keydown', e => {
   if (/INPUT|TEXTAREA/.test(document.activeElement?.tagName || '')) return;
   if ((e.key === 'Delete' || e.key === 'Backspace') && S.sel >= 0) { e.preventDefault(); $('bDel').click(); }
   else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); $('bUndo').click(); }
-  else if (e.key === 'ArrowRight' && S.cur < S.pages.length - 1) { S.cur++; S.sel = -1; renderPages(); drawEditor(); }
-  else if (e.key === 'ArrowLeft' && S.cur > 0) { S.cur--; S.sel = -1; renderPages(); drawEditor(); }
+  else if (e.key === 'ArrowRight' && S.cur < S.pages.length - 1) { S.cur++; S.sel = -1; S.zoom = 1; renderPages(); drawEditor(); }
+  else if (e.key === 'ArrowLeft' && S.cur > 0) { S.cur--; S.sel = -1; S.zoom = 1; renderPages(); drawEditor(); }
+  else if ((e.key === '+' || e.key === '=') && page()) $('bZoomIn').click();
+  else if (e.key === '-' && page()) $('bZoomOut').click();
 });
 window.addEventListener('beforeunload', e => { if (S.results.some(r => !r.saved) || pendingCount()) { e.preventDefault(); e.returnValue = ''; } });
 // ---------- Einstellungen-Sheet ----------

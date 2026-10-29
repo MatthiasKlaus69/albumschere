@@ -336,6 +336,29 @@ body.has-pages .toast { bottom: 24px }
   .menu .mname { padding: 4px 6px } .menu .mname input { height: 26px; font-size: 12.5px } .menu .mname small { font-size: 9.5px }
   .menu .mtarget { grid-row: auto }
 }
+
+/* v37 mobil: alles auf einen Bildschirm, Werkzeugleiste unter der Albumseite */
+@media (max-width: 759px) {
+  .app { padding: 6px 8px 8px; gap: 6px }
+  .head { min-height: 0 } .logo-img { width: 70px }
+  .menu { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px }
+  .menu .mbtn, .menu .mname { height: 38px; font-size: 11px; padding: 0 3px; gap: 2px; border-radius: 7px; flex-direction: row }
+  .menu .mbtn svg.i { width: 14px; height: 14px }
+  .menu .mname { flex-direction: column; padding: 2px 4px; gap: 1px } .menu .mname input { height: 20px; font-size: 11px } .menu .mname small { font-size: 8.5px }
+  .menu .mrestart { font-size: 10.5px; letter-spacing: .02em }
+  .mtarget .seg button { min-height: 28px; font-size: 11px; padding: 0 6px } .mtarget .seg button svg.i { width: 14px; height: 14px }
+  .work { padding: 4px; border-radius: 10px; gap: 6px }
+  .stage { flex-direction: column; padding: 4px; gap: 4px }
+  .cvwrap { padding: 0 }
+  .tcol { width: auto; flex-direction: column; position: static; gap: 4px; align-self: stretch }
+  .tcol .chip { font-size: 11px; padding: 3px 8px; min-height: 0; text-align: center; border-radius: 8px }
+  .stage .tcol .toolbar { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; padding: 3px; gap: 0; border-radius: 10px; overflow: visible }
+  .stage .tool { min-width: 0; flex: 1 1 0; min-height: 36px; height: 36px; padding: 2px 0 } .stage .tool span { display: none }
+  .stage .tool svg.i { width: 18px; height: 18px }
+  .stage .sep { width: 1px; height: 22px; margin: 0 1px; align-self: center }
+  .thumb { width: 46px; height: 46px }
+  .foot { padding: 2px 0 4px; font-size: 10.5px }
+}
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -439,7 +462,7 @@ body.has-pages .toast { bottom: 24px }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 36</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 38</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -531,7 +554,7 @@ function orderCorners(c) {
   return [0, 1, 2, 3].map(i => s[(i + k) % 4]);
 }
 
-var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1, texR: 1, paperSides: false, paperHoles: false, shrink: true, shrinkCol: 22, shrinkMax: 0.3, shrinkEdge: 0.6, shrinkRow: 0.75, holes2: true, cmpEdge: 0.05, multiHoles: true, plLumG: 70, plChromaG: 18 }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
+var CFG = Object.assign({ lineCap: 130, tol: 2.5, ends: 0, covBase: 0.78, dedup: false, cell: 0.025, candSort: 'cov', candCap: 2000, goodCap: 450, nms1: 2, nms2: 2, fill: 0.85, tileMin: 0.5, gainPrint: false, tileStrict: false, prefilter: true, bucket: 0, rounds: 2, roundMin: 0.5, roundCov: 0.65, contrast: 0.8, cD0: 150, band: 0.55, inner: true, innerLo: 0.07, innerHi: 0.22, innerCov: 0.85, tEdgeBase: 95, pageMaxBase: 0.3, plTex: 22, plDist: 30, plMode: 'region', plLum: 120, plChroma: 70, plRel: 0.3, holes: true, holeFill: 0.93, snapIoU: 0.8, goodPer: 1e9, holeOpen: 0.003, holeCov: 0.75, minSide: 0.06, neighbors: false, nbCov: 0.55, nbPage: 0.35, maxAspect: 4, nbRing: 0.5, sepCov: 0, extend: false, extMax: 1.8, extPage: 0.15, tileF: 1, innerPage: 0.5, contCov: 0.9, contTol: 0.006, ringMin: 0, ringFrac: 0.4, ringEarly: false, ringDist: 40, ringD: [5, 9, 13], onPage: false, noBorder: false, plAll: 0.02, pageVote: false, voteD: [6, 10, 14, 18], voteMin: 0.2, rejoin: true, rejCov: 0.8, rejTol: 0.008, rejFill: 0.9, rejSeam: 0.6, rejOne: true, rejPage: 0.15, rejCt: 60, rotTilt: true, scharr: false, extPen: 0, extLen: 0.15, chiMin: 0.8, gcMax: 0.21, gcIt: 2, gcPx: 20000, segMin: 15, seamDup: 1, nmsT: 1, nmsR: 3, innerSide: 0, grow: false, growMax: 1.6, growCov: 0.8, growSide: 0.7, holeKeep: 0.85, innerLight: false, borderRing: 0, rotBias: 0.1, texR: 1, paperSides: false, paperHoles: false, shrink: true, shrinkCol: 22, shrinkMax: 0.3, shrinkEdge: 0.6, shrinkRow: 0.75, holes2: true, cmpEdge: 0.05, multiHoles: true, plLumG: 70, plChromaG: 18, plLumD: 28, plChromaD: 28, plAny: 0.12 }, (typeof globalThis !== 'undefined' && globalThis.CFG_OVERRIDE) || {});
 // ---- Kantenbasierte Mehrfach-Fotoerkennung ----
 // Ablauf nach dem Vorbild aktueller Dokumentscanner: Farbkanten -> Hough-Linien mit Belegungsprofil
 // -> Vierecke aus zwei Linienpaaren -> Bewertung -> gierige Auswahl; Rückfall über Flächenmaske für runde Fotos.
@@ -598,8 +621,14 @@ function detectQuads(rgba, w, h, sens) {
         if (i < n - w && smooth[i + w] && lab[i + w] < 0) { lab[i + w] = id; stk[top++] = i + w; }
       }
       const r = sr / cnt, g = sg / cnt, b = sb / cnt, L = 0.299 * r + 0.587 * g + 0.114 * b, ch = Math.max(r, g, b) - Math.min(r, g, b);
-      comps.push({ cnt, r, g, b, ok: (L > CFG.plLum && ch < CFG.plChroma) || (L > (CFG.plLumG || 999) && ch < CFG.plChromaG) });
+      comps.push({ cnt, r, g, b, ok: (L > CFG.plLum && ch < CFG.plChroma) || (L > (CFG.plLumG || 999) && ch < CFG.plChromaG),
+        col: (L > (CFG.plLumD || 999) && ch < CFG.plChromaD) || (CFG.plAny && cnt >= CFG.plAny * n && L > 22) });
     }
+    // Farbseiten-Erkennung: helle Albumseite → bisherige Regeln unverändert; farbige/dunkle Seite → farbunabhängige Seitenfläche
+    { let bl = 0, bc = 0; for (const c of comps) { if (c.ok) bl = Math.max(bl, c.cnt); if (c.col && !c.ok) bc = Math.max(bc, c.cnt); }
+      const farbe = CFG.colorPages !== false && bc >= 0.05 * n && bc > (CFG.colRatio || 1.3) * bl;
+      globalThis.PAGEMODE = farbe ? 'farbe' : 'hell';
+      if (farbe) for (const c of comps) c.ok = c.ok || c.col; }
     let best = -1; comps.forEach((c, k) => { if (c.ok && (best < 0 || c.cnt > comps[best].cnt)) best = k; });
     const keep = new Uint8Array(comps.length);
     if (best >= 0) PAGECOL = [comps[best].r, comps[best].g, comps[best].b];
@@ -2079,10 +2108,14 @@ detectQuads = function (rgba, w, h, sens) {
   const C = LRN.preselect(L, extra, CFG.lrnN || 600);
   const sc = C.map(c => LRN.score(globalThis.LRN_MODEL, LRN.features(L, c, L.v1, L.comb)));
   const sel = LRN.select(C, sc, CFG.lrnThr || 0);
+  if (CFG.mergeSplit !== false && globalThis.PAGEMODE === 'farbe') mergeSplit(L, sel);
   if (CFG.ovalFix !== false) ovalFix(L, sel);
   if (CFG.splitFrames !== false) splitFrames(L, sel);
+  if (CFG.growToPage !== false && globalThis.PAGEMODE === 'farbe') growToPage(L, sel);
   if (CFG.gapFill !== false) for (const g of gapFill(L, sel)) sel.push(g);
+  if (CFG.mergeSplit !== false && globalThis.PAGEMODE === 'farbe') mergeSplit(L, sel);
   if (CFG.splitFrames !== false) splitFrames(L, sel);
+  if (CFG.sizeSel !== false) { const r = sizeSelect(L, C, sel); if (r) { sel.length = 0; for (const q of r) sel.push(q); } }
   globalThis.LAST = null;
   const out = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
@@ -2178,7 +2211,7 @@ function gapFill(L, sel) {
     if (covNP(b) > 0.3) continue;
     // 3. Kanten suchen: jede Seite entlang ihrer Normalen verschieben; gerade Kante mit Papier dahinter
     const free = bb => sumR(cov, ...bb) < 0.03 && bb[0] >= 1 && bb[1] >= 1 && bb[2] <= w - 2 && bb[3] <= h - 2;
-    let nb = b.slice();
+    let nb = b.slice(); const b0 = b.slice();
     for (let pass = 0; pass < (b.oval ? 0 : 2); pass++) { const b = nb.slice(), bw = b[2] - b[0], bh = b[3] - b[1];
     const iy0 = b[1] + ((bh * 0.1) | 0), iy1 = b[3] - ((bh * 0.1) | 0), ix0 = b[0] + ((bw * 0.1) | 0), ix1 = b[2] - ((bw * 0.1) | 0);
     const sides = [
@@ -2198,18 +2231,23 @@ function gapFill(L, sel) {
       if (best) nb[k] = best.v;
     }
     }
-    if (fr(nb) < 0.5 || covNP(nb) > 0.1 || sumR(cov, ...nb) > 0.3) continue;
+    const okBox = nb => {
+    if (fr(nb) < 0.5 || covNP(nb) > 0.1 || sumR(cov, ...nb) > 0.3) return false;
     // 4. muss in der Albumseite liegen: mindestens 3 Seiten grenzen an Papier oder erkannte Fotos
-    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (pageish(i) || !np[i] || cov[i]) pp++; } return n ? pp / n : 0; };
+    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) return false; const i = y * w + x; if (pageish(i) || !np[i] || cov[i]) pp++; } return n ? pp / n : 0; };
     const rs = [ring(nb[0] - 8, nb[1], nb[0] - 3, nb[3]), ring(nb[2] + 3, nb[1], nb[2] + 8, nb[3]), ring(nb[0], nb[1] - 8, nb[2], nb[1] - 3), ring(nb[0], nb[3] + 3, nb[2], nb[3] + 8)];
     if (CFG.gapDbg) console.log('rand', nb.join(','), rs.map(v => v.toFixed(2)).join(' '));
-    if (rs.filter(v => v >= 0.35).length < 3) continue;
-    if (nb[0] < fb[0] || nb[1] < fb[1] || nb[2] > fb[2] || nb[3] > fb[3]) continue;
-    if (nb[0] <= 2 || nb[1] <= 2 || nb[2] >= w - 3 || nb[3] >= h - 3) continue; // am Bildrand: kein sicheres Foto
+    if (rs.filter(v => v >= 0.35).length < 3) return false;
+    if (globalThis.PAGEMODE === 'farbe') { if (sumR(hull, nb[0], nb[1], nb[2], nb[3]) < 0.9) return false; } // Farbseite: innerhalb der Albumseite
+    else if (nb[0] < fb[0] || nb[1] < fb[1] || nb[2] > fb[2] || nb[3] > fb[3]) return false;
+    if (nb[0] <= 2 || nb[1] <= 2 || nb[2] >= w - 3 || nb[3] >= h - 3) return false; // am Bildrand: kein sicheres Foto
     // Bildinhalt statt Zwischenblatt/Druck: echtes Foto hat Kontrastumfang und dunkle Anteile
     const st = gapStats(L, nb); if (CFG.gapDbg) console.log('stat', nb.join(','), JSON.stringify(st));
-    if (st.p5 > (CFG.gapP5 || 90)) continue; // keine dunklen Bildanteile: Zwischenblatt, Druck, Papier
-    if (Math.max(nb[2] - nb[0], nb[3] - nb[1]) / Math.max(1, Math.min(nb[2] - nb[0], nb[3] - nb[1])) > 2.5) continue;
+    if (st.p5 > (CFG.gapP5 || 90)) return false; // keine dunklen Bildanteile: Zwischenblatt, Druck, Papier
+    if (Math.max(nb[2] - nb[0], nb[3] - nb[1]) / Math.max(1, Math.min(nb[2] - nb[0], nb[3] - nb[1])) > 2.5) return false;
+      return true; };
+    // Farbseiten: scheitert der kantengenaue Rahmen, den ursprünglichen Flächenrahmen prüfen
+    if (!okBox(nb)) { if (globalThis.PAGEMODE === 'farbe' && okBox(b0)) nb = b0.slice(); else continue; }
     const q = [[nb[0], nb[1]], [nb[2], nb[1]], [nb[2], nb[3]], [nb[0], nb[3]]];
     out.push(q); fillQ(q, cov);
   }
@@ -2431,6 +2469,127 @@ function fitEllipseRobust(P) {
   for (let it = 0; it < 3 && el; it++) { const d = pts.map(p => { const x = p[0] - mx - el.cx, y = p[1] - my - el.cy; return [(x / el.a) ** 2 + (y / el.b) ** 2, p]; });
     d.sort((u, v) => u[0] - v[0]); pts = d.slice(Math.floor(d.length * 0.15)).map(u => u[1]); el = solve(pts); }
   if (!el) return null; return { cx: el.cx + mx, cy: el.cy + my, a: el.a, b: el.b };
+}
+
+// Ein Foto, an einer starken inneren Kante in zwei Rahmen geteilt: Rahmen stoßen direkt aneinander,
+// Ober-/Unterkanten (bzw. linke/rechte Kanten) fluchten und dazwischen liegt keine Albumseite → zusammenführen.
+function mergeSplit(L, sel) {
+  if (sel.length < 2) return;
+  const { w, h } = L, np = growPaperNP(L);
+  const bx = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const pageFrac = (x0, y0, x1, y1) => { let p = 0, n = 0; for (let y = Math.max(0, Math.round(y0)); y <= Math.min(h - 1, Math.round(y1)); y++) for (let x = Math.max(0, Math.round(x0)); x <= Math.min(w - 1, Math.round(x1)); x++) { n++; if (!np[y * w + x]) p++; } return n ? p / n : 1; };
+  for (let changed = true; changed;) { changed = false;
+    for (let i = 0; i < sel.length && !changed; i++) for (let j = 0; j < sel.length && !changed; j++) { if (i === j) continue;
+      const A = bx(sel[i]), B = bx(sel[j]);
+      for (const vert of [true, false]) {
+        // vert: A links, B rechts; sonst A oben, B unten
+        const [a0, a1, b0, b1, c0, c1, d0, d1] = vert ? [A[2], B[0], A[1], A[3], B[1], B[3], A[0], B[2]] : [A[3], B[1], A[0], A[2], B[0], B[2], A[1], B[3]];
+        const span = vert ? Math.min(A[2] - A[0], B[2] - B[0]) : Math.min(A[3] - A[1], B[3] - B[1]);
+        if (a1 - a0 > 7 || a0 - a1 > 0.15 * span || d0 >= a1) continue;   // stoßen direkt aneinander (schräge Rahmen dürfen leicht überlappen)
+        const sa = b1 - b0, sb = c1 - c0, tol = 0.09 * Math.max(sa, sb);
+        if (Math.abs(b0 - c0) > tol || Math.abs(b1 - c1) > tol) continue;     // Kanten fluchten
+        const lo = Math.max(b0, c0) + 0.1 * sa, hi = Math.min(b1, c1) - 0.1 * sa, m = (a0 + a1) / 2;
+        const pf = vert ? pageFrac(m - 4, lo, m + 4, hi) : pageFrac(lo, m - 4, hi, m + 4);
+        const U = [Math.min(A[0], B[0]), Math.min(A[1], B[1]), Math.max(A[2], B[2]), Math.max(A[3], B[3])], uw = U[2] - U[0], uh = U[3] - U[1];
+        if (CFG.gapDbg) console.log('naht', A.map(Math.round).join(','), B.map(Math.round).join(','), vert ? 'senkrecht' : 'waagrecht', 'seite', pf.toFixed(2), 'format', (Math.max(uw, uh) / Math.min(uw, uh)).toFixed(2));
+        if (pf > (CFG.mergePage || 0.04) || Math.max(uw, uh) / Math.min(uw, uh) > 2.3) continue;
+        // Größenprüfung: beide Teile deutlich kleiner als die übrigen Fotos der Seite, zusammen etwa so groß wie diese
+        const others = sel.filter((_, k) => k !== i && k !== j).map(q => { const b = bx(q); return (b[2] - b[0]) * (b[3] - b[1]); }).sort((x, y) => x - y);
+        if (!others.length) continue; const med = others[others.length >> 1], aA = (A[2] - A[0]) * (A[3] - A[1]), aB = (B[2] - B[0]) * (B[3] - B[1]);
+        if (CFG.gapDbg) console.log('  groesse', Math.round(aA), Math.round(aB), Math.round(uw * uh), 'median', Math.round(med));
+        const halves = aA <= 0.75 * med && aB <= 0.75 * med, sliver = Math.min(aA, aB) <= 0.4 * med; // zwei Hälften oder schmaler Streifen am Foto
+        if (!(halves || sliver) || uw * uh > 1.35 * med || (!sliver && Math.max(uw, uh) / Math.min(uw, uh) > 1.9)) continue;
+        // äußere Ecken übernehmen
+        const P = sel[i], Q = sel[j], all = P.concat(Q), cx = (U[0] + U[2]) / 2, cy = (U[1] + U[3]) / 2;
+        const pick = (sx, sy) => all.reduce((b, p) => ((p[0] - cx) * sx + (p[1] - cy) * sy > (b[0] - cx) * sx + (b[1] - cy) * sy ? p : b));
+        const m4 = [pick(-1, -1), pick(1, -1), pick(1, 1), pick(-1, 1)].map(p => p.slice());
+        sel.splice(Math.max(i, j), 1); sel.splice(Math.min(i, j), 1); sel.push(m4); changed = true; break;
+      } } }
+}
+
+// Farbseite: jede Rahmenkante muss an Albumseite grenzen. Liegt dahinter noch Bildinhalt, Kante nach außen schieben, bis Seite kommt.
+function growToPage(L, sel) {
+  const { w, h } = L, np = growPaperNP(L);
+  const others = k => { const M = new Uint8Array(w * h); sel.forEach((q, j) => { if (j === k) return; const xs = q.map(p => p[0]), ys = q.map(p => p[1]);
+    for (let y = Math.max(0, Math.floor(Math.min(...ys))); y <= Math.min(h - 1, Math.ceil(Math.max(...ys))); y++) for (let x = Math.max(0, Math.floor(Math.min(...xs))); x <= Math.min(w - 1, Math.ceil(Math.max(...xs))); x++) if (inPoly(q, x + .5, y + .5)) M[y * w + x] = 1; }); return M; };
+  sel.forEach((q, k) => {
+    const O = others(k), c = q.reduce((a, p) => [a[0] + p[0] / 4, a[1] + p[1] / 4], [0, 0]);
+    // Kante i: Ecken i und i+1; Normale nach außen
+    for (let it = 0; it < 2; it++) for (let e = 0; e < 4; e++) {
+      const A = q[e], B = q[(e + 1) % 4], ex = B[0] - A[0], ey = B[1] - A[1], len = Math.hypot(ex, ey) || 1; let nx = ey / len, ny = -ex / len;
+      const mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2; if ((mx - c[0]) * nx + (my - c[1]) * ny < 0) { nx = -nx; ny = -ny; }
+      const opp = Math.hypot(q[(e + 2) % 4][0] - B[0], q[(e + 2) % 4][1] - B[1]);
+      // Anteil Bildinhalt (kein Papier, kein anderes Foto) in einem Streifen im Abstand d außerhalb der Kante
+      const content = d => { let n = 0, v = 0; for (let t = 0.15; t <= 0.85; t += 0.05) { const x = Math.round(A[0] + ex * t + nx * d), y = Math.round(A[1] + ey * t + ny * d); if (x < 0 || y < 0 || x >= w || y >= h) { n++; continue; } n++; const i = y * w + x; if (np[i] && !O[i]) v++; } return v / n; };
+      if (content(3) < 0.7) continue;                       // Kante grenzt schon an Seite/Foto
+      let d = 3; const maxD = 0.35 * opp; while (d < maxD && content(d) >= 0.5) d++;
+      if (d >= maxD || content(d + 3) > 0.3) continue;       // keine klare Seite dahinter
+      // neue Kante muss auf einer echten geraden Bildkante liegen
+      let best = -1, bs = 0; for (let dd = d - 3; dd <= d + 2; dd++) { let hit = 0, n = 0; for (let t = 0.1; t <= 0.9; t += 0.02) { n++; let f = 0; for (let o = -1; o <= 1 && !f; o++) { const x = Math.round(A[0] + ex * t + nx * (dd + o)), y = Math.round(A[1] + ey * t + ny * (dd + o)); if (x >= 0 && y >= 0 && x < w && y < h && L.edge[y * w + x]) f = 1; } hit += f; } if (hit / n > bs) { bs = hit / n; best = dd; } }
+      if (CFG.gapDbg) console.log('  kantenbeleg', bs.toFixed(2));
+      if (bs < 0.6) continue; d = best;
+      if (CFG.gapDbg) console.log('wachsen', k, 'kante', e, 'um', d);
+      q[e] = [A[0] + nx * d, A[1] + ny * d]; q[(e + 1) % 4] = [B[0] + nx * d, B[1] + ny * d];
+    }
+  });
+}
+
+// ---- Größenmodell: Fotos sind oft gleich groß eingeklebt. Bei dicht beklebten Seiten (kaum Seite zwischen den Fotos)
+// wird aus allen Kandidaten eine Kachelung gleich großer, kantenbelegter Rahmen gewählt. ----
+function sizeSelect(L, C, sel) {
+  const { w, h, edge, eAng } = L, np = growPaperNP(L);
+  const ord = q => orderCorners(q.map(p => p.slice()));
+  const D = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
+  // Kantenbelegung einer Strecke P→Q (Kante senkrecht zur Strecke)
+  const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+    let hit = 0, n = 0; for (let s = 0.04; s <= 0.96; s += 1.5 / len) { n++; const x0 = P[0] + dx * s, y0 = P[1] + dy * s; let f = 0;
+      for (let o = -2; o <= 2 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return n ? hit / n : 0; };
+  const L1 = (A, B, u) => [A[0] + (B[0] - A[0]) * u, A[1] + (B[1] - A[1]) * u];
+  const content = q => { let n = 0, v = 0; for (let u = 0.1; u < 0.95; u += 0.1) for (let t = 0.1; t < 0.95; t += 0.1) { const p = L1(L1(q[0], q[1], u), L1(q[3], q[2], u), t), x = Math.round(p[0]), y = Math.round(p[1]); n++; if (x >= 0 && y >= 0 && x < w && y < h && np[y * w + x]) v++; } return v / n; };
+  const geo = q => { q = ord(q); const a = (D(q[0], q[1]) + D(q[3], q[2])) / 2, b = (D(q[0], q[3]) + D(q[1], q[2])) / 2;
+    const sides = [cov(q[0], q[1]), cov(q[1], q[2]), cov(q[2], q[3]), cov(q[3], q[0])].sort((x, y) => x - y);
+    let split = 0; for (let u = 0.3; u <= 0.7; u += 0.05) split = Math.max(split, cov(L1(q[0], q[1], u), L1(q[3], q[2], u)), cov(L1(q[0], q[3], u), L1(q[1], q[2], u)));
+    // knapp innerhalb jeder Seite muss Bildinhalt liegen (Rahmen sitzt auf dem Foto, nicht auf der Albumseite)
+    const cen = [(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2]; const ins = [];
+    for (let e = 0; e < 4; e++) { const A = q[e], B = q[(e + 1) % 4]; let n = 0, v = 0; for (let u = 0.1; u <= 0.9; u += 0.05) { const p = L1(A, B, u), dx = cen[0] - p[0], dy = cen[1] - p[1], dl = Math.hypot(dx, dy) || 1, x = Math.round(p[0] + dx / dl * 5), y = Math.round(p[1] + dy / dl * 5); n++; if (x >= 0 && y >= 0 && x < w && y < h && np[y * w + x]) v++; } ins.push(v / n); } ins.sort((x, y) => x - y); const inner = ins[1]; // eine Seite darf dunklen Bildinhalt haben
+    return { q, inner, long: Math.max(a, b), short: Math.min(a, b), area: a * b, minC: sides[0], c2: sides[1], meanC: (sides[0] + sides[1] + sides[2] + sides[3]) / 4, split, cont: content(q) }; };
+  const cands = [];
+  for (const c of C) { const q = c.q || c; const g = geo(q); const asp = g.long / Math.max(1, g.short);
+    if (CFG.probe) { const P = CFG.probe, m = Math.max(...P.map(pp => Math.min(...g.q.map(r => Math.hypot(r[0] - pp[0], r[1] - pp[1]))))); if (m < 15) console.log('probe', m.toFixed(0), JSON.stringify({ asp: +asp.toFixed(2), minC: +g.minC.toFixed(2), c2: +g.c2.toFixed(2), meanC: +g.meanC.toFixed(2), cont: +g.cont.toFixed(2), inner: +g.inner.toFixed(2), split: +g.split.toFixed(2), short: Math.round(g.short) })); }
+    if (asp < 1.15 || asp > 1.75 || g.short < 0.12 * Math.min(w, h)) continue; if (g.c2 < 0.55 || g.meanC < 0.65 || g.cont < (CFG.sizeCont || 0.75) || g.inner < (CFG.sizeInner || 0.45)) continue; cands.push(g); }
+  const old = sel.map(geo);
+  if (cands.length < 2) return null;
+  const inter = (A, B) => { const a = box(A.q), b = box(B.q), ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])); return ix * iy / Math.min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])); };
+  function box(q) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
+  // Größenhypothesen: verschiedene Formate der gut belegten Kandidaten; je Hypothese gierige Kachelung,
+  // gewählt wird die Kachelung mit der meisten Kantenevidenz (mehr gleich große Fotos schlagen einen Riesenrahmen)
+  const good = cands.filter(g => g.split < 0.8).sort((x, y) => (y.meanC + y.minC) - (x.meanC + x.minC));
+  const hyps = []; for (const g of good) { if (hyps.length >= 40) break; if (!hyps.some(hh => Math.abs(hh.long / g.long - 1) < 0.08 && Math.abs(hh.short / g.short - 1) < 0.08)) hyps.push(g); }
+  let best = null;
+  for (const hy of hyps) {
+    const SL = hy.long, SS = hy.short, match = g => Math.max(Math.abs(g.long / SL - 1), Math.abs(g.short / SS - 1));
+    const pool = good.filter(g => match(g) < (CFG.sizeTol || 0.16)).map(g => ({ g, s: g.meanC + 0.5 * g.minC - 1.5 * match(g) + 0.3 * g.cont }));
+    pool.sort((x, y) => y.s - x.s); const acc = [];
+    for (const { g } of pool) if (!acc.some(a => inter(a, g) > 0.12)) acc.push(g);
+    const score = acc.reduce((t, g) => t + g.meanC * g.minC, 0);
+    if (!best || score > best.score) best = { score, acc, SL, SS };
+  }
+  if (!best) return null;
+  const acc = best.acc.slice();
+  // vorhandene Rahmen behalten, die nicht mit der Kachelung kollidieren (andere Formate, z. B. Zeichnung, Rundfoto)
+  for (const o of old) if (!acc.some(a => inter(a, o) > 0.12)) acc.push(o);
+  if (CFG.gapDbg) console.log('groessenmodell', Math.round(best.SL), Math.round(best.SS), 'evidenz', best.score.toFixed(2), 'kacheln', acc.length, 'alt', old.length, 'kand', cands.length);
+  // nur übernehmen, wenn die Kachelung deutlich mehr Bildinhalt erfasst
+  const area = list => list.reduce((s, g) => s + g.area, 0);
+  { // unerfasster Bildinhalt der Seite (Anteil Nicht-Papier, das von keinem alten Rahmen abgedeckt ist)
+    let u = 0, t = 0; for (let y = 0; y < h; y += 3) for (let x = 0; x < w; x += 3) { if (!np[y * w + x]) continue; t++; if (!old.some(o => inPoly(o.q, x, y))) u++; }
+    globalThis.SIZEDBG = { n: acc.length, no: old.length, ar: area(old) ? area(acc) / area(old) : 99, unc: t ? u / t : 0 };
+    if (CFG.gapDbg) console.log('dicht', JSON.stringify(globalThis.SIZEDBG)); }
+  if (acc.length <= old.length || area(acc) < 1.15 * area(old)) return null;
+  // helle Seiten: nur wenn bisher kaum etwas erkannt wurde (Kachelung erfasst mindestens doppelt so viel Fläche)
+  if (globalThis.PAGEMODE !== 'farbe' && area(acc) < 2 * area(old)) return null;
+  return acc.map(g => g.q);
 }
 
 </script>
@@ -2705,7 +2864,7 @@ function drawEditor() {
   $('pageName').textContent = p.sample ? 'Beispiel' : `Seite ${S.cur + 1}`;
   const st = $('cvwrap'), cs = getComputedStyle(st);
   const stageW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const wide = window.innerWidth >= 760, maxH = Math.max(260, wide ? window.innerHeight - 330 : window.innerHeight * 0.6);
+  const wide = window.innerWidth >= 760, maxH = Math.max(wide ? 260 : 180, wide ? window.innerHeight - 330 : window.innerHeight - 330);
   dropViews(p); const pv = viewCanvas(p);
   let w = stageW, h = w * pv.height / pv.width;
   if (h > maxH) { h = maxH; w = h * pv.width / pv.height; }

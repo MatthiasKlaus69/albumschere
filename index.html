@@ -410,6 +410,9 @@ body.expert .foot { color: #fff; opacity: .9 }
 .uparr.a0 { left: 50%; top: 9%; transform: translateX(-50%) } .uparr.a2 { left: 50%; bottom: 9%; transform: translateX(-50%) }
 .uparr.a1 { right: 7%; top: 50%; transform: translateY(-50%) } .uparr.a3 { left: 7%; top: 50%; transform: translateY(-50%) }
 .upx { position: absolute; right: 14px; top: 14px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 18px; cursor: pointer }
+
+.upov { background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #1a0c02 }
+.upov::before { content: ""; position: absolute; inset: 0; background: rgba(30,12,0,.35) }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -516,7 +519,7 @@ body.expert .foot { color: #fff; opacity: .9 }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 42</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 43</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -3084,6 +3087,7 @@ async function addFiles(files) {
       const iw = dec.w, ih = dec.h; dec.close();
       status(`Erkenne Fotos auf Seite ${n} von ${list.length} …`, true); await tick();
       const page = { id: S.uid++, key: key(f), name: f.name, file: f, w: iw, h: ih, preview, quads: [] };
+      if (S.expert && n === 1) { status('Markiere oben …', true); S.upRot = await askUp(preview.toDataURL('image/jpeg', 0.7)); }
       if (S.expert && S.upRot != null) { page.rot = S.upRot; page.rotManual = true; } // Ausrichtung aus der Dreieckswahl
       await runDetect(page, +$('sens').value);
       page.ver = (page.ver || 0) + 1; page.cutVer = 0;
@@ -3634,7 +3638,7 @@ function xClose() { $('xov').hidden = true; $('xMenu').hidden = true; }
 function xFinish() { S.pageBase += S.pages.length; try { localStorage.setItem('albumschere.base', String(S.pageBase)); } catch (e) {}
   S.results.forEach(r => URL.revokeObjectURL(r.url)); for (const p of S.pages) { if (p.preview) p.preview.width = p.preview.height = 0; if (p._view) p._view.width = p._view.height = 0; }
   S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; renderPages(); drawEditor(); renderGrid(); updateDock(); }
-function xNext(msg) { xMenu(msg + ' Nächste Albumseite fotografieren?', [['Fotografieren', 'go', e => { e.preventDefault(); xClose(); askUp(); }], ['Auswählen', '', () => xClose(), 'inPick'], ['Beenden', 'ghost', () => xClose()]]); }
+function xNext(msg) { xMenu(msg + ' Nächste Albumseite fotografieren?', [['Fotografieren', 'go', () => xClose(), 'inCam'], ['Auswählen', '', () => xClose(), 'inPick'], ['Beenden', 'ghost', () => xClose()]]); }
 async function expertRun() {
   if (S.cutting) return; const n0 = S.results.length;
   await cutAll(); const fresh = S.results.slice(n0);
@@ -3650,10 +3654,11 @@ async function expertRun() {
 
 // Expertenmodus: vor dem Fotografieren festlegen, wo bei der Albumseite oben ist (0 oben, 1 rechts, 2 unten, 3 links)
 S.upRot = null;
-function askUp() { $('upov').hidden = false; }
-document.querySelectorAll('#upov polygon').forEach(pl => pl.addEventListener('click', () => { S.upRot = +pl.dataset.r; $('upov').hidden = true; $('inCam').click(); }));
-$('upClose').onclick = () => { $('upov').hidden = true; };
-$('lblCam').addEventListener('click', e => { if (!S.expert) return; e.preventDefault(); askUp(); });
+// nach dem Fotografieren/Auswählen: fotografierte Seite zeigen, Benutzer markiert oben (gilt für alle gerade gewählten Seiten)
+let upResolve = null;
+function askUp(src) { $('upov').style.backgroundImage = src ? `url(${src})` : ''; $('upov').hidden = false; return new Promise(r => { upResolve = r; }); }
+document.querySelectorAll('#upov polygon').forEach(pl => pl.addEventListener('click', () => { $('upov').hidden = true; const r = upResolve; upResolve = null; if (r) r(+pl.dataset.r); }));
+$('upClose').onclick = () => { $('upov').hidden = true; const r = upResolve; upResolve = null; if (r) r(null); };
 // ---------- Start ----------
 renderTargets(); $('bDir').onclick = () => chooseDir();
 resetLearned(true);

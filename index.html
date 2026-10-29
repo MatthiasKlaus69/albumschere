@@ -398,6 +398,18 @@ body.expert .foot { color: #fff; opacity: .9 }
 .hexp[aria-checked="true"] { background: #a14a0a; border-color: #ffa452 } .hexp[aria-checked="true"] .sw { background: #ff8a1f } .hexp[aria-checked="true"] .sw i { left: 17px; background: #fff }
 .menu { grid-template-columns: repeat(6, minmax(0, 1fr)) }
 @media (max-width: 759px) { .menu { grid-template-columns: repeat(3, minmax(0, 1fr)) } .hexp { padding: 4px 8px; gap: 5px; font-size: 10.5px } .hexp .sw { width: 26px; height: 15px } .hexp .sw i { width: 11px; height: 11px } .hexp[aria-checked="true"] .sw i { left: 13px } }
+
+/* Expertenmodus: Ausrichtung per Dreieck */
+.upov { position: fixed; inset: 0; z-index: 80; background: rgba(30,12,0,.45) }
+.upov svg { position: absolute; inset: 0; width: 100%; height: 100% }
+.upov polygon { fill: rgba(255,138,31,.28); stroke: rgba(255,230,200,.9); stroke-width: .35; cursor: pointer; transition: fill .15s }
+.upov polygon:hover, .upov polygon:active { fill: rgba(255,138,31,.7) }
+.uptxt { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); pointer-events: none; text-align: center; color: #fff; font-size: 17px; font-weight: 600; background: rgba(60,25,0,.85); padding: 14px 18px; border-radius: 14px; max-width: 76vw; line-height: 1.35 }
+.uptxt small { font-weight: 500; font-size: 13px; color: #ffd9b3 }
+.uparr { position: absolute; pointer-events: none; color: #fff; font-size: 34px; text-shadow: 0 2px 8px rgba(0,0,0,.6) }
+.uparr.a0 { left: 50%; top: 9%; transform: translateX(-50%) } .uparr.a2 { left: 50%; bottom: 9%; transform: translateX(-50%) }
+.uparr.a1 { right: 7%; top: 50%; transform: translateY(-50%) } .uparr.a3 { left: 7%; top: 50%; transform: translateY(-50%) }
+.upx { position: absolute; right: 14px; top: 14px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 18px; cursor: pointer }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -441,7 +453,7 @@ body.expert .foot { color: #fff; opacity: .9 }
   <div class="topbar" id="topbar" hidden></div>
 
   <nav class="menu" id="menu" aria-label="Menü">
-    <label class="mbtn" for="inCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
+    <label class="mbtn" for="inCam" id="lblCam"><svg class="i"><use href="#i-cam"/></svg>Fotografieren</label>
     <label class="mbtn" for="inPick"><svg class="i"><use href="#i-img"/></svg>Auswählen</label>
     <label class="mname" for="album"><input id="album" type="text" value="" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Dateiname beginnt mit"><small>Dateiname beginnt mit</small></label>
     <button class="mbtn" id="bCut"><svg class="i"><use href="#i-cut"/></svg>Ausschneiden</button>
@@ -504,7 +516,7 @@ body.expert .foot { color: #fff; opacity: .9 }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 40</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 42</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -514,6 +526,11 @@ body.expert .foot { color: #fff; opacity: .9 }
 <div class="scrim" id="scrim" hidden></div>
 <div class="dock" id="dock" hidden><button id="mMain"><svg class="i" id="mIco"></svg><span id="mMainL"></span></button></div>
 <div class="drop" id="drop" hidden><div>Albumseiten hier ablegen</div></div>
+<div class="upov" id="upov" hidden><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Wo ist oben?">
+  <polygon data-r="0" points="0,0 100,0 50,50"/><polygon data-r="1" points="100,0 100,100 50,50"/><polygon data-r="2" points="0,100 100,100 50,50"/><polygon data-r="3" points="0,0 0,100 50,50"/></svg>
+  <div class="uptxt">Markiere oben</div>
+  <span class="uparr a0">▲</span><span class="uparr a1">▶</span><span class="uparr a2">▼</span><span class="uparr a3">◀</span>
+  <button class="upx" id="upClose" aria-label="Abbrechen">✕</button></div>
 <div class="xov" id="xov" hidden><div class="xbox"><img id="xImg" alt=""><p id="xCap"></p>
   <div class="xmenu" id="xMenu" hidden><b id="xMsg"></b><div class="xrow" id="xBtns"></div></div></div></div>
 <div class="toast" id="cutInfo" role="status" aria-live="polite"></div>
@@ -2160,6 +2177,7 @@ detectQuads = function (rgba, w, h, sens) {
   if (CFG.mergeSplit !== false && globalThis.PAGEMODE === 'farbe') mergeSplit(L, sel);
   if (CFG.splitFrames !== false) splitFrames(L, sel);
   if (CFG.sizeSel !== false) { const r = sizeSelect(L, C, sel); if (r) { sel.length = 0; for (const q of r) sel.push(q); } }
+  if (CFG.sizeCheck !== false) sizeCheck(L, C, sel);
   globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { const cs = contourSearch(L, sel); globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
   if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   globalThis.LAST = null;
@@ -2821,6 +2839,63 @@ function segmentSeeds(L, sel, C) {
   return out;
 }
 
+// ---- Größenprüfung: Fotos einer Seite sind meist gleich groß. Abweichende Rahmen werden mehrfach geprüft
+// (zwei Fotos in einem Rahmen? Seite/Nachbarfoto mit eingeschlossen? nur Teil eines Fotos? ausgeschnittenes Foto?) ----
+function sizeCheck(L, C, sel) {
+  if (sel.length < 3) return;
+  const { w, h, edge, eAng } = L, np = growPaperNP(L);
+  const D = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]), L1 = (A, B, u) => [A[0] + (B[0] - A[0]) * u, A[1] + (B[1] - A[1]) * u];
+  const ord = q => orderCorners(q.map(p => p.slice()));
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
+  const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+    let hit = 0, n = 0; for (let s = 0.04; s <= 0.96; s += 1.5 / len) { n++; const x0 = P[0] + dx * s, y0 = P[1] + dy * s; let f = 0;
+      for (let o = -2; o <= 2 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return n ? hit / n : 0; };
+  const dims = q => { q = ord(q); const a = (D(q[0], q[1]) + D(q[3], q[2])) / 2, b = (D(q[0], q[3]) + D(q[1], q[2])) / 2; return { q, L: Math.max(a, b), S: Math.min(a, b), area: a * b }; };
+  const edgeQ = q => { q = ord(q); const c = [cov(q[0], q[1]), cov(q[1], q[2]), cov(q[2], q[3]), cov(q[3], q[0])].sort((x, y) => x - y); return { min: c[0], mean: (c[0] + c[1] + c[2] + c[3]) / 4 }; };
+  const box = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const inter = (A, B) => { const a = box(A), b = box(B), ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])); return ix * iy; };
+  const area = q => { const b = box(q); return (b[2] - b[0]) * (b[3] - b[1]); };
+  // vorherrschende Fotogröße: größte Gruppe gleich großer Rahmen (±15 %)
+  const G = sel.map(q => ({ q, ...dims(q) }));
+  let dom = null; for (const g of G) { const grp = G.filter(o => Math.abs(o.L / g.L - 1) < 0.15 && Math.abs(o.S / g.S - 1) < 0.15); if (!dom || grp.length > dom.length) dom = grp; }
+  if (CFG.gapDbg) console.log('groessen', G.map(g => Math.round(g.L) + 'x' + Math.round(g.S)).join(' '), 'dominant', dom && dom.length);
+  if (!dom || dom.length < 2 || dom.length < 0.5 * G.length) return;
+  const DL = dom.reduce((s, g) => s + g.L, 0) / dom.length, DS = dom.reduce((s, g) => s + g.S, 0) / dom.length;
+  const match = g => Math.max(Math.abs(g.L / DL - 1), Math.abs(g.S / DS - 1));
+  // Kandidaten in Fotogröße mit guten Kanten
+  const pool = C.map(c => c.q || c).map(q => { const d = dims(q); return { ...d, m: match(d) }; }).filter(d => d.m < 0.15);
+  for (let k = 0; k < sel.length; k++) {
+    const g = { q: sel[k], ...dims(sel[k]) }; if (match(g) < 0.2) continue;
+    const others = sel.filter((_, j) => j !== k);
+    // Prüfung 4: ausgeschnittenes (nicht rechteckiges) Foto – Bildinhalt füllt den Rahmen nicht rechteckig aus: behalten
+    { const b = box(g.q); let n = 0, v = 0, cn = 0, cv = 0; const cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+      for (let y = Math.ceil(b[1]); y <= b[3]; y += 2) for (let x = Math.ceil(b[0]); x <= b[2]; x += 2) { if (x < 0 || y < 0 || x >= w || y >= h) continue; const corner = Math.abs(x - cx) > 0.35 * (b[2] - b[0]) && Math.abs(y - cy) > 0.35 * (b[3] - b[1]); if (corner) { cn++; if (np[y * w + x]) cv++; } else { n++; if (np[y * w + x]) v++; } }
+      if (n && cn && v / n > 0.85 && cv / cn < 0.45) { if (CFG.gapDbg) console.log('groessenpruefung', k, 'ausgeschnitten – bleibt'); continue; } }
+    const e0 = edgeQ(g.q);
+    // Prüfung 1: zwei Fotos in einem Rahmen (Länge ≈ 2× Fotogröße) – an Trennkante teilen
+    let done = false;
+    { const q = ord(g.q), wA = (D(q[0], q[1]) + D(q[3], q[2])) / 2, hA = (D(q[0], q[3]) + D(q[1], q[2])) / 2;
+      for (const vert of [true, false]) { const long = vert ? wA : hA, short = vert ? hA : wA;
+        const twoL = Math.abs(long / (2 * DS) - 1) < 0.2 && Math.abs(short / DL - 1) < 0.2, twoS = Math.abs(long / (2 * DL) - 1) < 0.2 && Math.abs(short / DS - 1) < 0.2;
+        if (!twoL && !twoS) continue;
+        let best = 0, bu = 0; for (let u = 0.4; u <= 0.6; u += 0.01) { const c = vert ? cov(L1(q[0], q[1], u), L1(q[3], q[2], u)) : cov(L1(q[0], q[3], u), L1(q[1], q[2], u)); if (c > best) { best = c; bu = u; } }
+        if (best < 0.6) continue;
+        const A = vert ? [q[0], L1(q[0], q[1], bu), L1(q[3], q[2], bu), q[3]] : [q[0], q[1], L1(q[1], q[2], bu), L1(q[0], q[3], bu)];
+        const B = vert ? [L1(q[0], q[1], bu), q[1], q[2], L1(q[3], q[2], bu)] : [L1(q[0], q[3], bu), L1(q[1], q[2], bu), q[2], q[3]];
+        if (CFG.gapDbg) console.log('groessenpruefung', k, 'zwei Fotos, Trennkante', best.toFixed(2));
+        sel.splice(k, 1, A, B); k++; done = true; break; } }
+    if (done) continue;
+    // Prüfung 2/3: zu groß (Seite/Nachbar eingeschlossen) bzw. zu klein (Teilfoto) – passender gleich großer Kandidat mit besseren Kanten?
+    let rep = null;
+    for (const c of pool) { const I = inter(c.q, g.q); if (I < 0.6 * Math.min(area(c.q), area(g.q))) continue;
+      if (others.some(o => inter(o, c.q) > 0.15 * Math.min(area(o), area(c.q)))) continue;
+      const ec = edgeQ(c.q); if (ec.min < Math.max(0.5, e0.min) || ec.mean < Math.max(0.65, e0.mean + 0.05)) continue; // nur bei deutlich besseren Kanten ersetzen
+      if (!rep || ec.mean - c.m > rep.s) rep = { q: c.q, s: ec.mean - c.m, ec }; }
+    if (rep) { if (CFG.gapDbg) console.log('groessenpruefung', k, 'ersetzt durch Fotogroesse, Kanten', rep.ec.mean.toFixed(2), 'statt', e0.mean.toFixed(2)); sel[k] = rep.q; }
+    else if (CFG.gapDbg) console.log('groessenpruefung', k, 'abweichend, aber keine bessere Alternative – bleibt');
+  }
+}
+
 </script>
 <script>
 const $ = id => document.getElementById(id);
@@ -3009,6 +3084,7 @@ async function addFiles(files) {
       const iw = dec.w, ih = dec.h; dec.close();
       status(`Erkenne Fotos auf Seite ${n} von ${list.length} …`, true); await tick();
       const page = { id: S.uid++, key: key(f), name: f.name, file: f, w: iw, h: ih, preview, quads: [] };
+      if (S.expert && S.upRot != null) { page.rot = S.upRot; page.rotManual = true; } // Ausrichtung aus der Dreieckswahl
       await runDetect(page, +$('sens').value);
       page.ver = (page.ver || 0) + 1; page.cutVer = 0;
       S.pages.push(page);
@@ -3558,7 +3634,7 @@ function xClose() { $('xov').hidden = true; $('xMenu').hidden = true; }
 function xFinish() { S.pageBase += S.pages.length; try { localStorage.setItem('albumschere.base', String(S.pageBase)); } catch (e) {}
   S.results.forEach(r => URL.revokeObjectURL(r.url)); for (const p of S.pages) { if (p.preview) p.preview.width = p.preview.height = 0; if (p._view) p._view.width = p._view.height = 0; }
   S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; renderPages(); drawEditor(); renderGrid(); updateDock(); }
-function xNext(msg) { xMenu(msg + ' Nächste Albumseite fotografieren?', [['Fotografieren', 'go', () => xClose(), 'inCam'], ['Auswählen', '', () => xClose(), 'inPick'], ['Beenden', 'ghost', () => xClose()]]); }
+function xNext(msg) { xMenu(msg + ' Nächste Albumseite fotografieren?', [['Fotografieren', 'go', e => { e.preventDefault(); xClose(); askUp(); }], ['Auswählen', '', () => xClose(), 'inPick'], ['Beenden', 'ghost', () => xClose()]]); }
 async function expertRun() {
   if (S.cutting) return; const n0 = S.results.length;
   await cutAll(); const fresh = S.results.slice(n0);
@@ -3571,6 +3647,13 @@ async function expertRun() {
   if (S.results.length && S.results.every(r => r.saved)) { xFinish(); xNext(`${n} ${n === 1 ? 'Foto' : 'Fotos'} gespeichert.`); return; }
   xMenu(`${n} ${n === 1 ? 'Foto' : 'Fotos'} fertig.`, [['Speichern', 'go', async () => { try { await saveAll(); } catch (e) {} if (S.results.every(r => r.saved)) { xFinish(); xNext(`${n} ${n === 1 ? 'Foto' : 'Fotos'} gespeichert.`); } }], ['Abbrechen', 'ghost', () => xClose()]]);
 }
+
+// Expertenmodus: vor dem Fotografieren festlegen, wo bei der Albumseite oben ist (0 oben, 1 rechts, 2 unten, 3 links)
+S.upRot = null;
+function askUp() { $('upov').hidden = false; }
+document.querySelectorAll('#upov polygon').forEach(pl => pl.addEventListener('click', () => { S.upRot = +pl.dataset.r; $('upov').hidden = true; $('inCam').click(); }));
+$('upClose').onclick = () => { $('upov').hidden = true; };
+$('lblCam').addEventListener('click', e => { if (!S.expert) return; e.preventDefault(); askUp(); });
 // ---------- Start ----------
 renderTargets(); $('bDir').onclick = () => chooseDir();
 resetLearned(true);

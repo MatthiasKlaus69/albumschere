@@ -359,6 +359,45 @@ body.has-pages .toast { bottom: 24px }
   .thumb { width: 46px; height: 46px }
   .foot { padding: 2px 0 4px; font-size: 10.5px }
 }
+
+/* v39: Seiten- und Qualitätsangabe direkt unter der Albumseite */
+.cvcol { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px }
+.cvcol .cvwrap { flex: 1 1 auto }
+.cvcol .chip { position: static; align-self: center; max-width: 100%; white-space: normal; height: auto; min-height: 28px; padding: 5px 12px; font-size: 13px }
+@media (max-width: 759px) { .cvcol .chip { font-size: 11.5px; padding: 3px 10px; min-height: 0 } }
+
+/* ===== Expertenmodus ===== */
+.menu { grid-template-columns: repeat(7, minmax(0, 1fr)) }
+.mexp .sw { width: 30px; height: 17px; border-radius: 9px; background: #3a3a3e; position: relative; flex: none; transition: background .2s }
+.mexp .sw i { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: #ddd; transition: left .2s }
+.mexp[aria-checked="true"] .sw { background: #ff8a1f } .mexp[aria-checked="true"] .sw i { left: 15px; background: #fff }
+body.expert { --line: #a8561a; --line2: #8a4512; --gold: #ffb15a; --gold-hi: #ffd08f; --muted: #ffd9b3; --dim: #f2b98a }
+html:has(body.expert) { background: linear-gradient(180deg, #e8761c, #b4520d) #c95f12 !important }
+body.expert .menu, body.expert .work, body.expert .panel { background: rgba(120,52,6,.82); border-color: #ffa452 }
+body.expert .menu .mbtn, body.expert .menu .mname { background: linear-gradient(180deg, #a14a0a, #7a3606); border-color: #ffa452; color: #fff }
+body.expert .menu .mbtn svg.i { color: #ffe1bd }
+body.expert .stage, body.expert .toolbar { background: rgba(70,30,4,.9) }
+body.expert .foot { color: #fff; opacity: .9 }
+.xov { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(20,10,2,.88); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px) }
+.xbox { display: grid; justify-items: center; gap: 12px; padding: 16px; max-width: 92vw }
+.xbox img { max-width: 86vw; max-height: 62vh; border: 6px solid #f4f2ec; box-shadow: 0 10px 40px rgba(0,0,0,.6); background: #f4f2ec }
+.xbox p { margin: 0; color: #ffd9b3; font: 600 14px var(--f-mono) }
+.xmenu { display: grid; gap: 14px; justify-items: center; text-align: center; color: #fff; font-size: 18px }
+.xrow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center }
+.xrow .btn { min-height: 52px; font-size: 16px; padding: 0 22px }
+.xrow .btn.go { background: linear-gradient(180deg, #ff9a3c, #d96a10); border-color: #ffc27f; color: #fff }
+@media (max-width: 759px) { .menu { grid-template-columns: repeat(3, minmax(0, 1fr)) } .mexp .sw { width: 24px; height: 14px } .mexp .sw i { width: 10px; height: 10px } .mexp[aria-checked="true"] .sw i { left: 12px } }
+
+/* Umschalter Normal/Experte oben auf Höhe des Logos */
+.head { position: relative }
+.hexp { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: rgba(31,31,33,.92); color: var(--muted); font: 600 13px var(--f-ui); cursor: pointer }
+.hexp .sw { width: 34px; height: 19px; border-radius: 10px; background: #3a3a3e; position: relative; flex: none; transition: background .2s }
+.hexp .sw i { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: #ddd; transition: left .2s }
+.hexp[aria-checked="false"] .lb:first-child, .hexp[aria-checked="true"] .lb:last-child { color: #fff }
+.hexp[aria-checked="true"] { background: #a14a0a; border-color: #ffa452 } .hexp[aria-checked="true"] .sw { background: #ff8a1f } .hexp[aria-checked="true"] .sw i { left: 17px; background: #fff }
+.menu { grid-template-columns: repeat(6, minmax(0, 1fr)) }
+@media (max-width: 759px) { .menu { grid-template-columns: repeat(3, minmax(0, 1fr)) } .hexp { padding: 4px 8px; gap: 5px; font-size: 10.5px } .hexp .sw { width: 26px; height: 15px } .hexp .sw i { width: 11px; height: 11px } .hexp[aria-checked="true"] .sw i { left: 13px } }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -397,7 +436,8 @@ body.has-pages .toast { bottom: 24px }
 <input id="inDir" class="vh" type="file" webkitdirectory multiple>
 
 <div class="app">
-  <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere by MS CUBE"><use href="#logoSym"/><text x="1296" y="408" text-anchor="end" class="byline">by MS CUBE</text></svg><h1 class="vh">Albumschere</h1></header>
+  <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere by MS CUBE"><use href="#logoSym"/><text x="1296" y="408" text-anchor="end" class="byline">by MS CUBE</text></svg><h1 class="vh">Albumschere</h1>
+    <button class="hexp" id="bExpert" role="switch" aria-checked="false" title="Expertenmodus: Fotografieren → automatisch erkennen, ausschneiden, speichern"><span class="lb">Normal</span><span class="sw"><i></i></span><span class="lb">Experte</span></button></header>
   <div class="topbar" id="topbar" hidden></div>
 
   <nav class="menu" id="menu" aria-label="Menü">
@@ -425,13 +465,15 @@ body.has-pages .toast { bottom: 24px }
       <p>Fotografiere eine Albumseite oder wähle Fotos aus. Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</p>
     </div>
     <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
+      <div class="cvcol">
       <div class="cvwrap" id="cvwrap">
         <button class="glass-btn" id="bClear" aria-label="Alles leeren"><svg class="i"><use href="#i-new"/></svg><span>Neu</span></button>
         <button class="glass-btn" id="bMenu" aria-label="Einstellungen"></button>
         <canvas id="cv"></canvas>
       </div>
-      <div class="tcol">
       <div class="chip" id="chip"><span class="dot"></span><span id="pageInfo"></span></div>
+      </div>
+      <div class="tcol">
       <div class="toolbar" id="toolbar" role="toolbar" aria-label="Bearbeiten" aria-orientation="vertical">
         <button class="tool" id="bUndo" title="Rückgängig" disabled><svg class="i"><use href="#i-undo"/></svg><span>Zurück</span></button>
         <button class="tool" id="bAdd" title="Rahmen hinzufügen"><svg class="i"><use href="#i-frame"/></svg><span>Rahmen</span></button>
@@ -462,7 +504,7 @@ body.has-pages .toast { bottom: 24px }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 38</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 40</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -472,6 +514,8 @@ body.has-pages .toast { bottom: 24px }
 <div class="scrim" id="scrim" hidden></div>
 <div class="dock" id="dock" hidden><button id="mMain"><svg class="i" id="mIco"></svg><span id="mMainL"></span></button></div>
 <div class="drop" id="drop" hidden><div>Albumseiten hier ablegen</div></div>
+<div class="xov" id="xov" hidden><div class="xbox"><img id="xImg" alt=""><p id="xCap"></p>
+  <div class="xmenu" id="xMenu" hidden><b id="xMsg"></b><div class="xrow" id="xBtns"></div></div></div></div>
 <div class="toast" id="cutInfo" role="status" aria-live="polite"></div>
 <script id="detectSrc">
 // ---- Fotoerkennung (reines JS, ohne DOM) ----
@@ -2116,6 +2160,8 @@ detectQuads = function (rgba, w, h, sens) {
   if (CFG.mergeSplit !== false && globalThis.PAGEMODE === 'farbe') mergeSplit(L, sel);
   if (CFG.splitFrames !== false) splitFrames(L, sel);
   if (CFG.sizeSel !== false) { const r = sizeSelect(L, C, sel); if (r) { sel.length = 0; for (const q of r) sel.push(q); } }
+  globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { const cs = contourSearch(L, sel); globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
+  if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   globalThis.LAST = null;
   const out = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
@@ -2234,7 +2280,7 @@ function gapFill(L, sel) {
     const okBox = nb => {
     if (fr(nb) < 0.5 || covNP(nb) > 0.1 || sumR(cov, ...nb) > 0.3) return false;
     // 4. muss in der Albumseite liegen: mindestens 3 Seiten grenzen an Papier oder erkannte Fotos
-    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) return false; const i = y * w + x; if (pageish(i) || !np[i] || cov[i]) pp++; } return n ? pp / n : 0; };
+    const ring = (x0, y0, x1, y1) => { let pp = 0, n = 0; for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { n++; if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (pageish(i) || !np[i] || cov[i]) pp++; } return n ? pp / n : 0; };
     const rs = [ring(nb[0] - 8, nb[1], nb[0] - 3, nb[3]), ring(nb[2] + 3, nb[1], nb[2] + 8, nb[3]), ring(nb[0], nb[1] - 8, nb[2], nb[1] - 3), ring(nb[0], nb[3] + 3, nb[2], nb[3] + 8)];
     if (CFG.gapDbg) console.log('rand', nb.join(','), rs.map(v => v.toFixed(2)).join(' '));
     if (rs.filter(v => v >= 0.35).length < 3) return false;
@@ -2559,7 +2605,7 @@ function sizeSelect(L, C, sel) {
     if (CFG.probe) { const P = CFG.probe, m = Math.max(...P.map(pp => Math.min(...g.q.map(r => Math.hypot(r[0] - pp[0], r[1] - pp[1]))))); if (m < 15) console.log('probe', m.toFixed(0), JSON.stringify({ asp: +asp.toFixed(2), minC: +g.minC.toFixed(2), c2: +g.c2.toFixed(2), meanC: +g.meanC.toFixed(2), cont: +g.cont.toFixed(2), inner: +g.inner.toFixed(2), split: +g.split.toFixed(2), short: Math.round(g.short) })); }
     if (asp < 1.15 || asp > 1.75 || g.short < 0.12 * Math.min(w, h)) continue; if (g.c2 < 0.55 || g.meanC < 0.65 || g.cont < (CFG.sizeCont || 0.75) || g.inner < (CFG.sizeInner || 0.45)) continue; cands.push(g); }
   const old = sel.map(geo);
-  if (cands.length < 2) return null;
+  globalThis.UNREC2 = 0; if (cands.length < 2) return null;
   const inter = (A, B) => { const a = box(A.q), b = box(B.q), ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])); return ix * iy / Math.min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])); };
   function box(q) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
   // Größenhypothesen: verschiedene Formate der gut belegten Kandidaten; je Hypothese gierige Kachelung,
@@ -2586,10 +2632,193 @@ function sizeSelect(L, C, sel) {
     let u = 0, t = 0; for (let y = 0; y < h; y += 3) for (let x = 0; x < w; x += 3) { if (!np[y * w + x]) continue; t++; if (!old.some(o => inPoly(o.q, x, y))) u++; }
     globalThis.SIZEDBG = { n: acc.length, no: old.length, ar: area(old) ? area(acc) / area(old) : 99, unc: t ? u / t : 0 };
     if (CFG.gapDbg) console.log('dicht', JSON.stringify(globalThis.SIZEDBG)); }
+  { const fin = (acc.length > old.length && area(acc) >= 1.15 * area(old) && (globalThis.PAGEMODE === 'farbe' || area(acc) >= 2 * area(old))) ? acc : old;
+    const strong = good.filter(g => g.meanC >= (CFG.unMean ?? 0.85) && g.minC >= (CFG.unMin ?? 0.7) && g.inner >= 0.6 && g.cont >= 0.85).sort((x, y) => (y.meanC + y.minC) - (x.meanC + x.minC));
+    const extra = []; for (const g of strong) if (!fin.concat(extra).some(a => inter(a, g) > 0.12)) extra.push(g);
+    globalThis.UNREC2 = extra.length; }
   if (acc.length <= old.length || area(acc) < 1.15 * area(old)) return null;
   // helle Seiten: nur wenn bisher kaum etwas erkannt wurde (Kachelung erfasst mindestens doppelt so viel Fläche)
   if (globalThis.PAGEMODE !== 'farbe' && area(acc) < 2 * area(old)) return null;
   return acc.map(g => g.q);
+}
+
+// ---- Konturensuche: unerkannte Fotoflächen über stufenweise veränderten Kontrast (Abstand zur Seitenfarbe) finden.
+// Die Fläche wird als Rechteck erfasst, ausgerichtet an der Albumkante (Lage der erkannten Fotos). ----
+function contourSearch(L, sel) {
+  const { w, h, Rb, Gb, Bb, edge } = L, n = w * h; if (!sel.length) return [];
+  const box = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const areas = sel.map(q => { const b = box(q); return (b[2] - b[0]) * (b[3] - b[1]); }).sort((a, b) => a - b), med = areas[areas.length >> 1];
+  // Albumkante: mittlere Neigung der erkannten Rahmen
+  let ang = 0; { const as = sel.map(q => { const o = orderCorners(q.map(p => p.slice())); let a = Math.atan2(o[1][1] - o[0][1], o[1][0] - o[0][0]); a = ((a + Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2) - Math.PI / 4; return a; }).sort((a, b) => a - b); ang = as[as.length >> 1]; }
+  const ca = Math.cos(ang), sa = Math.sin(ang), rot = (x, y) => [x * ca + y * sa, -x * sa + y * ca], unrot = (u, v) => [u * ca - v * sa, u * sa + v * ca];
+  // Seitenfarbe = Farbe direkt um die erkannten Fotos
+  const cov = new Uint8Array(n);
+  for (const q of sel) { const b = box(q); for (let y = Math.max(0, Math.floor(b[1]) - 4); y <= Math.min(h - 1, Math.ceil(b[3]) + 4); y++) for (let x = Math.max(0, Math.floor(b[0]) - 4); x <= Math.min(w - 1, Math.ceil(b[2]) + 4); x++) if (inPoly(q, x + .5, y + .5)) cov[y * w + x] = 1; }
+  const ringR = [], ringG = [], ringB = [];
+  for (const q of sel) { const o = orderCorners(q.map(p => p.slice())), c = [(o[0][0] + o[2][0]) / 2, (o[0][1] + o[2][1]) / 2];
+    for (let e = 0; e < 4; e++) for (let t = 0.1; t <= 0.9; t += 0.04) { const A = o[e], B = o[(e + 1) % 4], px = A[0] + (B[0] - A[0]) * t, py = A[1] + (B[1] - A[1]) * t, dx = px - c[0], dy = py - c[1], dl = Math.hypot(dx, dy) || 1;
+      const x = Math.round(px + dx / dl * 8), y = Math.round(py + dy / dl * 8); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (cov[i]) continue; ringR.push(Rb[i]); ringG.push(Gb[i]); ringB.push(Bb[i]); } }
+  if (ringR.length < 20) return [];
+  const md = a => a.slice().sort((x, y) => x - y)[a.length >> 1], PR = md(ringR), PG = md(ringG), PB = md(ringB);
+  const dist = new Float32Array(n); for (let i = 0; i < n; i++) dist[i] = Math.abs(Rb[i] - PR) + Math.abs(Gb[i] - PG) + Math.abs(Bb[i] - PB);
+  // Bereich der Albumseite: Hülle der erkannten Fotos, erweitert
+  const all = sel.flat(), bb = box(all), mg = Math.sqrt(med) * 0.9;
+  const X0 = Math.max(2, Math.floor(bb[0] - mg)), Y0 = Math.max(2, Math.floor(bb[1] - mg)), X1 = Math.min(w - 3, Math.ceil(bb[2] + mg)), Y1 = Math.min(h - 3, Math.ceil(bb[3] + mg));
+  // Albumseite = konvexe Hülle der seitenfarbigen Pixel (Tisch/Hintergrund außerhalb bleiben draußen), etwas verkleinert
+  const inPage = new Uint8Array(n); { const pts = [];
+    for (let y = 0; y < h; y += 2) { let a = -1, b = -1; for (let x = 0; x < w; x++) if (dist[y * w + x] < 30) { if (a < 0) a = x; b = x; } if (a >= 0) pts.push([a, y], [b, y]); }
+    if (pts.length > 6) { pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+      for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+      for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+      const H = lo.slice(0, -1).concat(up.slice(0, -1));
+      for (let y = 0; y < h; y++) { let a = Infinity, b = -Infinity; for (let i = 0; i < H.length; i++) { const p = H[i], q = H[(i + 1) % H.length]; if ((p[1] - y) * (q[1] - y) > 0 || p[1] === q[1]) continue; const x = p[0] + (y - p[1]) * (q[0] - p[0]) / (q[1] - p[1]); a = Math.min(a, x); b = Math.max(b, x); }
+        for (let x = Math.max(0, Math.ceil(a) + 4); x <= Math.min(w - 1, Math.floor(b) - 4); x++) inPage[y * w + x] = 1; } } }
+  const regionsAt = T => { const M = new Uint8Array(n);
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * w + x; if (!cov[i] && inPage[i] && dist[i] > T) M[i] = 1; }
+    // Schließen (r=2) und Öffnen (r=2): Lücken im Bildinhalt füllen, dünne Schrift entfernen
+    const mor = (S, r, dil) => { const T1 = new Uint8Array(n), T2 = new Uint8Array(n);
+      for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let v = dil ? 0 : 1; for (let d = -r; d <= r; d++) { const s = S[y * w + Math.min(X1, Math.max(X0, x + d))]; if (dil ? s : !s) { v = dil ? 1 : 0; break; } } T1[y * w + x] = v; }
+      for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let v = dil ? 0 : 1; for (let d = -r; d <= r; d++) { const s = T1[Math.min(Y1, Math.max(Y0, y + d)) * w + x]; if (dil ? s : !s) { v = dil ? 1 : 0; break; } } T2[y * w + x] = v; } return T2; };
+    const ro = CFG.contourOpen || 6; let S = mor(mor(M, 2, true), 2, false); S = mor(mor(S, ro, false), ro, true);
+    const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), out = [];
+    for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (!S[s0] || lab[s0] >= 0) continue;
+      let top = 0, c = 0, u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9, edgeT = false; stk[top++] = s0; lab[s0] = out.length;
+      while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; const [u, v] = rot(xx, yy); if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
+        if (xx <= X0 || yy <= Y0 || xx >= X1 || yy >= Y1) edgeT = true;
+        for (const j of [i - 1, i + 1, i - w, i + w]) if (S[j] && lab[j] < 0) { lab[j] = out.length; stk[top++] = j; } }
+      out.push({ c, r: [u0, v0, u1, v1], edgeT }); }
+    // zu große / ausgefranste Komponenten: Distanztransformation, Marker = Kerne mit großem Randabstand (Watershed-Prinzip)
+    const res = [];
+    for (let k = 0; k < out.length; k++) { const o = out[k], [u0, v0, u1, v1] = o.r, A = (u1 - u0) * (v1 - v0);
+      if (o.c < 0.2 * med) continue;
+      if (!(A > 1.6 * med || o.c / Math.max(1, A) < 0.55)) { res.push(o); continue; }
+      // Schachbrett-Distanz zum Rand der Komponente
+      const Dm = new Float32Array(n); for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * w + x; Dm[i] = lab[i] === k ? 1e6 : 0; }
+      for (let y = Y0 + 1; y <= Y1; y++) for (let x = X0 + 1; x < X1; x++) { const i = y * w + x; if (Dm[i]) Dm[i] = Math.min(Dm[i], Dm[i - 1] + 1, Dm[i - w] + 1, Dm[i - w - 1] + 1.4, Dm[i - w + 1] + 1.4); }
+      for (let y = Y1 - 1; y >= Y0; y--) for (let x = X1 - 1; x > X0; x--) { const i = y * w + x; if (Dm[i]) Dm[i] = Math.min(Dm[i], Dm[i + 1] + 1, Dm[i + w] + 1, Dm[i + w + 1] + 1.4, Dm[i + w - 1] + 1.4); }
+      // Kerne: Abstand >= r; r so wählen, dass mehrere fotogroße Kerne entstehen
+      const rr = 0.18 * Math.sqrt(med); const cl = new Int32Array(n).fill(-1), st2 = new Int32Array(n), cores = [];
+      for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (Dm[s0] < rr || cl[s0] >= 0) continue;
+        let top = 0, c = 0, a0 = 1e9, b0 = 1e9, a1 = -1e9, b1 = -1e9; st2[top++] = s0; cl[s0] = cores.length;
+        while (top) { const i = st2[--top], xx = i % w, yy = (i / w) | 0; c++; const [u, v] = rot(xx, yy); if (u < a0) a0 = u; if (u > a1) a1 = u; if (v < b0) b0 = v; if (v > b1) b1 = v;
+          for (const j of [i - 1, i + 1, i - w, i + w]) if (Dm[j] >= rr && cl[j] < 0) { cl[j] = cores.length; st2[top++] = j; } }
+        cores.push({ c, r: [a0 - rr, b0 - rr, a1 + rr, b1 + rr], edgeT: o.edgeT && false }); }
+      for (const cr of cores) { const A2 = (cr.r[2] - cr.r[0]) * (cr.r[3] - cr.r[1]); if (A2 > 0.25 * med) res.push({ c: Math.min(A2, cr.c + 2 * rr * ((cr.r[2] - cr.r[0]) + (cr.r[3] - cr.r[1]))), r: cr.r, edgeT: false, split: true }); }
+    }
+    return res; };
+  // Kontrast stufenweise verändern, bis die Kontur stabil ist
+  const found = [], seeds = [];
+  const Ts = CFG.contourT || [90, 70, 55, 42, 32, 24];
+  let prev = null;
+  for (const T of Ts) { const R = regionsAt(T);
+    for (const o of R) { const [u0, v0, u1, v1] = o.r, A = (u1 - u0) * (v1 - v0), fill = o.c / Math.max(1, A), asp = Math.max(u1 - u0, v1 - v0) / Math.max(1, Math.min(u1 - u0, v1 - v0));
+      const ok = !o.edgeT && A > 0.3 * med && A < 2.2 * med && fill > 0.5 && asp < 2.2;
+      if (CFG.gapDbg) console.log('kontur T', T, o.r.map(Math.round).join(','), 'A/med', (A / med).toFixed(2), 'fuell', fill.toFixed(2), ok ? 'OK' : '');
+      if (!o.edgeT && A > 0.3 * med && A < 3 * med) seeds.push(o.r.slice());
+      if (!ok) continue;
+      // stabil: bei der nächsten Kontraststufe fast gleiche Kontur?
+      const same = (prev || []).find(p => Math.abs(p[0] - u0) + Math.abs(p[1] - v0) + Math.abs(p[2] - u1) + Math.abs(p[3] - v1) < 0.08 * (u1 - u0 + v1 - v0));
+      if (same && !found.some(f => Math.min(f[2], u1) - Math.max(f[0], u0) > 0 && Math.min(f[3], v1) - Math.max(f[1], v0) > 0)) found.push([u0, v0, u1, v1]); }
+    prev = R.filter(o => !o.edgeT).map(o => o.r); }
+  // Rechteck an der Albumkante ausrichten, Seiten auf nahe Kanten setzen
+  const out = [], fm = (CFG.contourMargin ?? 0.2) * Math.sqrt(med);
+  for (const [u0, v0, u1, v1] of found) {
+    { const cxy = unrot((u0 + u1) / 2, (v0 + v1) / 2), A = (u1 - u0) * (v1 - v0); // nur im Fotobereich der Seite, fotogroß
+      if (cxy[0] < bb[0] - fm || cxy[0] > bb[2] + fm || cxy[1] < bb[1] - fm || cxy[1] > bb[3] + fm || A < (CFG.contourMinA ?? 1.0) * med) continue; }
+    const q = [unrot(u0, v0), unrot(u1, v0), unrot(u1, v1), unrot(u0, v1)];
+    if (sel.concat(out).some(o => { const a = box(o), b = box(q), ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])); return ix * iy > 0.15 * Math.min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])); })) continue;
+    if (CFG.gapDbg) console.log('kontur gefunden', q.map(p => p.map(Math.round).join(':')).join(' '));
+    out.push(q);
+  }
+  globalThis.CSEED = { seeds, rot, unrot, med, PR, PG, PB, bb };
+  return out;
+}
+
+// ---- GrabCut (Rother et al. 2004) und Chan-Vese (2001) für unerkannte Fotos: Fläche freistellen, dann Rechteck an der Albumkante ----
+function gcSegment(L, box, bgRGB, iters) {
+  const { w, h, Rb, Gb, Bb } = L;
+  const pad = Math.round(0.12 * Math.max(box[2] - box[0], box[3] - box[1]));
+  const x0 = Math.max(0, Math.floor(box[0]) - pad), y0 = Math.max(0, Math.floor(box[1]) - pad), x1 = Math.min(w - 1, Math.ceil(box[2]) + pad), y1 = Math.min(h - 1, Math.ceil(box[3]) + pad);
+  const W = x1 - x0 + 1, H = y1 - y0 + 1, N = W * H; if (N < 400) return null;
+  // 0 sicher Hintergrund (Rand), 1 sicher Foto (Kern 50 %), 2/3 unsicher
+  const lab = new Uint8Array(N), cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2, hw = (box[2] - box[0]) / 2, hh = (box[3] - box[1]) / 2;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const X = x + x0, Y = y + y0, u = Math.abs(X - cx) / hw, v = Math.abs(Y - cy) / hh;
+    lab[y * W + x] = (x < 2 || y < 2 || x >= W - 2 || y >= H - 2) ? 0 : (u < 0.5 && v < 0.5) ? 1 : (u <= 1 && v <= 1) ? 3 : 2; }
+  const col = new Float64Array(N * 3); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y + y0) * w + x + x0, j = 3 * (y * W + x); col[j] = Rb[i]; col[j + 1] = Gb[i]; col[j + 2] = Bb[i]; }
+  const K = 5, bgS = []; for (let k = 0; k < 60; k++) bgS.push(bgRGB[0], bgRGB[1], bgRGB[2]);
+  const pick = f => { const idx = []; for (let i = 0; i < N; i++) if (f(lab[i])) idx.push(i); const X = new Float64Array(idx.length * 3); idx.forEach((i, k) => { X[3 * k] = col[3 * i]; X[3 * k + 1] = col[3 * i + 1]; X[3 * k + 2] = col[3 * i + 2]; }); return [X, idx.length]; };
+  let [fx, fn] = pick(l => l === 1 || l === 3); let [bx0, bn0] = pick(l => l === 0 || l === 2);
+  const bx = Float64Array.from(Array.from(bx0).concat(bgS)), bn = bn0 + 60;
+  if (fn < 30) return null;
+  let fgM = gcLearn(fx, fn, gcKmeans(fx, fn, K, 6), K), bgM = gcLearn(bx, bn, gcKmeans(bx, bn, K, 6), K);
+  const nb = [[1, 0, 1], [0, 1, 1], [1, 1, Math.SQRT1_2], [-1, 1, Math.SQRT1_2]];
+  let sum = 0, cnt = 0; for (let y = 0; y < H - 1; y++) for (let x = 1; x < W - 1; x++) for (const [dx, dy] of nb) { const a = 3 * (y * W + x), b = 3 * ((y + dy) * W + x + dx); sum += (col[a] - col[b]) ** 2 + (col[a + 1] - col[b + 1]) ** 2 + (col[a + 2] - col[b + 2]) ** 2; cnt++; }
+  const beta = cnt && sum ? 1 / (2 * sum / cnt) : 0, gamma = 50, LAM = 9 * gamma;
+  const maxE = 2 * (2 * N + 4 * N), eFrom = new Int32Array(maxE), eTo = new Int32Array(maxE), cap = new Float64Array(maxE);
+  const fg = new Uint8Array(N); for (let i = 0; i < N; i++) fg[i] = lab[i] === 1 || lab[i] === 3 ? 1 : 0;
+  for (let it = 0; it < iters; it++) {
+    if (it) { const [a1, n1] = (() => { const idx = []; for (let i = 0; i < N; i++) if (fg[i]) idx.push(i); const X = new Float64Array(idx.length * 3); idx.forEach((i, k) => { X[3 * k] = col[3 * i]; X[3 * k + 1] = col[3 * i + 1]; X[3 * k + 2] = col[3 * i + 2]; }); return [X, idx.length]; })();
+      if (n1 > 30) fgM = gcLearn(a1, n1, gcKmeans(a1, n1, K, 4), K); }
+    let nE = 0; const S = N, T = N + 1; const add = (u, v, c1, c2) => { eFrom[nE] = u; eTo[nE] = v; cap[nE] = c1; nE++; eFrom[nE] = v; eTo[nE] = u; cap[nE] = c2; nE++; };
+    for (let i = 0; i < N; i++) { const l = lab[i]; let fs, tt;
+      if (l === 0) { fs = 0; tt = LAM; } else if (l === 1) { fs = LAM; tt = 0; } else { const r = col[3 * i], g = col[3 * i + 1], b = col[3 * i + 2]; fs = -Math.log(gcProb(bgM, r, g, b) + 1e-300); tt = -Math.log(gcProb(fgM, r, g, b) + 1e-300); }
+      if (fs > 0) add(S, i, fs, 0); if (tt > 0) add(i, T, tt, 0); }
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (const [dx, dy, f] of nb) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= W || Y >= H) continue;
+      const a = y * W + x, b = Y * W + X, d2 = (col[3 * a] - col[3 * b]) ** 2 + (col[3 * a + 1] - col[3 * b + 1]) ** 2 + (col[3 * a + 2] - col[3 * b + 2]) ** 2, wg = gamma * f * Math.exp(-beta * d2); add(a, b, wg, wg); }
+    const reach = gcMaxflow(N + 2, S, T, eFrom, eTo, cap, nE);
+    for (let i = 0; i < N; i++) fg[i] = lab[i] === 1 ? 1 : lab[i] === 0 ? 0 : reach[i];
+  }
+  return { mask: fg, x0, y0, W, H };
+}
+// Chan-Vese (zweiphasig, Level-Set) auf dem Farbabstand zur Albumseite
+function cvSegment(L, box, bgRGB, steps) {
+  const { w, h, Rb, Gb, Bb } = L;
+  const pad = Math.round(0.12 * Math.max(box[2] - box[0], box[3] - box[1]));
+  const x0 = Math.max(0, Math.floor(box[0]) - pad), y0 = Math.max(0, Math.floor(box[1]) - pad), x1 = Math.min(w - 1, Math.ceil(box[2]) + pad), y1 = Math.min(h - 1, Math.ceil(box[3]) + pad);
+  const W = x1 - x0 + 1, H = y1 - y0 + 1, N = W * H; if (N < 400) return null;
+  const f = new Float32Array(N); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y + y0) * w + x + x0; f[y * W + x] = Math.min(255, Math.abs(Rb[i] - bgRGB[0]) + Math.abs(Gb[i] - bgRGB[1]) + Math.abs(Bb[i] - bgRGB[2])); }
+  const cx = (box[0] + box[2]) / 2 - x0, cy = (box[1] + box[3]) / 2 - y0, hw = (box[2] - box[0]) / 2, hh = (box[3] - box[1]) / 2;
+  let phi = new Float32Array(N); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) phi[y * W + x] = Math.min(hw - Math.abs(x - cx), hh - Math.abs(y - cy)); // innen > 0
+  const mu = CFG.cvMu ?? 0.15, dt = 0.5, eps = 1; let fs = 0; for (let i = 0; i < N; i++) fs = Math.max(fs, f[i]); const fn = fs || 1;
+  for (let it = 0; it < steps; it++) {
+    let s1 = 0, n1 = 0, s2 = 0, n2 = 0; for (let i = 0; i < N; i++) if (phi[i] > 0) { s1 += f[i]; n1++; } else { s2 += f[i]; n2++; }
+    const c1 = n1 ? s1 / n1 : 0, c2 = n2 ? s2 / n2 : 0, nx = new Float32Array(N);
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x, p = phi[i];
+      const kappa = phi[i - 1] + phi[i + 1] + phi[i - W] + phi[i + W] - 4 * p; // Krümmung (Laplace-Näherung)
+      const delta = eps / (Math.PI * (eps * eps + p * p));
+      nx[i] = p + dt * (delta * (mu * kappa - ((f[i] - c1) / fn) ** 2 + ((f[i] - c2) / fn) ** 2) * 20 + 0.0 * kappa); }
+    for (let x = 0; x < W; x++) { nx[x] = -1; nx[(H - 1) * W + x] = -1; } for (let y = 0; y < H; y++) { nx[y * W] = -1; nx[y * W + W - 1] = -1; }
+    // Reinitialisierung grob: Vorzeichen behalten, Betrag begrenzen
+    for (let i = 0; i < N; i++) nx[i] = Math.max(-5, Math.min(5, nx[i])); phi = nx;
+  }
+  const mask = new Uint8Array(N); for (let i = 0; i < N; i++) mask[i] = phi[i] > 0 ? 1 : 0;
+  return { mask, x0, y0, W, H };
+}
+function segmentSeeds(L, sel, C) {
+  const { seeds, rot, unrot, med, PR, PG, PB } = C, out = [];
+  const box = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const ovl = (a, b) => { const ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])); return ix * iy / Math.min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])); };
+  // Saatboxen ins Bild umrechnen, Doppelte entfernen
+  const sb = []; for (const r of seeds) { const q = [unrot(r[0], r[1]), unrot(r[2], r[1]), unrot(r[2], r[3]), unrot(r[0], r[3])], b = box(q); if (!sb.some(x => ovl(x, b) > 0.7)) sb.push(b); }
+  for (const b of sb.slice(0, CFG.segMax || 8)) {
+    if (sel.concat(out).some(q => ovl(box(q), b) > 0.3)) continue;
+    for (const [name, seg] of [['grabcut', () => gcSegment(L, b, [PR, PG, PB], 3)], ['chanvese', () => cvSegment(L, b, [PR, PG, PB], 150)]]) {
+      const r = seg(); if (!r) continue; const { mask, x0, y0, W, H } = r;
+      // größte zusammenhängende Fläche
+      const lab = new Int32Array(W * H).fill(-1), st = new Int32Array(W * H); let best = null;
+      for (let s0 = 0; s0 < W * H; s0++) { if (!mask[s0] || lab[s0] >= 0) continue; let top = 0, c = 0, edge = 0, u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9; st[top++] = s0; lab[s0] = s0;
+        while (top) { const i = st[--top], x = i % W, y = (i / W) | 0; c++; if (x < 3 || y < 3 || x >= W - 3 || y >= H - 3) edge++; const [u, v] = rot(x + x0, y + y0); if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
+          for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) if (j >= 0 && j < W * H && mask[j] && lab[j] < 0) { lab[j] = s0; st[top++] = j; } }
+        if (!best || c > best.c) best = { c, edge, r: [u0, v0, u1, v1] }; }
+      if (!best) continue; const [u0, v0, u1, v1] = best.r, A = (u1 - u0) * (v1 - v0), fill = best.c / Math.max(1, A), asp = Math.max(u1 - u0, v1 - v0) / Math.max(1, Math.min(u1 - u0, v1 - v0)), leak = best.edge / Math.max(1, 2 * (W + H));
+      const ok = leak < 0.05 && A > 0.4 * med && A < 2 * med && fill > 0.6 && asp < 2;
+      if (CFG.gapDbg) console.log(name, b.map(Math.round).join(','), '→', best.r.map(Math.round).join(','), 'A/med', (A / med).toFixed(2), 'fuell', fill.toFixed(2), 'leck', leak.toFixed(2), ok ? 'OK' : '');
+      if (!ok) continue;
+      const q = [unrot(u0, v0), unrot(u1, v0), unrot(u1, v1), unrot(u0, v1)];
+      if (sel.concat(out).some(o => ovl(box(o), box(q)) > 0.15)) continue;
+      out.push(q); break; }
+  }
+  return out;
 }
 
 </script>
@@ -2629,7 +2858,7 @@ self.onmessage = e => { const m = e.data, { id, data, w, h, sens } = m;
     if (m.type === 'user') { globalThis.LRN_USER = m.trees; return; }
     if (m.type === 'learn') { self.postMessage({ id, ...learnRows(data, w, h, sens, m.truth) }); return; }
     if (m.type === 'train') { self.postMessage({ id, trees: trainUser(m.X, m.y) }); return; }
-    const q = detectQuads(data, w, h, sens); const o = pageOrientation(data, w, h, q); self.postMessage({ id, q, o }); }
+    const q = detectQuads(data, w, h, sens); const o = pageOrientation(data, w, h, q); self.postMessage({ id, q, o, u: globalThis.UNREC || 0 }); }
   catch (err) { self.postMessage({ id, err: String(err) }); } };`;
     worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
     worker.onmessage = e => { const p = pending.get(e.data.id); if (p) { pending.delete(e.data.id); e.data.err ? p.rej(new Error(e.data.err)) : p.res(e.data); } };
@@ -2692,7 +2921,7 @@ async function resetLearned(silent) { LEARN.mem = []; LEARN.rows = []; LEARN.tre
   const wk = getWorker(); if (wk) wk.postMessage({ type: 'user', trees: null }); updateLearnInfo(); if (!silent) toast('Gelerntes zurückgesetzt'); }
 function detectAsync(data, w, h, sens) {
   const wk = getWorker();
-  const sync = () => { const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q) }; };
+  const sync = () => { const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q), u: globalThis.UNREC || 0 }; };
   if (!wk) return Promise.resolve(sync());
   return new Promise((res, rej) => { const id = ++wid; pending.set(id, { res, rej }); wk.postMessage({ id, data, w, h, sens }); }).catch(() => sync());
 }
@@ -2714,7 +2943,8 @@ async function runDetect(page, sens, fresh) {
     page.detSnap = snapOf(page); return;
   }
   page.memo = false;
-  const { q, o } = await detectAsync(d.data, c.width, c.height, sens);
+  const { q, o, u } = await detectAsync(d.data, c.width, c.height, sens);
+  page.unrec = u || 0; page.detN = q.length;
   // Kanten in der höher aufgelösten Vorschau nachschärfen
   const quads = refineQuads(grayOf(page.preview), page.preview.width, page.preview.height, q, Math.max(3, page.preview.width / c.width * 2.5));
   // Ausrichtung: alle Fotos der Seite stimmen gemeinsam ab; unsichere Seiten übernehmen die Lage der sicheren
@@ -2789,6 +3019,7 @@ async function addFiles(files) {
   // nach dem Einlesen auf die zuerst eingelesene Seite springen
   if (S.pages.length > first) { S.cur = first; S.sel = -1; S.zoom = 1; }
   status('', false); renderPages(); drawEditor();
+  if (S.expert && S.pages.length > first) { expertRun(); return; }
   toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
 }
 $('inCam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
@@ -2854,13 +3085,19 @@ function dropViews(keep) { for (const q of S.pages) if (q !== keep && q._view &&
 function viewCanvas(p) { const r = p.rot || 0; if (p._vrot !== r) { p._view = rotCanvas(p.preview, r); p._vrot = r; p._thumbR = null; } return p._view; }
 function thumbOf(p) { const r = p.rot || 0; if (p._thumbR !== r + 1) { const t = rotCanvas(scaledCanvas(p.preview, p.preview.width, p.preview.height, 240), r); p._thumbV = t.toDataURL('image/jpeg', .8); p._thumbR = r + 1; } return p._thumbV; }
 
+// Qualitätsindex: erkannte / (erkannte + geschätzt unerkannte) Fotos. Selbst ergänzte Rahmen verringern die Zahl der unerkannten.
+function qualityText(p) {
+  const k = p.quads.length, u = Math.max(0, (p.unrec || 0) - Math.max(0, k - (p.detN ?? k))), n = k + u;
+  const pct = n ? Math.round(100 * k / n) : 100;
+  return `${k}/${n} ${n === 1 ? 'Foto' : 'Fotos'} erkannt (${pct} %)`;
+}
 function drawEditor() {
   const p = page();
   $('secEdit').hidden = !p; $('toolbar').hidden = !p; $('legend').hidden = true; $('chip').hidden = !p && !$('chip').classList.contains('busy'); $('stage').classList.toggle('is-empty', !p);
   $('emptyStage').hidden = !!p; cv.hidden = !p; $('bClear').hidden = !S.pages.length;
   updateButtons();
   if (!p) return;
-  if (!$('chip').classList.contains('busy')) status(`Seite ${S.cur + 1} von ${S.pages.length} · ${p.quads.length} ${p.quads.length === 1 ? 'Foto' : 'Fotos'}${p.sample ? ' · Beispiel' : ''}`, false);
+  if (!$('chip').classList.contains('busy')) status(`Seite ${S.cur + 1} von ${S.pages.length} · ${qualityText(p)}${p.sample ? ' · Beispiel' : ''}`, false);
   $('pageName').textContent = p.sample ? 'Beispiel' : `Seite ${S.cur + 1}`;
   const st = $('cvwrap'), cs = getComputedStyle(st);
   const stageW = st.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
@@ -3108,7 +3345,7 @@ function safeName(s) { return (s || '').replace(/[\\/:*?"<>|]+/g, '-').replace(/
 const pad = n => String(n).padStart(2, '0');
 function names(pi, qi) {
   const a = safeName($('album').value);
-  return { file: `${a ? a + '_' : ''}S${pad(pi + 1)}_F${pad(qi + 1)}.jpg` };
+  return { file: `${a ? a + '_' : ''}S${pad(pi + 1 + (S.pageBase || 0))}_F${pad(qi + 1)}.jpg` };
 }
 
 // Seitennummern der Ergebnisse an die aktuelle Seitenreihenfolge anpassen
@@ -3246,7 +3483,7 @@ function download(filename, blob) {
   a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-async function getDir() { const h = await chooseDir(); if (!h) throw { name: 'AbortError' }; return h; }
+async function getDir() { if (S.expert && dirHandle) { try { if ((await dirHandle.queryPermission({ mode: 'readwrite' })) === 'granted') return dirHandle; } catch (e) {} } const h = await chooseDir(); if (!h) throw { name: 'AbortError' }; return h; }
 async function writeToDir(dir, filename, blob) { const fh = await dir.getFileHandle(filename, { create: true }); const w = await fh.createWritable(); await w.write(blob); await w.close(); }
 async function saveFiles(list, single) {
   try {
@@ -3283,7 +3520,7 @@ function clearAll(btn) {
   }
   S.results.forEach(r => URL.revokeObjectURL(r.url));
   for (const p of S.pages) { if (p.preview) p.preview.width = p.preview.height = 0; if (p._view) p._view.width = p._view.height = 0; }
-  S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; resetArm = 0;
+  S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; resetArm = 0; S.pageBase = 0; try { localStorage.setItem('albumschere.base', '0'); } catch (e) {}
   armUI(false);
   openSheet(false); renderPages(); drawEditor(); renderGrid(); updateDock(); window.scrollTo(0, 0); toast('Alles geleert – bereit für die nächste Serie');
 }
@@ -3306,6 +3543,34 @@ window.addEventListener('beforeunload', e => { if (S.results.some(r => !r.saved)
 function openSheet(on) { document.body.classList.toggle('sheet-open', on); $('scrim').hidden = !on; }
 $('bMenu').onclick = () => openSheet(true); $('bClose').onclick = () => openSheet(false); $('scrim').onclick = () => openSheet(false);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') openSheet(false); });
+
+// ---------- Expertenmodus: Seite fotografieren → automatisch erkennen, ausschneiden, kurz zeigen, speichern, nächste Seite ----------
+S.expert = false; S.pageBase = 0;
+try { S.expert = localStorage.getItem('albumschere.expert') === '1'; S.pageBase = +(localStorage.getItem('albumschere.base') || 0); } catch (e) {}
+function setExpert(on) { S.expert = on; document.body.classList.toggle('expert', on); $('bExpert').setAttribute('aria-checked', String(on)); try { localStorage.setItem('albumschere.expert', on ? '1' : '0'); } catch (e) {} }
+$('bExpert').onclick = () => { setExpert(!S.expert); toast(S.expert ? 'Expertenmodus an: Fotografieren → alles läuft automatisch' : 'Expertenmodus aus'); };
+setExpert(S.expert);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function xMenu(msg, buttons) { $('xov').hidden = false; $('xImg').hidden = true; $('xCap').textContent = ''; $('xMenu').hidden = false; $('xMsg').textContent = msg;
+  const box = $('xBtns'); box.innerHTML = ''; for (const [label, cls, fn, forId] of buttons) { const b = document.createElement(forId ? 'label' : 'button'); b.className = 'btn ' + (cls || ''); b.textContent = label; if (forId) b.htmlFor = forId; b.onclick = e => { fn && fn(e); }; box.appendChild(b); } }
+function xClose() { $('xov').hidden = true; $('xMenu').hidden = true; }
+// gespeicherte Serie abschließen: Seitennummern fortzählen, Arbeitsfläche leeren (ohne Rückfrage)
+function xFinish() { S.pageBase += S.pages.length; try { localStorage.setItem('albumschere.base', String(S.pageBase)); } catch (e) {}
+  S.results.forEach(r => URL.revokeObjectURL(r.url)); for (const p of S.pages) { if (p.preview) p.preview.width = p.preview.height = 0; if (p._view) p._view.width = p._view.height = 0; }
+  S.pages = []; S.results = []; S.cur = -1; S.sel = -1; S.saveIdx = 0; renderPages(); drawEditor(); renderGrid(); updateDock(); }
+function xNext(msg) { xMenu(msg + ' Nächste Albumseite fotografieren?', [['Fotografieren', 'go', () => xClose(), 'inCam'], ['Auswählen', '', () => xClose(), 'inPick'], ['Beenden', 'ghost', () => xClose()]]); }
+async function expertRun() {
+  if (S.cutting) return; const n0 = S.results.length;
+  await cutAll(); const fresh = S.results.slice(n0);
+  // jedes Foto eine halbe Sekunde zeigen
+  $('xov').hidden = false; $('xMenu').hidden = true; $('xImg').hidden = false;
+  for (let i = 0; i < fresh.length; i++) { $('xImg').src = fresh[i].url; $('xCap').textContent = `${names(fresh[i].pi, fresh[i].qi).file}  ·  ${i + 1}/${fresh.length}`; await sleep(500); }
+  const n = S.results.length; if (!n) { xNext('Keine Fotos erkannt.'); return; }
+  // automatisch speichern (Ordner/Downloads); wo der Browser einen Tipp verlangt (Fotos-App), per Knopf
+  try { await saveAll(); } catch (e) {}
+  if (S.results.length && S.results.every(r => r.saved)) { xFinish(); xNext(`${n} ${n === 1 ? 'Foto' : 'Fotos'} gespeichert.`); return; }
+  xMenu(`${n} ${n === 1 ? 'Foto' : 'Fotos'} fertig.`, [['Speichern', 'go', async () => { try { await saveAll(); } catch (e) {} if (S.results.every(r => r.saved)) { xFinish(); xNext(`${n} ${n === 1 ? 'Foto' : 'Fotos'} gespeichert.`); } }], ['Abbrechen', 'ghost', () => xClose()]]);
+}
 // ---------- Start ----------
 renderTargets(); $('bDir').onclick = () => chooseDir();
 resetLearned(true);

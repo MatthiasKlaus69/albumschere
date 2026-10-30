@@ -532,6 +532,93 @@ body.debug .foot { color: #fff }
 /* NORMAL: Edelstahlgrau/Schwarz – Symbole stahlfarben statt gold */
 body:not(.expert):not(.debug) .menu .mbtn svg.i { color: #e9edf2 }
 body:not(.expert):not(.debug) .hexp3 #mNormal[aria-checked="true"] { background: linear-gradient(180deg, #c9ccd1, #8a8d92); color: #111; text-shadow: 0 1px 0 rgba(255,255,255,.5) }
+
+/* ===== Hochwertige Optik: Tastenkappen erhaben, Bildschirm vertieft im erhabenen Rahmen ===== */
+.menu .mbtn, .menu .mname { border-radius: 13px !important; transform: translateY(-3px);
+  box-shadow: 0 6px 0 #26272a, 0 7px 0 #111, 0 12px 20px rgba(0,0,0,.6), inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 6px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.08) !important;
+  transition: transform .07s ease, box-shadow .07s ease }
+.menu .mbtn:active:not(:disabled) { transform: translateY(3px) !important; box-shadow: 0 1px 0 #26272a, 0 2px 4px rgba(0,0,0,.6), inset 0 3px 8px rgba(0,0,0,.45) !important }
+.menu .mbtn:disabled { transform: translateY(-1px) !important; box-shadow: 0 2px 0 #26272a, inset 0 1px 0 rgba(255,255,255,.2) !important }
+.menu .mname input { border-radius: 8px; box-shadow: inset 0 3px 7px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.4) !important }
+/* Bildschirmbereich: erhabener Metallrahmen … */
+.stage { background: var(--sheen), var(--brush), var(--alu) !important; border: 1px solid #141516 !important; border-top-color: #cfd1d5 !important; border-radius: 20px !important; padding: 16px !important;
+  box-shadow: 0 16px 34px rgba(0,0,0,.65), 0 3px 0 #1e1f21, inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.4) !important }
+/* … mit vertiefter Bildfläche */
+.cvwrap { background: radial-gradient(ellipse at 50% 30%, #17181b, #060607 75%) !important; border-radius: 12px; border: 1px solid #000; border-bottom-color: #9a9ca0;
+  box-shadow: inset 0 8px 22px rgba(0,0,0,.95), inset 0 0 0 2px rgba(0,0,0,.7), inset 0 -2px 0 rgba(255,255,255,.08), 0 1px 0 rgba(255,255,255,.45) !important; padding: 12px !important }
+#cv { border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06) }
+.stage.is-empty, .stage .empty, #emptyStage { }
+.stage .tcol .toolbar { border-radius: 16px !important }
+.stage .tool { border-radius: 11px; margin: 1px 0 }
+.stage .tool:not(:disabled) { background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.02) 55%, rgba(0,0,0,.1)); box-shadow: 0 3px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.35) }
+.stage .tool:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.45), inset 0 2px 5px rgba(0,0,0,.5) }
+.hexp3 { box-shadow: inset 0 3px 7px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.25) !important }
+.hexp3 button[aria-checked="true"] { box-shadow: 0 3px 0 rgba(0,0,0,.6), 0 5px 9px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.6) !important }
+body.expert .stage { background: var(--sheen), var(--brush), linear-gradient(180deg, #e08a3a 0%, #b9621a 50%, #8f470c 100%) !important; border-top-color: #ffd0a0 !important }
+body.debug .stage { background: var(--sheen), var(--brush), linear-gradient(180deg, #5f8fd6 0%, #2f5ea8 50%, #1f4583 100%) !important; border-top-color: #c6dcff !important }
+body.debug .cvwrap { box-shadow: inset 0 8px 22px rgba(0,0,0,.95), inset 0 0 0 2px #6aa6ff, 0 1px 0 rgba(255,255,255,.45) !important }
+
+/* Zahlenfeld: edles Metall / Liquid Glass */
+.cntbox { padding: 22px 20px; border-radius: 26px; background: linear-gradient(160deg, rgba(255,255,255,.22), rgba(255,255,255,.05) 45%, rgba(255,255,255,.12)); border: 1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(18px) saturate(1.6); -webkit-backdrop-filter: blur(18px) saturate(1.6); box-shadow: 0 24px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.25) }
+.cnttxt { font: 600 17px var(--f-ui); letter-spacing: .02em }
+.cntgrid { grid-template-columns: repeat(3, 76px); gap: 12px }
+.cntgrid button { position: relative; overflow: hidden; height: 68px; border-radius: 20px; color: #1b1c1f; font: 700 27px var(--f-ui); text-shadow: 0 1px 0 rgba(255,255,255,.75);
+  border: 1px solid rgba(255,255,255,.75); border-bottom-color: rgba(90,92,96,.8);
+  background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.12) 48%, rgba(0,0,0,.06) 52%, rgba(255,255,255,.25) 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, rgba(0,0,0,.05) 1px 2px), linear-gradient(180deg, rgba(225,228,233,.82), rgba(160,164,171,.72));
+  backdrop-filter: blur(10px) saturate(1.4); -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  box-shadow: 0 5px 0 rgba(70,72,76,.85), 0 10px 22px rgba(0,0,0,.45), inset 0 2px 1px rgba(255,255,255,.95), inset 0 -6px 12px rgba(0,0,0,.12);
+  transition: transform .08s ease, box-shadow .08s ease }
+.cntgrid button::after { content: ""; position: absolute; left: 10%; right: 10%; top: 4px; height: 38%; border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0)); pointer-events: none }
+.cntgrid button:hover { background: linear-gradient(180deg, rgba(255,255,255,.65) 0%, rgba(255,255,255,.2) 48%, rgba(0,0,0,.04) 52%, rgba(255,255,255,.3) 100%), linear-gradient(180deg, rgba(240,242,246,.9), rgba(175,179,186,.8)) }
+.cntgrid button:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(70,72,76,.85), 0 3px 8px rgba(0,0,0,.4), inset 0 3px 8px rgba(0,0,0,.25) }
+.cntskip { border-radius: 999px; padding: 10px 22px; color: #1b1c1f; font: 600 14px var(--f-ui); border: 1px solid rgba(255,255,255,.7);
+  background: linear-gradient(180deg, rgba(255,255,255,.6), rgba(200,203,208,.55)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 3px 0 rgba(70,72,76,.8), 0 8px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.9) }
+.cntskip:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(70,72,76,.8), inset 0 2px 5px rgba(0,0,0,.25) }
+
+/* ===== NORMAL: Luxus-Look – Espresso, gebürstete Bronze, Champagner-Gold ===== */
+html:has(body:not(.expert):not(.debug)) { background:
+  radial-gradient(120% 60% at 110% 10%, rgba(214,180,140,.18), transparent 55%),
+  radial-gradient(90% 50% at -10% 85%, rgba(190,150,110,.16), transparent 60%),
+  linear-gradient(115deg, transparent 38%, rgba(255,235,210,.07) 44%, transparent 50%, transparent 62%, rgba(255,235,210,.05) 68%, transparent 74%),
+  linear-gradient(180deg, #3a2c22 0%, #241a14 55%, #17110d 100%) #1e1611 !important; background-attachment: fixed !important }
+body:not(.expert):not(.debug) { --gold: #e2c39a; --gold-hi: #f6e2c4; --line: #6e5640; --muted: #e8d6bf; --dim: #b9a387; --ink: #f6ece0;
+  --champ: linear-gradient(135deg, #f7e7cf 0%, #c9a57c 35%, #8a6a4c 55%, #e9d2b0 75%, #a7835f 100%);
+  --bronze: linear-gradient(180deg, #6d5644 0%, #4c3a2d 45%, #3a2c22 55%, #55412f 100%) }
+body:not(.expert):not(.debug) .menu, body:not(.expert):not(.debug) .stage, body:not(.expert):not(.debug) .stage .tcol .toolbar, body:not(.expert):not(.debug) .toolbar { background: var(--sheen), repeating-linear-gradient(90deg, rgba(255,240,220,.05) 0 1px, rgba(0,0,0,.05) 1px 3px), var(--bronze) !important;
+  border: 1px solid #1b130d !important; border-top-color: #d9bf9c !important;
+  box-shadow: 0 18px 36px rgba(0,0,0,.6), 0 0 0 1px rgba(226,195,154,.35), inset 0 1px 0 rgba(255,236,210,.45), inset 0 -2px 0 rgba(0,0,0,.45) !important }
+body:not(.expert):not(.debug) .menu::before, body:not(.expert):not(.debug) .menu::after, body:not(.expert):not(.debug) .stage .tcol .toolbar::before, body:not(.expert):not(.debug) .stage .tcol .toolbar::after {
+  background: radial-gradient(circle, #fff3df 0 1px, #e2c39a 2px, #9a7653 4px, #4a3626 5.5px, rgba(0,0,0,.65) 6.3px, transparent 7px) left center / 14px 14px no-repeat,
+              radial-gradient(circle, #fff3df 0 1px, #e2c39a 2px, #9a7653 4px, #4a3626 5.5px, rgba(0,0,0,.65) 6.3px, transparent 7px) right center / 14px 14px no-repeat !important }
+body:not(.expert):not(.debug) .menu .mbtn, body:not(.expert):not(.debug) .menu .mname { color: #f6ece0 !important; text-shadow: 0 1px 2px rgba(0,0,0,.6) !important;
+  background: linear-gradient(180deg, rgba(255,240,220,.18), rgba(255,240,220,.02) 50%, rgba(0,0,0,.12) 51%, rgba(255,240,220,.06)), linear-gradient(180deg, #4a382b, #2b1f17) !important;
+  border: 1px solid transparent !important; border-radius: 14px !important;
+  background-clip: padding-box !important; position: relative;
+  box-shadow: 0 0 0 1.5px #c9a57c, 0 0 0 2.5px rgba(40,26,16,.9), 0 6px 0 #160f0a, 0 12px 22px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,236,210,.35) !important }
+body:not(.expert):not(.debug) .menu .mbtn:hover:not(:disabled) { background: linear-gradient(180deg, rgba(255,240,220,.26), rgba(255,240,220,.04) 50%, rgba(0,0,0,.1) 51%, rgba(255,240,220,.1)), linear-gradient(180deg, #5a4535, #33251b) !important }
+body:not(.expert):not(.debug) .menu .mbtn:active:not(:disabled) { box-shadow: 0 0 0 1.5px #c9a57c, 0 1px 0 #160f0a, inset 0 3px 8px rgba(0,0,0,.6) !important }
+body:not(.expert):not(.debug) .menu .mbtn svg.i { color: #e9cfa6 !important; filter: drop-shadow(0 1px 1px rgba(0,0,0,.7)) }
+body:not(.expert):not(.debug) .menu .mname input { background: #120c08 !important; color: #f3dfc2 !important; border: 1px solid #6e5640 !important }
+body:not(.expert):not(.debug) .menu .mname small { color: #e2c39a !important }
+body:not(.expert):not(.debug) .cvwrap { background: radial-gradient(ellipse at 50% 25%, #2a1f18, #0c0806 75%) !important; border-bottom-color: #c9a57c !important }
+/* runde Werkzeugknöpfe mit Goldring */
+body:not(.expert):not(.debug) .stage .tool { color: #f0dcc0 !important }
+body:not(.expert):not(.debug) .stage .tool svg.i { width: 34px; height: 34px; padding: 7px; border-radius: 50%; color: #f0dcc0;
+  background: radial-gradient(circle at 50% 30%, #6a5241, #2c2018 70%); box-shadow: 0 0 0 1.5px #c9a57c, 0 0 0 3px rgba(30,20,12,.9), 0 4px 8px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,236,210,.4) }
+body:not(.expert):not(.debug) .stage .tool:not(:disabled) { background: transparent !important; box-shadow: none !important }
+body:not(.expert):not(.debug) .stage .tool:active:not(:disabled) svg.i { transform: translateY(1px); box-shadow: 0 0 0 1.5px #c9a57c, inset 0 2px 5px rgba(0,0,0,.6) }
+body:not(.expert):not(.debug) .hexp3 { background: #140e0a !important; border-color: #6e5640 !important }
+body:not(.expert):not(.debug) .hexp3 button { color: #c8b293 }
+body:not(.expert):not(.debug) .hexp3 #mNormal[aria-checked="true"] { background: var(--champ) !important; color: #2a1c12 !important; text-shadow: 0 1px 0 rgba(255,255,255,.5) !important }
+body:not(.expert):not(.debug) .chip, body:not(.expert):not(.debug) .tcol .chip { background: linear-gradient(180deg, #4a382b, #2b1f17) !important; box-shadow: 0 0 0 1px #c9a57c, 0 4px 10px rgba(0,0,0,.5) !important; color: #f6ece0 !important }
+body:not(.expert):not(.debug) .thumb.on { box-shadow: 0 0 0 2px #e2c39a, 0 6px 14px rgba(0,0,0,.6) !important }
+body:not(.expert):not(.debug) .mtarget .seg { background: #140e0a !important }
+body:not(.expert):not(.debug) .mtarget .seg button[aria-checked="true"] { background: var(--champ) !important; color: #2a1c12 !important }
+body:not(.expert):not(.debug) .logo-img { filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)) sepia(.35) saturate(1.3) brightness(1.05) }
+body:not(.expert):not(.debug) .foot { color: #b9a387 }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -641,7 +728,7 @@ body:not(.expert):not(.debug) .hexp3 #mNormal[aria-checked="true"] { background:
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 48</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 49</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -658,7 +745,7 @@ body:not(.expert):not(.debug) .hexp3 #mNormal[aria-checked="true"] { background:
   <button class="upx" id="upClose" aria-label="Abbrechen">✕</button></div>
 <div class="cntov" id="cntov" hidden><div class="cntbox"><div class="cnttxt">Wie viele Fotos sind auf der Seite?</div>
   <div class="cntgrid"><button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button><button data-n="5">5</button><button data-n="6">6</button><button data-n="7">7</button><button data-n="8">8</button><button data-n="9">9</button><button data-n="10">10</button><button data-n="11">11</button><button data-n="12">12</button></div>
-  <button class="cntskip" id="cntSkip">Weiß nicht</button></div></div>
+  <button class="cntskip" id="cntSkip">Kein Kommentar.</button></div></div>
 <div class="xov" id="xov" hidden><div class="xbox"><img id="xImg" alt=""><p id="xCap"></p>
   <div class="xmenu" id="xMenu" hidden><b id="xMsg"></b><div class="xrow" id="xBtns"></div></div></div></div>
 <div class="toast" id="cutInfo" role="status" aria-live="polite"></div>
@@ -2310,6 +2397,7 @@ detectQuads = function (rgba, w, h, sens) {
   if (CFG.overlap !== false) globalThis.DBGSTEP.ovl = resolveOverlaps(L, sel);
   if (CFG.blobs !== false) for (const q of smallBlobs(L, sel)) { sel.push(q); globalThis.DBGSTEP.blob++; }
   globalThis.PQ = null; try { globalThis.PQ = pageQuad(L, sel); } catch (e) {}
+  if (CFG.freeAreas !== false && globalThis.PQ && (globalThis.PQ.region || sel.length)) { const fa = freeAreas(L, sel, globalThis.PQ.quad); for (const q of fa) sel.push(q); globalThis.DBGSTEP.free = fa.length; if (fa.length) try { globalThis.PQ = pageQuad(L, sel); } catch (e) {} }
   if (CFG.sizeFit === true) { const sf = sizeFit(L, sel, globalThis.PQ); for (const q of sf) sel.push(q); globalThis.DBGSTEP.fit = sf.length; }
   // Erwartete Anzahl (Express: vom Nutzer eingegeben): fehlende Fotos mit gelockerten Schwellen suchen, überzählige mit der schwächsten Kantenbelegung verwerfen
   if (CFG.expect > 0) { const keep = { sfMin: CFG.sfMin, sfMean: CFG.sfMean, sfPre: CFG.sfPre, sfMax: CFG.sfMax };
@@ -2319,6 +2407,7 @@ detectQuads = function (rgba, w, h, sens) {
     if (sel.length > CFG.expect) { const sc = sel.map(q => { const o = orderCorners(q.map(p => p.slice())); let t = 0; for (let k = 0; k < 4; k++) t += edgeCovL(L, o[k], o[(k + 1) % 4]); return t / 4; });
       const idx = sel.map((q, i) => i).sort((a, b) => sc[b] - sc[a]).slice(0, CFG.expect).sort((a, b) => a - b); const ns = idx.map(i => sel[i]); sel.length = 0; for (const q of ns) sel.push(q); globalThis.DBGSTEP.drop = sc.length - ns.length; } }
   globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { let cs = contourSearch(L, sel); if (globalThis.PQ && CFG.seedPage !== false) { const inQ = q => insidePage(globalThis.PQ.quadF, q) >= 0.5; cs = cs.filter(inQ); if (globalThis.CSEED) { const U = globalThis.CSEED.unrot; globalThis.CSEED.seeds = globalThis.CSEED.seeds.filter(r => inQ([U(r[0], r[1]), U(r[2], r[1]), U(r[2], r[3]), U(r[0], r[3])])); } } if (CFG.promote !== false && globalThis.CSEED) { const pr = promoteSeeds(L, sel, globalThis.CSEED, globalThis.PQ); for (const q of pr) sel.push(q); globalThis.DBGSTEP.prom = pr.length; cs = cs.filter(c => !pr.some(q => insidePage(q, c) > 0.5)); } globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
+  if (CFG.snap === true) globalThis.DBGSTEP.snap = snapSides(L, sel);
   if (CFG.clipPage !== false && globalThis.PQ) globalThis.DBGSTEP.clip = clipToPage(L, sel, globalThis.PQ);
   if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   if (CFG.pageFeat !== false) try { globalThis.PAGEFEAT = pageFeatures(L, sel); } catch (e) { globalThis.PAGEFEAT = null; }
@@ -3236,9 +3325,13 @@ function pageQuad(L, sel) {
     const pick = (f, key) => os.map(o => f(o)).sort((u, v) => key(u) - key(v))[0];
     FE.oben = pick(o => [o[0], o[1]], e => m(e[0][1], e[1][1])); FE.unten = pick(o => [o[3], o[2]], e => -m(e[0][1], e[1][1]));
     FE.links = pick(o => [o[0], o[3]], e => m(e[0][0], e[1][0])); FE.rechts = pick(o => [o[1], o[2]], e => -m(e[0][0], e[1][0])); }
-  const L2 = k => line(res[k], FE[k] || IB[k]), L3 = k => line(res[k], IB[k]);
+  // Ersatz 1: Seite der größten Papierfläche (Albumseite zuerst); Ersatz 2: Fotokante; Ersatz 3: Bildrand
+  let PRG = null; if (CFG.pageRegion !== false) try { PRG = pageRegion(L, sel); } catch (e) {}
+  const RG = PRG ? PRG.lines : {}, fb = {};
+  for (const k of ['oben', 'unten', 'links', 'rechts']) if (!res[k] && RG[k]) fb[k] = 'Papierfläche';
+  const L2 = k => line(res[k], RG[k] || FE[k] || IB[k]), L3 = k => line(res[k], RG[k] || IB[k]);
   const quad = mk(L2('oben'), L2('unten'), L2('links'), L2('rechts')), quadF = mk(L3('oben'), L3('unten'), L3('links'), L3('rechts'));
-  return { quad, quadF, sides: res, fallback: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, res[k] ? null : (FE[k] ? 'Fotokante' : 'Bildrand')])) };
+  return { quad, quadF, region: !!PRG, sides: res, fallback: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, res[k] ? null : (fb[k] || (FE[k] ? 'Fotokante' : 'Bildrand'))])) };
 }
 
 // Anteil eines Vierecks innerhalb der Albumseite (Stichproben)
@@ -3248,7 +3341,7 @@ function insidePage(Q, q) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]), 
 function clipToPage(L, sel, PQ) {
   const Q = PQ.quadF, names = ['oben', 'rechts', 'unten', 'links'], tol = CFG.clipTol ?? 1.5; let n = 0;
   const cx = Q.reduce((s, p) => s + p[0], 0) / 4, cy = Q.reduce((s, p) => s + p[1], 0) / 4;
-  for (let k = 0; k < 4; k++) { if (!PQ.sides[names[k]]) continue; const A = Q[k], B = Q[(k + 1) % 4]; let nx = -(B[1] - A[1]), ny = B[0] - A[0]; const l = Math.hypot(nx, ny) || 1; nx /= l; ny /= l;
+  for (let k = 0; k < 4; k++) { if (!PQ.sides[names[k]] && !(PQ.fallback && PQ.fallback[names[k]] === 'Papierfläche')) continue; const A = Q[k], B = Q[(k + 1) % 4]; let nx = -(B[1] - A[1]), ny = B[0] - A[0]; const l = Math.hypot(nx, ny) || 1; nx /= l; ny /= l;
     if ((cx - A[0]) * nx + (cy - A[1]) * ny < 0) { nx = -nx; ny = -ny; } // Normale zeigt nach innen
     const dIn = p => (p[0] - A[0]) * nx + (p[1] - A[1]) * ny;
     for (let f = 0; f < sel.length; f++) { const o = orderCorners(sel[f].map(p => p.slice())), side = Math.min(Math.hypot(o[1][0] - o[0][0], o[1][1] - o[0][1]), Math.hypot(o[3][0] - o[0][0], o[3][1] - o[0][1]));
@@ -3342,6 +3435,105 @@ function sizeFit(L, sel, PQ) {
     out.push([toXY(u0 + U0, v0 + V0), toXY(u1 + U0, v0 + V0), toXY(u1 + U0, v1 + V0), toXY(u0 + U0, v1 + V0)]);
     for (let v = Math.max(0, v0 - 3); v <= Math.min(VH - 1, v1 + 3); v++) for (let u = Math.max(0, u0 - 3); u <= Math.min(UW - 1, u1 + 3); u++) Cv[v * UW + u] = 1; SC = I2(Cv); }
   return out;
+}
+
+// ---- Albumseite zuerst: größte zusammenhängende Papierfläche (+ erkannte Fotos), Löcher gefüllt, als Viereck an der Albumneigung ausgerichtet ----
+function pageRegion(L, sel) {
+  const { w, h, pageLike } = L, n = w * h;
+  // größte Papierkomponente
+  const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n); let best = -1, bc = 0, id = 0;
+  for (let s0 = 0; s0 < n; s0++) { if (!pageLike[s0] || lab[s0] >= 0) continue; let top = 0, c = 0; stk[top++] = s0; lab[s0] = id;
+    while (top) { const i = stk[--top], x = i % w; c++; for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w]) if (j >= 0 && j < n && pageLike[j] && lab[j] < 0) { lab[j] = id; stk[top++] = j; } }
+    let sc = c; if (sel.length) { sc = 0; } if (!sel.length && c > bc) { bc = c; best = id; } id++; }
+  if (sel.length) { // Papierkomponente mit den meisten Pixeln im (erweiterten) Bereich der Fotos
+    const xs = sel.flat().map(p => p[0]), ys = sel.flat().map(p => p[1]), mx = (Math.max(...xs) - Math.min(...xs)) * 0.15, my = (Math.max(...ys) - Math.min(...ys)) * 0.15;
+    const bx0 = Math.max(0, Math.floor(Math.min(...xs) - mx)), bx1 = Math.min(w - 1, Math.ceil(Math.max(...xs) + mx)), by0 = Math.max(0, Math.floor(Math.min(...ys) - my)), by1 = Math.min(h - 1, Math.ceil(Math.max(...ys) + my));
+    const cnt = new Map(); for (let y = by0; y <= by1; y++) for (let x = bx0; x <= bx1; x++) { const l = lab[y * w + x]; if (l >= 0) cnt.set(l, (cnt.get(l) || 0) + 1); }
+    bc = 0; for (const [l, c] of cnt) if (c > bc) { bc = c; best = l; } bc = 0; for (let i = 0; i < n; i++) if (lab[i] === best) bc++; }
+  if (bc < n * (CFG.prMin ?? 0.06)) return null;
+  let ang = 0; if (sel.length) { const as = sel.map(q => { const o = orderCorners(q.map(p => p.slice())); const a = Math.atan2(o[1][1] - o[0][1], o[1][0] - o[0][0]); return ((a + Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2) - Math.PI / 4; }).sort((a, b) => a - b); ang = as[as.length >> 1]; }
+  const ca = Math.cos(ang), sa = Math.sin(ang), toUV = (x, y) => [x * ca + y * sa, -x * sa + y * ca], toXY = (u, v) => [u * ca - v * sa, u * sa + v * ca];
+  const pts = []; for (let y = 0; y < h; y += 2) for (let x = 0; x < w; x += 2) if (lab[y * w + x] === best) pts.push(toUV(x, y));
+  for (const q of sel) for (const [x, y] of q) pts.push(toUV(x, y));
+  // je Seite: äußerste Punkte je Spalte/Zeile, robuste Gerade (Median der Steigung), dann so weit nach außen, dass 98 % innen liegen
+  const fit = (horiz, outSign) => { const m = new Map(); for (const [u, v] of pts) { const k = Math.round((horiz ? u : v) / 4); const val = horiz ? v : u; const cur = m.get(k); if (cur === undefined || (outSign > 0 ? val > cur : val < cur)) m.set(k, val); }
+    const arr = [...m.entries()].map(([k, val]) => [k * 4, val]).sort((a, b) => a[0] - b[0]); if (arr.length < 6) return null;
+    const lo = Math.floor(arr.length * 0.1), hi = Math.ceil(arr.length * 0.9), core = arr.slice(lo, hi);
+    const sl = []; for (let i = 0; i < core.length; i += 2) for (let j = i + 3; j < core.length; j += 3) sl.push((core[j][1] - core[i][1]) / (core[j][0] - core[i][0] || 1));
+    sl.sort((a, b) => a - b); const k = Math.max(-0.12, Math.min(0.12, sl.length ? sl[sl.length >> 1] : 0));
+    const res = core.map(([a, b]) => b - k * a).sort((a, b) => a - b); const d = outSign > 0 ? res[Math.floor(res.length * 0.9)] : res[Math.floor(res.length * 0.1)];
+    return { k, d, a0: arr[0][0], a1: arr[arr.length - 1][0] }; };
+  const T = fit(true, -1), B = fit(true, 1), Lf = fit(false, -1), R = fit(false, 1); if (!T || !B || !Lf || !R) return null;
+  // Schnittpunkte im gedrehten System: horizontale v = k*u + d, vertikale u = k*v + d
+  const X = (Hh, Vv) => { const v = (Hh.k * Vv.d + Hh.d) / (1 - Hh.k * Vv.k), u = Vv.k * v + Vv.d; return toXY(u, v); };
+  const quad = [X(T, Lf), X(T, R), X(B, R), X(B, Lf)].map(([x, y]) => [Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))]);
+  const seg = (Hh, horiz) => horiz ? null : null;
+  if (sel.length) { const corners = sel.flat(); let inn = 0; for (const [x, y] of corners) { if (inPoly(quad, x, y)) { inn++; continue; } // 2 % Toleranz
+      let dmin = 1e9; for (let e = 0; e < 4; e++) { const A = quad[e], B = quad[(e + 1) % 4], vx = B[0] - A[0], vy = B[1] - A[1], l2 = vx * vx + vy * vy || 1, t = Math.max(0, Math.min(1, ((x - A[0]) * vx + (y - A[1]) * vy) / l2)); dmin = Math.min(dmin, Math.hypot(x - A[0] - t * vx, y - A[1] - t * vy)); } if (dmin < 0.02 * Math.min(w, h)) inn++; }
+    if (inn < corners.length) return null; }
+  return { quad, lines: { oben: [X(T, Lf), X(T, R)], rechts: [X(T, R), X(B, R)], unten: [X(B, R), X(B, Lf)], links: [X(B, Lf), X(T, Lf)] }, area: bc / n, lab, best };
+}
+
+// ---- Fotoflächen auf der Albumseite: geschlossene Nicht-Papier-Flächen, die nicht von Rahmen belegt sind ----
+function freeAreas(L, sel, Q, PR) {
+  const { w, h, pageLike, edge } = L, n = w * h, out = []; if (!Q) return out;
+  const os = sel.map(q => orderCorners(q.map(p => p.slice())));
+  const qa = (() => { let s = 0; for (let i = 0; i < 4; i++) { const a = Q[i], b = Q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; })();
+  const areas = os.map(o => { let s = 0; for (let i = 0; i < 4; i++) { const a = o[i], b = o[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; }).sort((a, b) => a - b);
+  const med = areas.length ? areas[areas.length >> 1] : qa * (CFG.faMed ?? 0.07), mx = areas.length ? Math.max(areas[areas.length - 1], qa * 0.12) : qa * 0.35;
+  let ang = 0; if (os.length) { const as = os.map(o => { const a = Math.atan2(o[1][1] - o[0][1], o[1][0] - o[0][0]); return ((a + Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2) - Math.PI / 4; }).sort((a, b) => a - b); ang = as[as.length >> 1]; }
+  const xs = Q.map(p => p[0]), ys = Q.map(p => p[1]), X0 = Math.max(1, Math.floor(Math.min(...xs))), X1 = Math.min(w - 2, Math.ceil(Math.max(...xs))), Y0 = Math.max(1, Math.floor(Math.min(...ys))), Y1 = Math.min(h - 2, Math.ceil(Math.max(...ys)));
+  const inQ = new Uint8Array(n), cov = new Uint8Array(n);
+  for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) if (inPoly(Q, x + .5, y + .5)) inQ[y * w + x] = 1;
+  for (const o of os) { const bx = o.map(p => p[0]), by = o.map(p => p[1]); for (let y = Math.max(0, Math.floor(Math.min(...by)) - 5); y <= Math.min(h - 1, Math.ceil(Math.max(...by)) + 5); y++) for (let x = Math.max(0, Math.floor(Math.min(...bx)) - 5); x <= Math.min(w - 1, Math.ceil(Math.max(...bx)) + 5); x++) {
+    if (inPoly(o, x + .5, y + .5)) { cov[y * w + x] = 1; continue; } let dmin = 1e9; for (let e = 0; e < 4; e++) { const A = o[e], B = o[(e + 1) % 4], vx = B[0] - A[0], vy = B[1] - A[1], l2 = vx * vx + vy * vy || 1, t = Math.max(0, Math.min(1, ((x - A[0]) * vx + (y - A[1]) * vy) / l2)); dmin = Math.min(dmin, Math.hypot(x - A[0] - t * vx, y - A[1] - t * vy)); } if (dmin <= 5) cov[y * w + x] = 1; } }
+  // Kandidatenmaske: in der Seite, kein Papier, kein Rahmen; mit Radius 3 öffnen (Schrift/Linien entfernen)
+  const M = new Uint8Array(n); for (let i = 0; i < n; i++) M[i] = inQ[i] && !pageLike[i] && !cov[i] ? 1 : 0;
+  const morph = (S, r, er) => { const D = new Uint8Array(n); for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let v = er ? 1 : 0; for (let dy = -r; dy <= r && (er ? v : !v); dy++) for (let dx = -r; dx <= r && (er ? v : !v); dx++) { const xx = x + dx, yy = y + dy; const s = xx >= 0 && yy >= 0 && xx < w && yy < h ? S[yy * w + xx] : 0; if (er && !s) v = 0; if (!er && s) v = 1; } D[y * w + x] = v; } return D; };
+  const R0 = CFG.faOpen ?? 4, C = morph(morph(M, R0, true), R0, false);
+  const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), done = new Uint8Array(n);
+  const ca = Math.cos(ang), sa = Math.sin(ang), un = (u, v) => [u * ca - v * sa, u * sa + v * ca];
+  for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (!C[s0] || lab[s0] >= 0 || done[s0]) continue; for (let i = 0; i < n; i++) if (lab[i] === 1) lab[i] = 2;
+    let top = 0, c = 0, e = 0, u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9, edgeQ = 0, ringT = 0, ringP = 0; const px = []; stk[top++] = s0; lab[s0] = 1;
+    while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (edge[i]) e++; const u = xx * ca + yy * sa, v = -xx * sa + yy * ca; if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
+      for (const j of [i - 1, i + 1, i - w, i + w]) { if (j < 0 || j >= n) continue; if (!inQ[j]) edgeQ++; if (C[j] && lab[j] < 0) { lab[j] = 1; stk[top++] = j; }
+        if (!C[j]) { const k = i + 5 * (j - i); if (k >= 0 && k < n && !cov[k] && Math.abs((k % w) - xx) <= 5) { ringT++; if (pageLike[k]) ringP++; } } } }
+    const A = (u1 - u0) * (v1 - v0), W = u1 - u0, H = v1 - v0;
+    const why = c < 0.25 * med ? 'klein' : A > 1.6 * mx ? 'groß' : c / A < (CFG.faFill ?? 0.55) ? 'Füllung' : Math.max(W, H) / Math.min(W, H) > 3 ? 'Form' : e / c < (CFG.faTex ?? 0.04) ? 'kein Inhalt' : ringP / Math.max(1, ringT) < (CFG.faRing ?? 0.75) ? 'nicht von Seite umgeben' : '';
+    if (CFG.faDbg) console.log('fläche', Math.round(u0), Math.round(v0), Math.round(W), Math.round(H), 'px', c, 'füll', (c / A).toFixed(2), 'kanten', (e / c).toFixed(3), 'ring', (ringP / Math.max(1, ringT)).toFixed(2), 'med', Math.round(med), why);
+    if ((why === 'groß' || why === 'nicht von Seite umgeben' || (!why && c > (CFG.faSplit ?? 1.8) * med)) && c > (CFG.faSplit ?? 1.8) * med && ringP / Math.max(1, ringT) >= (CFG.faRingSplit ?? 0.6)) {
+      // zu groß: Teilflächen über stärkere Erosion trennen (freeComps teilt rekursiv)
+      const sub = new Uint8Array(n); const cv2 = new Uint8Array(n); for (let i = 0; i < n; i++) cv2[i] = 1;
+      let bx0 = w, by0 = h, bx1 = 0, by1 = 0; for (let yy = Y0; yy <= Y1; yy++) for (let xx = X0; xx <= X1; xx++) { const i = yy * w + xx; if (lab[i] === 1 && C[i] && !done[i]) { sub[i] = 1; cv2[i] = 0; done[i] = 1; if (xx < bx0) bx0 = xx; if (xx > bx1) bx1 = xx; if (yy < by0) by0 = yy; if (yy > by1) by1 = yy; } }
+      const parts = freeComps(L, cv2, inQ, sub, med);
+      for (const b of parts) { const bw = b[2] - b[0], bh = b[3] - b[1]; let f = 0; for (let yy = b[1]; yy <= b[3]; yy++) for (let xx = b[0]; xx <= b[2]; xx++) f += sub[yy * w + xx];
+        const ok = bw * bh >= 0.25 * med && bw * bh <= Math.min(1.6 * mx, (CFG.faPartMax ?? 2.5) * med) && f / Math.max(1, bw * bh) >= 0.5 && Math.max(bw, bh) / Math.max(1, Math.min(bw, bh)) <= 3;
+        if (CFG.faDbg) console.log('  teil', b.join(','), 'füll', (f / Math.max(1, bw * bh)).toFixed(2), ok ? 'ok' : 'nein');
+        if (ok) out.push([[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]]); }
+      continue; }
+    for (let yy = Y0; yy <= Y1; yy++) for (let xx = X0; xx <= X1; xx++) { const i = yy * w + xx; if (lab[i] === 1) done[i] = 1; }
+    if (why) continue;
+    out.push([un(u0, v0), un(u1, v0), un(u1, v1), un(u0, v1)]); }
+  return out;
+}
+
+// ---- Kantenverfeinerung je Foto: jede Seite einzeln auf die am besten belegte Kante schieben/kippen (hebt die Konfidenz K) ----
+function snapSides(L, sel) {
+  const R = CFG.snapR ?? 4, gain = CFG.snapGain ?? 0.08; let n = 0;
+  const X = (P, Q, A, B) => { const d = (Q[0] - P[0]) * (B[1] - A[1]) - (Q[1] - P[1]) * (B[0] - A[0]); if (Math.abs(d) < 1e-9) return null; const t = ((A[0] - P[0]) * (B[1] - A[1]) - (A[1] - P[1]) * (B[0] - A[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
+  for (let f = 0; f < sel.length; f++) { const o = orderCorners(sel[f].map(p => p.slice())); const lines = [];
+    let changed = false;
+    for (let k = 0; k < 4; k++) { const A = o[k], B = o[(k + 1) % 4], dx = B[0] - A[0], dy = B[1] - A[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+      const base = edgeCovL(L, A, B); let best = [A, B], bc = base;
+      for (let a = -R; a <= R; a++) for (let b = -R; b <= R; b++) { const P = [A[0] + nx * a, A[1] + ny * a], Q = [B[0] + nx * b, B[1] + ny * b], c = edgeCovL(L, P, Q); if (c > bc + 1e-9) { bc = c; best = [P, Q]; } }
+      if (bc >= Math.max(0.5, base + gain)) { lines.push(best); changed = true; } else lines.push([A, B]); }
+    if (!changed) continue;
+    const nq = [X(...lines[3], ...lines[0]), X(...lines[0], ...lines[1]), X(...lines[1], ...lines[2]), X(...lines[2], ...lines[3])];
+    if (nq.some(p => !p)) continue;
+    // Plausibel: Ecken höchstens 2R verschoben
+    if (nq.some((p, i) => Math.hypot(p[0] - o[i][0], p[1] - o[i][1]) > 2.5 * R)) continue;
+    sel[f] = nq; n++; }
+  return n;
 }
 
 </script>

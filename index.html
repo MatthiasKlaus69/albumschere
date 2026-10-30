@@ -414,6 +414,52 @@ body.expert .foot { color: #fff; opacity: .9 }
 .upov { background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #1a0c02 }
 .upov::before { content: ""; position: absolute; inset: 0; background: rgba(30,12,0,.35) }
 .tool.on { background: rgba(255,138,31,.35); color: #fff }
+
+/* ---- 3D-Optik: erhabene Tasten, vertiefte Flächen ---- */
+.menu { box-shadow: 0 10px 24px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.07), inset 0 -2px 0 rgba(0,0,0,.35) }
+.menu .mbtn, .menu .mname { background: linear-gradient(180deg, #38383b 0%, #29292b 48%, #1f1f21 100%); border: 1px solid #0f0f10; border-top-color: #4a4a4e;
+  box-shadow: 0 4px 0 #0c0c0d, 0 7px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.4); transform: translateY(-2px); transition: transform .08s, box-shadow .08s, background .15s }
+.menu .mbtn:hover:not(:disabled) { background: linear-gradient(180deg, #424246 0%, #303033 48%, #242426 100%); border-color: #0f0f10; border-top-color: #56565a }
+.menu .mbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 #0c0c0d, 0 2px 4px rgba(0,0,0,.5), inset 0 2px 5px rgba(0,0,0,.55) }
+.menu .mbtn:disabled { transform: translateY(0); box-shadow: 0 1px 0 #0c0c0d, inset 0 1px 0 rgba(255,255,255,.05) }
+.menu .mbtn svg.i { filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)) }
+.menu .mbtn span, .menu .mbtn { text-shadow: 0 1px 1px rgba(0,0,0,.55) }
+.menu .mname input { box-shadow: inset 0 2px 4px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08) }
+.mtarget .seg { background: #111112; border-radius: 10px; box-shadow: inset 0 2px 5px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.06) }
+.mtarget .seg button[aria-checked="true"] { background: linear-gradient(180deg, #46464a, #303033); box-shadow: 0 2px 0 #0c0c0d, 0 3px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16) }
+.stage { box-shadow: inset 0 3px 10px rgba(0,0,0,.75), inset 0 0 0 1px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06) }
+#cv { box-shadow: 0 10px 26px rgba(0,0,0,.65), 0 2px 5px rgba(0,0,0,.5) }
+.toolbar, .stage .tcol .toolbar { background: linear-gradient(180deg, #303033, #222224); box-shadow: 0 8px 20px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -2px 0 rgba(0,0,0,.4) }
+.tool { transition: transform .08s, box-shadow .08s, background .12s }
+.tool:hover:not(:disabled) { background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03)); box-shadow: 0 2px 0 rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.12) }
+.tool:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,.6) }
+.tool svg.i { filter: drop-shadow(0 1px 1px rgba(0,0,0,.7)) }
+.chip, .tcol .chip { background: linear-gradient(180deg, #3a3a3d, #252527); box-shadow: 0 3px 8px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12) }
+.thumb { box-shadow: 0 4px 10px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1); transition: transform .12s, opacity .15s }
+.thumb.on { box-shadow: 0 0 0 2px var(--gold), 0 6px 14px rgba(0,0,0,.6); transform: translateY(-2px) }
+.hexp { box-shadow: inset 0 2px 4px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06) }
+body.expert .menu .mbtn, body.expert .menu .mname { background: linear-gradient(180deg, #c45f12 0%, #a14a0a 48%, #7a3606 100%); border-color: #4a1f02; border-top-color: #ffb36b;
+  box-shadow: 0 4px 0 #4a1f02, 0 7px 12px rgba(60,20,0,.5), inset 0 1px 0 rgba(255,220,180,.3), inset 0 -1px 0 rgba(0,0,0,.3) }
+body.expert .menu .mbtn:active:not(:disabled) { box-shadow: 0 0 0 #4a1f02, inset 0 2px 5px rgba(0,0,0,.5) }
+body.expert .toolbar, body.expert .stage .tcol .toolbar { background: linear-gradient(180deg, #8a3f08, #5a2804) }
+
+.hexp3 { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: #111112; border: 1px solid var(--line);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.06) }
+.hexp3 button { border: 0; background: transparent; color: var(--muted); font: 600 12.5px var(--f-ui); padding: 6px 11px; border-radius: 999px; cursor: pointer; transition: background .15s, box-shadow .15s }
+.hexp3 button[aria-checked="true"] { color: #fff; background: linear-gradient(180deg, #4a4a4e, #313134); box-shadow: 0 2px 0 #0c0c0d, 0 3px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16) }
+.hexp3 #bExpert[aria-checked="true"] { background: linear-gradient(180deg, #ff9a3c, #c4580c); box-shadow: 0 2px 0 #4a1f02, inset 0 1px 0 rgba(255,230,200,.4) }
+.hexp3 #mDebug[aria-checked="true"] { color: #1a1a00; background: linear-gradient(180deg, #fff35a, #d9c400); box-shadow: 0 2px 0 #4a4200, inset 0 1px 0 rgba(255,255,255,.5) }
+body.debug .stage { box-shadow: inset 0 0 0 2px #ffee00, inset 0 3px 10px rgba(0,0,0,.75) }
+@media (max-width: 759px) { .hexp3 { padding: 2px } .hexp3 button { font-size: 9.5px; padding: 3px 5px } }
+
+.dbgp { flex: none; width: 270px; align-self: flex-start; max-height: calc(100vh - 220px); overflow: auto; padding: 10px 12px; border-radius: 10px; background: #0b0b0c; border: 1px solid #3a3a10;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.8); font: 11.5px/1.45 var(--f-mono); color: #e8e6df }
+.dbgp h4 { margin: 10px 0 4px; font: 700 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: #ffee00 }
+.dbgp h4:first-child { margin-top: 0 }
+.dbgp table { width: 100%; border-collapse: collapse } .dbgp td { padding: 1px 0; vertical-align: top } .dbgp td:last-child { text-align: right; color: #fff }
+.dbgp .bad { color: #ff7a6e !important } .dbgp .ok { color: #8dff7a !important } .dbgp .mut { color: #8a877f }
+.dbgp .lg { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px }
+@media (max-width: 759px) { .dbgp { order: 5; width: auto; max-height: none; align-self: stretch } }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -454,7 +500,7 @@ body.expert .foot { color: #fff; opacity: .9 }
 
 <div class="app">
   <header class="head"><svg class="logo-img" viewBox="0 0 1336 476" role="img" aria-label="Albumschere by MS CUBE"><use href="#logoSym"/><text x="1296" y="408" text-anchor="end" class="byline">by MS CUBE</text></svg><h1 class="vh">Albumschere</h1>
-    <button class="hexp" id="bExpert" role="switch" aria-checked="false" title="Expertenmodus: Fotografieren → automatisch erkennen, ausschneiden, speichern"><span class="lb">Normal</span><span class="sw"><i></i></span><span class="lb">Experte</span></button></header>
+    <div class="hexp3" id="modeSw" role="radiogroup" aria-label="Modus"><button id="mNormal" role="radio" aria-checked="true">Normal</button><button id="bExpert" role="radio" aria-checked="false" title="Expertenmodus: Fotografieren → automatisch erkennen, ausschneiden, speichern">Experte</button><button id="mDebug" role="radio" aria-checked="false" title="Debug: Albumseitenkontur, Gradienten, Kantenbelegung">Debug</button></div></header>
   <div class="topbar" id="topbar" hidden></div>
 
   <nav class="menu" id="menu" aria-label="Menü">
@@ -482,6 +528,7 @@ body.expert .foot { color: #fff; opacity: .9 }
       <p>Fotografiere eine Albumseite oder wähle Fotos aus. Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</p>
     </div>
     <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
+      <aside class="dbgp" id="dbgPanel" hidden></aside>
       <div class="cvcol">
       <div class="cvwrap" id="cvwrap">
         <button class="glass-btn" id="bClear" aria-label="Alles leeren"><svg class="i"><use href="#i-new"/></svg><span>Neu</span></button>
@@ -522,7 +569,7 @@ body.expert .foot { color: #fff; opacity: .9 }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 45</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 46</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -2184,6 +2231,9 @@ detectQuads = function (rgba, w, h, sens) {
   if (CFG.splitFrames !== false) splitFrames(L, sel);
   if (CFG.sizeSel !== false) { const r = sizeSelect(L, C, sel); if (r) { sel.length = 0; for (const q of r) sel.push(q); } }
   if (CFG.sizeCheck !== false) sizeCheck(L, C, sel);
+  globalThis.DBGSTEP = { ovl: 0, blob: 0 };
+  if (CFG.overlap !== false) globalThis.DBGSTEP.ovl = resolveOverlaps(L, sel);
+  if (CFG.blobs !== false) for (const q of smallBlobs(L, sel)) { sel.push(q); globalThis.DBGSTEP.blob++; }
   globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { const cs = contourSearch(L, sel); globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
   if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   if (CFG.pageFeat !== false) try { globalThis.PAGEFEAT = pageFeatures(L, sel); } catch (e) { globalThis.PAGEFEAT = null; }
@@ -2925,12 +2975,7 @@ function pageFeatures(L, sel) {
 // ---- Debug-Ausgabe: Albumseitenkontur, Gradienten, Seitentyp, Fotogröße, Kantenbelegung je Rahmen, vermutete Lücken ----
 function debugInfo(L, sel, C) {
   const { w, h, pageLike, edge, eAng, Rb, Gb, Bb } = L, n = w * h;
-  // Albumseite = konvexe Hülle der als Seite erkannten Pixel
-  const pts = []; for (let y = 0; y < h; y += 2) { let a = -1, b = -1; for (let x = 0; x < w; x++) if (pageLike[y * w + x]) { if (a < 0) a = x; b = x; } if (a >= 0) pts.push([a, y], [b, y]); }
-  let hull = []; if (pts.length > 6) { pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
-    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
-    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
-    hull = lo.slice(0, -1).concat(up.slice(0, -1)); }
+  const pq = pageQuad(L, sel), hull = pq.quad;
   // Gradientenbetrag (Sobel auf Helligkeit)
   const Y = new Float32Array(n); for (let i = 0; i < n; i++) Y[i] = 0.299 * Rb[i] + 0.587 * Gb[i] + 0.114 * Bb[i];
   const G = new Float32Array(n); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;
@@ -2951,12 +2996,157 @@ function debugInfo(L, sel, C) {
     let hit = 0, k = 0; for (let s2 = 0.04; s2 <= 0.96; s2 += 1.5 / len) { k++; const x0 = P[0] + dx * s2, y0 = P[1] + dy * s2; let f = 0; for (let o = -2; o <= 2 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return k ? hit / k : 0; };
   const frames = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), c = [cov(o[0], o[1]), cov(o[1], o[2]), cov(o[2], o[3]), cov(o[3], o[0])];
     const a = (Math.hypot(o[1][0] - o[0][0], o[1][1] - o[0][1]) + Math.hypot(o[2][0] - o[3][0], o[2][1] - o[3][1])) / 2, b = (Math.hypot(o[3][0] - o[0][0], o[3][1] - o[0][1]) + Math.hypot(o[2][0] - o[1][0], o[2][1] - o[1][1])) / 2;
-    return { c: [o.reduce((s3, p) => s3 + p[0], 0) / 4 / w, o.reduce((s3, p) => s3 + p[1], 0) / 4 / h], kanten: +(c.reduce((x, y) => x + y, 0) / 4).toFixed(2), min: +Math.min(...c).toFixed(2), gr: Math.round(Math.max(a, b)) + '×' + Math.round(Math.min(a, b)) }; });
+    return { s: c.map(v => +v.toFixed(2)), c: [o.reduce((s3, p) => s3 + p[0], 0) / 4 / w, o.reduce((s3, p) => s3 + p[1], 0) / 4 / h], kanten: +(c.reduce((x, y) => x + y, 0) / 4).toFixed(2), min: +Math.min(...c).toFixed(2), gr: Math.round(Math.max(a, b)) + '×' + Math.round(Math.min(a, b)) }; });
   const seeds = ((globalThis.CSEED && globalThis.CSEED.seeds) || []).slice(0, 12).map(r => { const U = globalThis.CSEED.unrot; return [U(r[0], r[1]), U(r[2], r[1]), U(r[2], r[3]), U(r[0], r[3])].map(([x, y]) => [x / w, y / h]); });
   return { hull: hull.map(([x, y]) => [x / w, y / h]), seite: hull.length > 2 ? Math.round(100 * Math.abs(hull.reduce((s2, p, i) => { const q = hull[(i + 1) % hull.length]; return s2 + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2 / n) : 0,
     mode: globalThis.PAGEMODE || '?', farbe: nF ? [Math.round(cR / nF), Math.round(cG / nF), Math.round(cB / nF)] : null,
     gradFrei: nF ? +(gF / nF).toFixed(1) : null, gradFoto: nP ? +(gP / nP).toFixed(1) : null, kantenFrei: nF ? +(100 * eF / nF).toFixed(1) : null, lab,
-    kandidaten: C.length, frames, seeds, unerkannt: globalThis.UNREC || 0, w, h };
+    kandidaten: C.length, frames, seeds, unerkannt: globalThis.UNREC || 0, w, h, schritte: globalThis.DBGSTEP || {},
+    seiten: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, pq.sides[k] ? { c: pq.sides[k].c, l: [pq.sides[k].P, pq.sides[k].Q].map(([x, y]) => [x / w, y / h]) } : null])) };
+}
+
+// ---- Kleine, freistehende Fotos (rund/oval/klein) auf der freien Albumfläche ----
+// Eine geschlossene, kompakte, nicht seitenfarbige Fläche, rundum von Albumseite umgeben, wird als Rahmen (an der Albumkante ausgerichtet) ergänzt.
+function smallBlobs(L, sel) {
+  const { w, h, Rb, Gb, Bb } = L, n = w * h, out = []; if (!sel.length) return out;
+  const box = q => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; };
+  const areas = sel.map(q => { const b = box(q); return (b[2] - b[0]) * (b[3] - b[1]); }).sort((a, b) => a - b), med = areas[areas.length >> 1];
+  let ang = 0; { const as = sel.map(q => { const o = orderCorners(q.map(p => p.slice())); let a = Math.atan2(o[1][1] - o[0][1], o[1][0] - o[0][0]); return ((a + Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2) - Math.PI / 4; }).sort((a, b) => a - b); ang = as[as.length >> 1]; }
+  const cov = new Uint8Array(n), G = CFG.blobGuard ?? 6;
+  for (const q of sel) { const b = box(q); for (let y = Math.max(0, Math.floor(b[1]) - G - 2); y <= Math.min(h - 1, Math.ceil(b[3]) + G + 2); y++) for (let x = Math.max(0, Math.floor(b[0]) - G - 2); x <= Math.min(w - 1, Math.ceil(b[2]) + G + 2); x++) {
+    if (inPoly(q, x + .5, y + .5)) { cov[y * w + x] = 1; continue; } // Abstand zum Rahmen
+    const o = q; let dmin = 1e9; for (let e = 0; e < 4; e++) { const A = o[e], B = o[(e + 1) % 4], vx = B[0] - A[0], vy = B[1] - A[1], l2 = vx * vx + vy * vy || 1, t = Math.max(0, Math.min(1, ((x - A[0]) * vx + (y - A[1]) * vy) / l2)); dmin = Math.min(dmin, Math.hypot(x - A[0] - t * vx, y - A[1] - t * vy)); }
+    if (dmin <= G) cov[y * w + x] = 1; } }
+  // Seitenfarbe: Ring um die Rahmen
+  const rr = [], rg = [], rb = [];
+  for (const q of sel) { const o = orderCorners(q.map(p => p.slice())), c = [(o[0][0] + o[2][0]) / 2, (o[0][1] + o[2][1]) / 2];
+    for (let e = 0; e < 4; e++) for (let t = 0.1; t <= 0.9; t += 0.04) { const A = o[e], B = o[(e + 1) % 4], px = A[0] + (B[0] - A[0]) * t, py = A[1] + (B[1] - A[1]) * t, dx = px - c[0], dy = py - c[1], dl = Math.hypot(dx, dy) || 1;
+      const x = Math.round(px + dx / dl * (G + 4)), y = Math.round(py + dy / dl * (G + 4)); if (x < 0 || y < 0 || x >= w || y >= h || cov[y * w + x]) continue; const i = y * w + x; rr.push(Rb[i]); rg.push(Gb[i]); rb.push(Bb[i]); } }
+  if (rr.length < 30) return out;
+  const md = a => a.slice().sort((x, y) => x - y)[a.length >> 1], PR = md(rr), PG = md(rg), PB = md(rb);
+  // Seitenfarbe muss einheitlich sein (sonst ist das keine freie Albumfläche)
+  const spread = md(rr.map((v, i) => Math.abs(v - PR) + Math.abs(rg[i] - PG) + Math.abs(rb[i] - PB))); if (CFG.blobDbg) console.log('blob page', PR, PG, PB, 'spread', spread); if (spread > (CFG.blobSpread ?? 24)) return out;
+  const T = CFG.blobDist ?? 60, dist = i => Math.abs(Rb[i] - PR) + Math.abs(Gb[i] - PG) + Math.abs(Bb[i] - PB);
+  const all = sel.flat(), bb = box(all), mg = Math.sqrt(med) * 0.4;
+  const X0 = Math.max(2, Math.floor(bb[0] - mg)), Y0 = Math.max(2, Math.floor(bb[1] - mg)), X1 = Math.min(w - 3, Math.ceil(bb[2] + mg)), Y1 = Math.min(h - 3, Math.ceil(bb[3] + mg));
+  const M = new Uint8Array(n); for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const i = y * w + x; if (!cov[i] && dist(i) > T) M[i] = 1; }
+  // Schließen (Radius 2), damit das Motiv eine geschlossene Fläche wird
+  const dil = (S, r) => { const D = new Uint8Array(n); for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let v = 0; for (let dy = -r; dy <= r && !v; dy++) for (let dx = -r; dx <= r && !v; dx++) { const xx = x + dx, yy = y + dy; if (xx >= X0 && yy >= Y0 && xx <= X1 && yy <= Y1 && S[yy * w + xx]) v = 1; } D[y * w + x] = v; } return D; };
+  const ero = (S, r) => { const D = new Uint8Array(n); for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { let v = 1; for (let dy = -r; dy <= r && v; dy++) for (let dx = -r; dx <= r && v; dx++) { const xx = x + dx, yy = y + dy; if (xx < X0 || yy < Y0 || xx > X1 || yy > Y1 || !S[yy * w + xx]) v = 0; } D[y * w + x] = v; } return D; };
+  const C = ero(dil(M, 2), 2);
+  const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), minS = Math.max(14, Math.min(w, h) * (CFG.blobMin ?? 0.035));
+  for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (!C[s0] || lab[s0] >= 0) continue;
+    let top = 0, c = 0, x0 = w, y0 = h, x1 = 0, y1 = 0, sd = 0; stk[top++] = s0; lab[s0] = 1;
+    while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; sd += dist(i); if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy;
+      for (const j of [i - 1, i + 1, i - w, i + w]) if (C[j] && lab[j] < 0) { lab[j] = 1; stk[top++] = j; } }
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1, A = bw * bh;
+    if (CFG.blobDbg && bw >= minS && bh >= minS) console.log('  comp', x0, y0, bw, bh, 'fill', (c / A).toFixed(2), 'd', Math.round(sd / c), 'A/med', (A / med).toFixed(2));
+    if (bw < minS || bh < minS || Math.max(bw, bh) / Math.min(bw, bh) > (CFG.blobAsp ?? 2) || A > 0.6 * med || c / A < (CFG.blobFill ?? 0.62) || sd / c < T * 1.3) continue;
+    if (x0 <= X0 + 1 || y0 <= Y0 + 1 || x1 >= X1 - 1 || y1 >= Y1 - 1) continue;
+    // rundum Albumseite: Ring 3..7 px außerhalb der Fläche ist überwiegend seitenfarbig
+    let rp = 0, rt = 0, rc = 0; for (let y = y0 - 7; y <= y1 + 7; y++) for (let x = x0 - 7; x <= x1 + 7; x++) { if (x < 0 || y < 0 || x >= w || y >= h) continue; const dx = Math.max(x0 - x, x - x1, 0), dy = Math.max(y0 - y, y - y1, 0), d = Math.max(dx, dy); if (d < 3) continue; if (cov[y * w + x]) { rc++; continue; } rt++; if (dist(y * w + x) < T * 0.6) rp++; }
+    if (CFG.blobDbg) console.log('  ring', (rp / rt).toFixed(2), 'an Rahmen', (rc / (rc + rt)).toFixed(2));
+    // jede Seite der Fläche hat einen schmalen Streifen Albumseite (1–3 px) zum Nachbarn: klebt sie direkt an einem Rahmen, ist sie ein Teil eines Fotos
+    const sideP = []; for (const [sx0, sy0, sx1, sy1] of [[x0, y0 - 3, x1, y0 - 1], [x1 + 1, y0, x1 + 3, y1], [x0, y1 + 1, x1, y1 + 3], [x0 - 3, y0, x0 - 1, y1]]) { let a = 0, k = 0;
+      for (let y = sy0; y <= sy1; y++) for (let x = sx0; x <= sx1; x++) { if (x < 0 || y < 0 || x >= w || y >= h) continue; k++; const i = y * w + x; if (!M[i] && dist(i) < T * 0.6) a++; } sideP.push(k ? a / k : 0); }
+    if (CFG.blobDbg) console.log('  seiten', sideP.map(v => v.toFixed(2)).join(' '));
+    if (!rt || rp / rt < (CFG.blobRing ?? 0.8) || Math.min(...sideP) < (CFG.blobSide ?? 0.5)) continue;
+    // Rahmen an der Albumkante ausgerichtet: Pixel der Fläche ins gedrehte System, dort Hüllrechteck
+    const ca = Math.cos(ang), sa = Math.sin(ang); let u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (C[y * w + x]) { const u = x * ca + y * sa, v = -x * sa + y * ca; if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v; }
+    const un = (u, v) => [u * ca - v * sa, u * sa + v * ca];
+    out.push([un(u0 - 1, v0 - 1), un(u1 + 1, v0 - 1), un(u1 + 1, v1 + 1), un(u0 - 1, v1 + 1)]);
+    if (CFG.blobDbg) console.log('blob', x0, y0, bw, bh, 'fill', (c / A).toFixed(2), 'ring', (rp / rt).toFixed(2), 'd', Math.round(sd / c)); }
+  return out;
+}
+
+// ---- Fotos liegen im Album nie übereinander: überlappende Rahmen an der stärksten Kante dazwischen trennen ----
+function resolveOverlaps(L, sel) {
+  const { w, h, edge, eAng } = L;
+  const area = q => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
+  const inter = (P, Q) => { // Schnittfläche zweier konvexer Vierecke (Sutherland-Hodgman)
+    let out = P.map(p => p.slice()); const sg = area(Q) && ((Q[1][0] - Q[0][0]) * (Q[2][1] - Q[0][1]) - (Q[1][1] - Q[0][1]) * (Q[2][0] - Q[0][0]) > 0 ? 1 : -1);
+    for (let i = 0; i < 4 && out.length; i++) { const A = Q[i], B = Q[(i + 1) % 4], inside = p => sg * ((B[0] - A[0]) * (p[1] - A[1]) - (B[1] - A[1]) * (p[0] - A[0])) >= 0, inp = out; out = [];
+      for (let j = 0; j < inp.length; j++) { const p = inp[j], q = inp[(j + 1) % inp.length], ip = inside(p), iq = inside(q);
+        if (ip) out.push(p); if (ip !== iq) { const d1 = (B[0] - A[0]) * (p[1] - A[1]) - (B[1] - A[1]) * (p[0] - A[0]), d2 = (B[0] - A[0]) * (q[1] - A[1]) - (B[1] - A[1]) * (q[0] - A[0]), t = d1 / (d1 - d2); out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]); } } }
+    if (out.length < 3) return 0; let s = 0; for (let i = 0; i < out.length; i++) { const a = out[i], b = out[(i + 1) % out.length]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
+  const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+    let hit = 0, k = 0; for (let s = 0.05; s <= 0.95; s += 1.5 / len) { k++; const x0 = P[0] + dx * s, y0 = P[1] + dy * s; let f = 0; for (let o = -1; o <= 1 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return k ? hit / k : 0; };
+  // Schnittpunkt Gerade (P,Q) mit Gerade (A,B)
+  const X = (P, Q, A, B) => { const d = (Q[0] - P[0]) * (B[1] - A[1]) - (Q[1] - P[1]) * (B[0] - A[0]); if (Math.abs(d) < 1e-9) return null; const t = ((A[0] - P[0]) * (B[1] - A[1]) - (A[1] - P[1]) * (B[0] - A[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
+  let changed = 0;
+  for (let i = 0; i < sel.length; i++) for (let j = i + 1; j < sel.length; j++) {
+    const a = orderCorners(sel[i].map(p => p.slice())), b = orderCorners(sel[j].map(p => p.slice())), I = inter(a, b); if (I <= 0) continue;
+    if (I < (CFG.ovlMin ?? 12)) continue; const Aa = area(a), Ab = area(b); if (I / Math.min(Aa, Ab) > (CFG.ovlMax ?? 0.35)) continue; // starke Überdeckung behandeln andere Schritte
+    // Lage: b unterhalb/oberhalb/links/rechts von a (über die Mittelpunkte)
+    const ca = [(a[0][0] + a[2][0]) / 2, (a[0][1] + a[2][1]) / 2], cb = [(b[0][0] + b[2][0]) / 2, (b[0][1] + b[2][1]) / 2], vert = Math.abs(cb[1] - ca[1]) > Math.abs(cb[0] - ca[0]);
+    let U, Lw; if (vert) { [U, Lw] = cb[1] > ca[1] ? [a, b] : [b, a]; } else { [U, Lw] = cb[0] > ca[0] ? [a, b] : [b, a]; }
+    // gegenüberliegende Kanten: bei vertikaler Lage untere Kante von U (3→2) und obere von Lw (0→1); horizontal: rechte Kante von U (1→2), linke von Lw (0→3)
+    const eU = vert ? [U[3], U[2]] : [U[1], U[2]], eL = vert ? [Lw[0], Lw[1]] : [Lw[0], Lw[3]];
+    // Trennlinie: Kandidaten zwischen beiden Kanten (Endpunkte jeweils linear zwischen eU und eL), Wertung = Kantenbelegung
+    let best = null, bs = -1; const S = 9;
+    for (let s1 = 0; s1 <= S; s1++) for (let s2 = 0; s2 <= S; s2++) { const t1 = s1 / S, t2 = s2 / S, P = [eU[0][0] + (eL[0][0] - eU[0][0]) * t1, eU[0][1] + (eL[0][1] - eU[0][1]) * t1], Q = [eU[1][0] + (eL[1][0] - eU[1][0]) * t2, eU[1][1] + (eL[1][1] - eU[1][1]) * t2];
+      const c = cov(P, Q); if (c > bs) { bs = c; best = [P, Q]; } }
+    // nur wenn die Trennlinie mindestens so gut belegt ist wie die bisherigen Kanten
+    if (bs < (CFG.ovlCov ?? 0.6) || bs < Math.max(cov(...eU), cov(...eL)) - 0.02) continue;
+    // Ränder der Fotos verlängern: Linie zwischen beiden auf die Seitenkanten setzen, 1 px Abstand
+    const nrm = (() => { const dx = best[1][0] - best[0][0], dy = best[1][1] - best[0][1], l = Math.hypot(dx, dy) || 1; let nx = -dy / l, ny = dx / l; const cU = vert ? ca : ca; const mU = [(U[0][0] + U[2][0]) / 2, (U[0][1] + U[2][1]) / 2]; if ((mU[0] - best[0][0]) * nx + (mU[1] - best[0][1]) * ny < 0) { nx = -nx; ny = -ny; } return [nx, ny]; })();
+    const off = (P, k) => [P[0] + nrm[0] * k, P[1] + nrm[1] * k], LU = [off(best[0], 1), off(best[1], 1)], LL = [off(best[0], -1), off(best[1], -1)];
+    const nu = U.map(p => p.slice()), nl = Lw.map(p => p.slice());
+    if (vert) { const p3 = X(U[0], U[3], ...LU), p2 = X(U[1], U[2], ...LU), q0 = X(Lw[0], Lw[3], ...LL), q1 = X(Lw[1], Lw[2], ...LL); if (!p3 || !p2 || !q0 || !q1) continue; nu[3] = p3; nu[2] = p2; nl[0] = q0; nl[1] = q1; }
+    else { const p1 = X(U[0], U[1], ...LU), p2 = X(U[3], U[2], ...LU), q0 = X(Lw[0], Lw[1], ...LL), q3 = X(Lw[3], Lw[2], ...LL); if (!p1 || !p2 || !q0 || !q3) continue; nu[1] = p1; nu[2] = p2; nl[0] = q0; nl[3] = q3; }
+    // nur übernehmen, wenn Fläche plausibel bleibt
+    if (area(nu) < 0.7 * area(U) || area(nl) < 0.7 * area(Lw)) continue;
+    if (CFG.ovlDbg) console.log('overlap', i, j, 'I', I.toFixed(1), 'cov', bs.toFixed(2));
+    const iU = U === a ? i : j, iL = U === a ? j : i; sel[iU] = nu; sel[iL] = nl; changed++; }
+  return changed;
+}
+
+// ---- Albumseite als geschlossenes Viereck: je Seite die stärkste lange Gerade außerhalb der Fotos, etwa parallel zum Bildrand ----
+// Findet sich auf einer Seite keine Kante, reicht die Albumseite über den Bildrand hinaus: dann gilt der Bildrand.
+function pageQuad(L, sel) {
+  const { w, h, edge, eAng } = L;
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 14; };
+  const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+    let hit = 0, k = 0; for (let s = 0; s <= 1; s += 1.5 / len) { const x0 = P[0] + dx * s, y0 = P[1] + dy * s; if (x0 < 1 || y0 < 1 || x0 > w - 2 || y0 > h - 2) continue; k++; let f = 0; for (let o = -1; o <= 1 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return k > 20 ? hit / k : 0; };
+  let fx0 = w * 0.3, fy0 = h * 0.3, fx1 = w * 0.7, fy1 = h * 0.7;
+  if (sel.length) { const xs = sel.flat().map(p => p[0]), ys = sel.flat().map(p => p[1]); fx0 = Math.min(...xs); fx1 = Math.max(...xs); fy0 = Math.min(...ys); fy1 = Math.max(...ys); }
+  const thr = CFG.pqThr ?? 0.45, tilt = CFG.pqTilt ?? 0.18, res = {};
+  // horizontale Seiten: Linie von (ax, y1) nach (bx, y2) über die Breite der Fotos
+  // Seitenfarbe: Ring um die Fotos
+  const { Rb, Gb, Bb } = L; let PC = null;
+  { const rr = [], rg = [], rb = []; for (const q of sel) { const o = orderCorners(q.map(p => p.slice())), c = [(o[0][0] + o[2][0]) / 2, (o[0][1] + o[2][1]) / 2];
+      for (let e = 0; e < 4; e++) for (let t = 0.1; t <= 0.9; t += 0.05) { const A = o[e], B = o[(e + 1) % 4], px = A[0] + (B[0] - A[0]) * t, py = A[1] + (B[1] - A[1]) * t, dx = px - c[0], dy = py - c[1], dl = Math.hypot(dx, dy) || 1;
+        const x = Math.round(px + dx / dl * 8), y = Math.round(py + dy / dl * 8); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; rr.push(Rb[i]); rg.push(Gb[i]); rb.push(Bb[i]); } }
+    const md = a => a.slice().sort((x, y) => x - y)[a.length >> 1]; if (rr.length > 20) PC = [md(rr), md(rg), md(rb)]; }
+  const FM = new Uint8Array(w * h); for (const q of sel) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); for (let y = Math.max(0, Math.floor(Math.min(...ys))); y <= Math.min(h - 1, Math.ceil(Math.max(...ys))); y++) for (let x = Math.max(0, Math.floor(Math.min(...xs))); x <= Math.min(w - 1, Math.ceil(Math.max(...xs))); x++) if (inPoly(q, x + .5, y + .5)) FM[y * w + x] = 1; }
+  const isPage = (x, y) => { x = Math.round(x); y = Math.round(y); if (!PC || x < 0 || y < 0 || x >= w || y >= h) return 0; const i = y * w + x; if (FM[i]) return 1; return Math.abs(Rb[i] - PC[0]) + Math.abs(Gb[i] - PC[1]) + Math.abs(Bb[i] - PC[2]) < (CFG.pqCol ?? 70) ? 1 : 0; };
+  const bands = (P, Q, inward) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1; let nx = dy / len, ny = -dx / len; if ((inward[0] * nx + inward[1] * ny) < 0) { nx = -nx; ny = -ny; }
+    let a = 0, b = 0, k = 0; for (let s = 0.02; s <= 0.98; s += 4 / len) { const x = P[0] + dx * s, y = P[1] + dy * s; if (x < 0 || y < 0 || x >= w || y >= h) continue; k++; a += isPage(x + nx * 8, y + ny * 8); b += isPage(x - nx * 8, y - ny * 8); } return k ? [a / k, b / k] : [0, 0]; };
+  const corners = sel.flat(), tol = Math.max(3, Math.min(w, h) * (CFG.pqTol ?? 0.02));
+  const side = (name, horiz, lo, hi) => { const cand = [];
+    const a0 = 0, a1 = horiz ? w - 1 : h - 1, span = a1 - a0, outward = name === 'unten' || name === 'rechts' ? 1 : -1;
+    for (let p = lo; p <= hi; p += 1) for (let tl = -tilt; tl <= tilt + 1e-9; tl += 0.03) { const d = Math.tan(tl) * span / 2, p1 = p - d, p2 = p + d;
+      // Linie darf kein Foto schneiden: alle Ecken liegen auf der Innenseite (3 px Toleranz)
+      const at = u => p1 + (p2 - p1) * (u - a0) / (span || 1);
+      if (CFG.pqDbg && name === CFG.pqDbg) { const P0 = horiz ? [a0, p1] : [p1, a0], Q0 = horiz ? [a1, p2] : [p2, a1], c0 = cov(P0, Q0); if (c0 > 0.3) console.log(name, p, tl.toFixed(2), c0.toFixed(2), corners.filter(([x, y]) => horiz ? outward * (y - at(x)) > 3 : outward * (x - at(y)) > 3).map(c => c.map(Math.round).join(',')).join(' ')); }
+      if (corners.some(([x, y]) => horiz ? outward * (y - at(x)) > tol : outward * (x - at(y)) > tol)) continue;
+      const P = horiz ? [a0, p1] : [p1, a0], Q = horiz ? [a1, p2] : [p2, a1], c = cov(P, Q); if (c < thr) continue; const [fi, fo] = bands(P, Q, horiz ? [0, -outward] : [-outward, 0]); if (fi < (CFG.pqIn ?? 0.5)) continue;
+      cand.push({ P, Q, c: +c.toFixed(2), fi: +fi.toFixed(2), fo: +fo.toFixed(2), sc: c * fi * (1 - 0.7 * fo), dist: Math.abs(p - (outward > 0 ? (horiz ? fy1 : fx1) : (horiz ? fy0 : fx0))) }); }
+    if (!cand.length) { res[name] = null; return; }
+    // Albumrand = erste kräftige Kante von den Fotos aus (nicht der Seitenstapel dahinter)
+    const ok = cand.sort((a, b) => b.sc - a.sc);
+    res[name] = ok[0]; };
+  const g = CFG.pqGap ?? 4;
+  const mY = Math.round(h * 0.06), mX = Math.round(w * 0.06);
+  side('oben', true, 1, Math.min(h - 2, Math.floor(fy0) + mY)); side('unten', true, Math.max(1, Math.ceil(fy1) - mY), h - 2);
+  side('links', false, 1, Math.min(w - 2, Math.floor(fx0) + mX)); side('rechts', false, Math.max(1, Math.ceil(fx1) - mX), w - 2);
+  const line = (r, def) => r ? [r.P, r.Q] : def;
+  const T = line(res.oben, [[0, 0], [w - 1, 0]]), B = line(res.unten, [[0, h - 1], [w - 1, h - 1]]), Lf = line(res.links, [[0, 0], [0, h - 1]]), R = line(res.rechts, [[w - 1, 0], [w - 1, h - 1]]);
+  const X = (A, Bq) => { const [P, Q] = A, [U, V] = Bq, d = (Q[0] - P[0]) * (V[1] - U[1]) - (Q[1] - P[1]) * (V[0] - U[0]); if (Math.abs(d) < 1e-9) return P; const t = ((U[0] - P[0]) * (V[1] - U[1]) - (U[1] - P[1]) * (V[0] - U[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
+  const quad = [X(T, Lf), X(T, R), X(B, R), X(B, Lf)].map(([x, y]) => [Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))]);
+  return { quad, sides: res };
 }
 
 </script>
@@ -3236,7 +3426,7 @@ function drawEditor() {
   $('secEdit').hidden = !p; $('toolbar').hidden = !p; $('legend').hidden = true; $('chip').hidden = !p && !$('chip').classList.contains('busy'); $('stage').classList.toggle('is-empty', !p);
   $('emptyStage').hidden = !!p; cv.hidden = !p; $('bClear').hidden = !S.pages.length;
   updateButtons();
-  if (!p) return;
+  if (!p) { $('dbgPanel').hidden = true; return; }
   if (!$('chip').classList.contains('busy')) status(`Seite ${S.cur + 1} von ${S.pages.length} · ${qualityText(p)}${p.sample ? ' · Beispiel' : ''}`, false);
   $('pageName').textContent = p.sample ? 'Beispiel' : `Seite ${S.cur + 1}`;
   const st = $('cvwrap'), cs = getComputedStyle(st);
@@ -3254,7 +3444,7 @@ function drawEditor() {
   view = { w, h, dpr };
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.drawImage(pv, 0, 0, w, h);
-  const AMB = '#f5bd3c';
+  const AMB = S.debug ? '#ffee00' : '#f5bd3c';
   // nicht erkannte Fläche leicht abdunkeln, damit die Fotos hervortreten
   if (p.quads.length) {
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h);
@@ -3288,39 +3478,43 @@ function drawEditor() {
     ctx.fillStyle = sel ? '#1d1500' : '#fff'; ctx.fillText(label, cx, cy + 0.5);
   });
   if (S.pts) for (const [x, y] of S.pts) { ctx.beginPath(); ctx.arc(x * w, y * h, 7, 0, 7); ctx.fillStyle = '#ff8a1f'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); }
-  if (S.debug) drawDebug(p, w, h);
+  $('dbgPanel').hidden = !S.debug; if (S.debug) drawDebug(p, w, h);
   if (loupe) drawLoupe(p);
 }
 // ---- Debug-Ansicht (Tipp auf die Versionsnummer) ----
 function drawDebug(p, w, h) {
-  const g = p.dbg; ctx.save();
+  const g = p.dbg, panel = $('dbgPanel'); ctx.save();
   const V = c => { const [x, y] = toView(p, c); return [x * w, y * h]; };
-  const lines = [];
-  if (!g) lines.push('Debug: keine Daten – Seite neu erkennen');
-  else if (g.err) lines.push('Debug-Fehler: ' + g.err);
+  const poly = (pts, col, lw, dash) => { ctx.setLineDash(dash || []); ctx.beginPath(); pts.forEach((c, i) => { const [x, y] = V(c); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.lineWidth = lw + 2; ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.stroke(); ctx.lineWidth = lw; ctx.strokeStyle = col; ctx.stroke(); ctx.setLineDash([]); };
+  const f2 = v => v == null ? '–' : (+v).toFixed(2), row = (a, b, cls) => `<tr><td>${a}</td><td class="${cls || ''}">${b}</td></tr>`;
+  let html = '';
+  if (!g) html = '<h4>Debug</h4><p>Keine Daten – Seite neu erkennen.</p>';
+  else if (g.err) html = '<h4>Debug-Fehler</h4><p>' + g.err + '</p>';
   else {
-    // Albumseitenkontur gelb
-    if (g.hull && g.hull.length > 2) { ctx.beginPath(); g.hull.forEach((c, i) => { const [x, y] = V(c); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath();
-      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.stroke(); ctx.lineWidth = 2.2; ctx.strokeStyle = '#ffee00'; ctx.stroke(); }
-    // vermutete unerkannte Fotos rot gestrichelt
-    ctx.setLineDash([6, 4]); for (const r of g.seeds || []) { ctx.beginPath(); r.forEach((c, i) => { const [x, y] = V(c); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.lineWidth = 2; ctx.strokeStyle = '#ff3b30'; ctx.stroke(); } ctx.setLineDash([]);
-    const tag = (x, y, txt, bg, fg) => { ctx.font = '600 11px ui-monospace, monospace'; const rows = txt.split('\n'), tw = Math.max(...rows.map(r => ctx.measureText(r).width)) + 10, th = rows.length * 14 + 6;
-      x = Math.min(w - tw - 2, Math.max(2, x - tw / 2)); y = Math.min(h - th - 2, Math.max(2, y)); ctx.fillStyle = bg; ctx.fillRect(x, y, tw, th); ctx.fillStyle = fg; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; rows.forEach((r, i) => ctx.fillText(r, x + 5, y + 4 + i * 14)); };
-    // Gradient auf der freien Albumfläche
-    if (g.lab) { const [x, y] = V(g.lab); tag(x, y - 20, `freie Fläche\nGradient ${g.gradFrei}\nKanten ${g.kantenFrei} %`, 'rgba(255,238,0,.92)', '#000'); }
-    // je Rahmen: Kantenbelegung, Größe
-    for (const f of g.frames || []) { const [x, y] = V(f.c); tag(x, y + 14, `K ${f.kanten} min ${f.min}\n${f.gr}`, 'rgba(0,0,0,.75)', f.min < 0.5 ? '#ff8a80' : '#b9f6ca'); }
-    const f = g.farbe ? `rgb(${g.farbe.join(',')})` : '–';
-    lines.push(`Seite ${g.mode} · Fläche ${g.seite} % · Farbe ${f}`, `Gradient frei ${g.gradFrei} · Foto ${g.gradFoto} · Kanten frei ${g.kantenFrei} %`,
-      `Kandidaten ${g.kandidaten} · Rahmen ${(g.frames || []).length} · unerkannt ${g.unerkannt}`, `rot gestrichelt: Verdachtsflächen ${(g.seeds || []).length}`, `Drehung ${(p.rotAuto || 0) * 90}° · Sicherheit ${(+(p.rotConf || 0)).toFixed(2)} · Analyse ${g.w}×${g.h}`);
+    // Albumseite hellgrün: gefundene Kanten durchgezogen, Bildrand-Ersatz gepunktet
+    if (g.hull && g.hull.length > 2) { const q = g.hull, sides = [['oben', 0, 1], ['rechts', 1, 2], ['unten', 2, 3], ['links', 3, 0]];
+      for (const [k, a, b] of sides) { const ok = g.seiten && g.seiten[k]; ctx.setLineDash(ok ? [] : [3, 5]); ctx.beginPath(); const [x1, y1] = V(q[a]), [x2, y2] = V(q[b]); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.lineWidth = ok ? 5 : 3; ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.stroke(); ctx.lineWidth = ok ? 3 : 1.5; ctx.strokeStyle = '#7dff6a'; ctx.stroke(); } ctx.setLineDash([]); }
+    // unerkannte Fotos rot gestrichelt
+    for (const r of g.seeds || []) poly(r, '#ff3b30', 2, [7, 5]);
+    // Rahmennummern wie im Editor zuordnen
+    const ctr = q => [q.c.reduce((s, c) => s + c[0], 0) / 4, q.c.reduce((s, c) => s + c[1], 0) / 4];
+    const fr = (g.frames || []).map(f => { let bi = -1, bd = 1e9; p.quads.forEach((q, i) => { const [x, y] = ctr(q), d = Math.hypot(x - f.c[0], y - f.c[1]); if (d < bd) { bd = d; bi = i; } }); return { ...f, nr: bd < 0.05 ? bi + 1 : null }; }).sort((a, b) => (a.nr || 99) - (b.nr || 99));
+    for (const f of fr) { const [x, y] = V(f.c); const t = `K ${f2(f.kanten)}`; ctx.font = '700 11px ui-monospace, monospace'; const tw = ctx.measureText(t).width + 10;
+      ctx.fillStyle = 'rgba(0,0,0,.78)'; ctx.fillRect(x - tw / 2, y + 13, tw, 17); ctx.fillStyle = f.min < 0.5 ? '#ff8a80' : '#ffee00'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y + 22); }
+    const S2 = g.seiten || {}, st = g.schritte || {}, nr = (g.seeds || []).length;
+    html += '<h4>Legende</h4>' + `<div><span class="lg" style="color:#7dff6a"></span>Albumseite (gepunktet = Bildrand)</div><div><span class="lg" style="color:#ffee00"></span>erkannte Fotos</div><div><span class="lg" style="color:#ff3b30;border-top-style:dashed"></span>vermutete unerkannte Fotos</div>`;
+    html += '<h4>Albumseite</h4><table>' + ['oben', 'rechts', 'unten', 'links'].map(k => row('Kante ' + k, S2[k] ? 'Belegung ' + f2(S2[k].c) : 'Bildrand', S2[k] ? 'ok' : 'mut')).join('') +
+      row('Typ', g.mode === 'farbe' ? 'farbig/dunkel' : 'hell') + row('Seitenfarbe', g.farbe ? `<span style="display:inline-block;width:10px;height:10px;background:rgb(${g.farbe});vertical-align:middle;margin-right:4px"></span>${g.farbe.join(',')}` : '–') + row('Anteil am Bild', g.seite + ' %') + '</table>';
+    html += '<h4>Freie Albumfläche</h4><table>' + row('Gradient frei', g.gradFrei ?? '–', g.gradFrei > 4 ? 'bad' : 'ok') + row('Gradient in Fotos', g.gradFoto ?? '–') + row('Kantenpixel frei', (g.kantenFrei ?? '–') + ' %', g.kantenFrei > 12 ? 'bad' : '') + '</table>';
+    html += `<h4>Fotos (${fr.length})</h4><table>` + row('<span class="mut">Nr · Größe</span>', '<span class="mut">o r u l · min</span>') +
+      fr.map(f => row(`${f.nr ?? '?'} · ${f.gr}`, `${(f.s || []).map(v => Math.round(v * 100)).join(' ')} · ${f2(f.min)}`, f.min < 0.5 ? 'bad' : '')).join('') + '</table>';
+    html += '<h4>Erkennung</h4><table>' + row('Kandidaten', g.kandidaten) + row('Verdachtsflächen', nr, nr ? 'bad' : 'ok') + row('geschätzt unerkannt', g.unerkannt, g.unerkannt ? 'bad' : 'ok') +
+      row('Überlappungen getrennt', st.ovl || 0) + row('kleine Fotos ergänzt', st.blob || 0) + row('Analyse', `${g.w}×${g.h} px`) + '</table>';
+    html += '<h4>Ausrichtung</h4><table>' + row('Drehung', ((p.rotAuto || 0) * 90) + '°') + row('Sicherheit', f2(p.rotConf || 0), (p.rotConf || 0) < 0.15 ? 'bad' : 'ok') + '</table>';
   }
-  ctx.font = '600 11px ui-monospace, monospace'; const tw = Math.max(...lines.map(r => ctx.measureText(r).width)) + 12;
-  const y0 = h - lines.length * 14 - 12; ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(4, y0, Math.min(w - 8, tw), lines.length * 14 + 8); ctx.fillStyle = '#ffee00'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  lines.forEach((r, i) => ctx.fillText(r, 10, y0 + 4 + i * 14)); ctx.restore();
+  ctx.restore(); if (panel.innerHTML !== html) panel.innerHTML = html;
 }
-$('appVer').style.cursor = 'pointer';
-$('appVer').onclick = async () => { S.debug = !S.debug; $('appVer').textContent = $('appVer').textContent.replace(/ · Debug$/, '') + (S.debug ? ' · Debug' : '');
-  toast(S.debug ? 'Debug-Ansicht an' : 'Debug-Ansicht aus'); const p = page(); if (S.debug && p && !p.dbg && !p.sample) { status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value, true); status('', false); } drawEditor(); };
 function norm(x, y) { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; }
 
 function drawLoupe(p) {
@@ -3733,9 +3927,15 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') openSheet(fa
 // ---------- Expertenmodus: Seite fotografieren → automatisch erkennen, ausschneiden, kurz zeigen, speichern, nächste Seite ----------
 S.expert = false; S.pageBase = 0;
 try { S.expert = localStorage.getItem('albumschere.expert') === '1'; S.pageBase = +(localStorage.getItem('albumschere.base') || 0); } catch (e) {}
-function setExpert(on) { S.expert = on; document.body.classList.toggle('expert', on); $('bExpert').setAttribute('aria-checked', String(on)); try { localStorage.setItem('albumschere.expert', on ? '1' : '0'); } catch (e) {} }
-$('bExpert').onclick = () => { setExpert(!S.expert); toast(S.expert ? 'Expertenmodus an: Fotografieren → alles läuft automatisch' : 'Expertenmodus aus'); };
-setExpert(S.expert);
+function setMode(m) { S.expert = m === 'expert'; S.debug = m === 'debug'; document.body.classList.toggle('expert', S.expert); document.body.classList.toggle('debug', S.debug);
+  for (const [id, v] of [['mNormal', 'normal'], ['bExpert', 'expert'], ['mDebug', 'debug']]) $(id).setAttribute('aria-checked', String(m === v));
+  try { localStorage.setItem('albumschere.mode', m); localStorage.setItem('albumschere.expert', S.expert ? '1' : '0'); } catch (e) {} }
+function setExpert(on) { setMode(on ? 'expert' : 'normal'); }
+async function pickMode(m) { const was = S.debug; setMode(m);
+  toast(m === 'expert' ? 'Expertenmodus an: Fotografieren → alles läuft automatisch' : m === 'debug' ? 'Debug-Ansicht an' : 'Normaler Modus');
+  const p = page(); if (S.debug && !was && p && !p.dbg && !p.sample) { status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value, true); status('', false); } drawEditor(); }
+$('mNormal').onclick = () => pickMode('normal'); $('bExpert').onclick = () => pickMode(S.expert ? 'normal' : 'expert'); $('mDebug').onclick = () => pickMode('debug');
+{ let m = 'normal'; try { m = localStorage.getItem('albumschere.mode') || (S.expert ? 'expert' : 'normal'); } catch (e) {} setMode(m); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function xMenu(msg, buttons) { $('xov').hidden = false; $('xImg').hidden = true; $('xCap').textContent = ''; $('xMenu').hidden = false; $('xMsg').textContent = msg;
   const box = $('xBtns'); box.innerHTML = ''; for (const [label, cls, fn, forId] of buttons) { const b = document.createElement(forId ? 'label' : 'button'); b.className = 'btn ' + (cls || ''); b.textContent = label; if (forId) b.htmlFor = forId; b.onclick = e => { fn && fn(e); }; box.appendChild(b); } }

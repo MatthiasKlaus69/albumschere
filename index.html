@@ -449,7 +449,6 @@ body.expert .toolbar, body.expert .stage .tcol .toolbar { background: linear-gra
 .hexp3 button[aria-checked="true"] { color: #fff; background: linear-gradient(180deg, #4a4a4e, #313134); box-shadow: 0 2px 0 #0c0c0d, 0 3px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16) }
 .hexp3 #bExpert[aria-checked="true"] { background: linear-gradient(180deg, #ff9a3c, #c4580c); box-shadow: 0 2px 0 #4a1f02, inset 0 1px 0 rgba(255,230,200,.4) }
 .hexp3 #mDebug[aria-checked="true"] { color: #1a1a00; background: linear-gradient(180deg, #fff35a, #d9c400); box-shadow: 0 2px 0 #4a4200, inset 0 1px 0 rgba(255,255,255,.5) }
-body.debug .stage { box-shadow: inset 0 0 0 2px #ffee00, inset 0 3px 10px rgba(0,0,0,.75) }
 @media (max-width: 759px) { .hexp3 { padding: 2px } .hexp3 button { font-size: 9.5px; padding: 3px 5px } }
 
 .dbgp { flex: none; width: 270px; align-self: flex-start; max-height: calc(100vh - 220px); overflow: auto; padding: 10px 12px; border-radius: 10px; background: #0b0b0c; border: 1px solid #3a3a10;
@@ -460,6 +459,33 @@ body.debug .stage { box-shadow: inset 0 0 0 2px #ffee00, inset 0 3px 10px rgba(0
 .dbgp .bad { color: #ff7a6e !important } .dbgp .ok { color: #8dff7a !important } .dbgp .mut { color: #8a877f }
 .dbgp .lg { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px }
 @media (max-width: 759px) { .dbgp { order: 5; width: auto; max-height: none; align-self: stretch } }
+
+/* ---- Metall-Optik: gebürstete Platten mit Schrauben ---- */
+:root { --metal: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.035) 1px 3px), linear-gradient(180deg, #4b4c50 0%, #36373a 45%, #2b2c2f 55%, #3a3b3e 100%) }
+.menu, .stage .tcol .toolbar, .toolbar { background: var(--metal); border: 1px solid #101011; border-top-color: #6a6b70;
+  box-shadow: 0 12px 26px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -2px 0 rgba(0,0,0,.45), inset 0 0 0 3px rgba(0,0,0,.12) }
+.menu::before, .menu::after, .stage .tcol .toolbar::before, .stage .tcol .toolbar::after { content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #f2f2f2 0 1.5px, #a9aaad 2.5px, #5d5e62 4.5px, #2a2a2c 5px);
+  box-shadow: 0 1px 1px rgba(0,0,0,.7), inset 0 0 0 .5px rgba(0,0,0,.6) }
+.menu::before, .stage .tcol .toolbar::before { top: 5px; left: 5px } .menu::after, .stage .tcol .toolbar::after { bottom: 5px; right: 5px }
+.menu { background-image: radial-gradient(circle at 9.5px calc(100% - 9.5px), #d9d9db 0 1.2px, #8d8e92 2.2px, #4a4b4e 4px, rgba(0,0,0,.6) 4.6px, transparent 5px),
+  radial-gradient(circle at calc(100% - 9.5px) 9.5px, #d9d9db 0 1.2px, #8d8e92 2.2px, #4a4b4e 4px, rgba(0,0,0,.6) 4.6px, transparent 5px), var(--metal) }
+.stage .tcol .toolbar { position: relative; left: auto; top: auto; padding-top: 16px; padding-bottom: 16px }
+.menu .mbtn, .menu .mname { background: repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, rgba(0,0,0,.04) 1px 2px), linear-gradient(180deg, #5a5b60 0%, #3c3d41 50%, #2e2f32 100%);
+  border-color: #0c0c0d; border-top-color: #7a7b80 }
+.menu .mbtn:hover:not(:disabled) { background: repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, rgba(0,0,0,.04) 1px 2px), linear-gradient(180deg, #66676c 0%, #46474b 50%, #36373a 100%) }
+/* ---- Debug-Modus: blaue Oberfläche ---- */
+body.debug { --line: #2f6fd6; --line2: #2558aa; --gold: #8ec1ff; --gold-hi: #c2ddff; --muted: #c8dcff; --dim: #93b4e6 }
+html:has(body.debug) { background: linear-gradient(180deg, #1d5fc4, #0d3a85) #154a9f !important }
+body.debug .menu, body.debug .work, body.debug .panel { border-color: #6aa6ff }
+body.debug .menu, body.debug .stage .tcol .toolbar, body.debug .toolbar { background: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.035) 1px 3px), linear-gradient(180deg, #2e5fa8 0%, #1f4583 50%, #1a3a70 100%) }
+body.debug .menu .mbtn, body.debug .menu .mname { background: linear-gradient(180deg, #3d78cf 0%, #285aa6 50%, #1d4686 100%); border-color: #0b2148; border-top-color: #8fbcff; color: #fff;
+  box-shadow: 0 4px 0 #0b2148, 0 7px 12px rgba(0,20,60,.5), inset 0 1px 0 rgba(220,235,255,.35) }
+body.debug .menu .mbtn svg.i { color: #d6e8ff }
+body.debug .stage { background: #08142b; box-shadow: inset 0 0 0 2px #6aa6ff, inset 0 3px 10px rgba(0,0,0,.75) }
+body.debug .foot { color: #fff }
+.hexp3 #mDebug[aria-checked="true"] { color: #fff; background: linear-gradient(180deg, #5b9bff, #1f5fc8); box-shadow: 0 2px 0 #0b2148, inset 0 1px 0 rgba(255,255,255,.4) }
+.dbgp { border-color: #2f6fd6 } .dbgp h4 { color: #8ec1ff }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -569,7 +595,7 @@ body.debug .stage { box-shadow: inset 0 0 0 2px #ffee00, inset 0 3px 10px rgba(0
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 46</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 47</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -2234,7 +2260,9 @@ detectQuads = function (rgba, w, h, sens) {
   globalThis.DBGSTEP = { ovl: 0, blob: 0 };
   if (CFG.overlap !== false) globalThis.DBGSTEP.ovl = resolveOverlaps(L, sel);
   if (CFG.blobs !== false) for (const q of smallBlobs(L, sel)) { sel.push(q); globalThis.DBGSTEP.blob++; }
-  globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { const cs = contourSearch(L, sel); globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
+  globalThis.PQ = null; try { globalThis.PQ = pageQuad(L, sel); } catch (e) {}
+  globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { let cs = contourSearch(L, sel); if (globalThis.PQ && CFG.seedPage !== false) { const inQ = q => insidePage(globalThis.PQ.quadF, q) >= 0.5; cs = cs.filter(inQ); if (globalThis.CSEED) { const U = globalThis.CSEED.unrot; globalThis.CSEED.seeds = globalThis.CSEED.seeds.filter(r => inQ([U(r[0], r[1]), U(r[2], r[1]), U(r[2], r[3]), U(r[0], r[3])])); } } if (CFG.promote !== false && globalThis.CSEED) { const pr = promoteSeeds(L, sel, globalThis.CSEED, globalThis.PQ); for (const q of pr) sel.push(q); globalThis.DBGSTEP.prom = pr.length; cs = cs.filter(c => !pr.some(q => insidePage(q, c) > 0.5)); } globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
+  if (CFG.clipPage !== false && globalThis.PQ) globalThis.DBGSTEP.clip = clipToPage(L, sel, globalThis.PQ);
   if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   if (CFG.pageFeat !== false) try { globalThis.PAGEFEAT = pageFeatures(L, sel); } catch (e) { globalThis.PAGEFEAT = null; }
   globalThis.DBGOUT = null; if (CFG.debug) try { globalThis.DBGOUT = debugInfo(L, sel, C); } catch (e) { globalThis.DBGOUT = { err: String(e) }; }
@@ -2975,7 +3003,7 @@ function pageFeatures(L, sel) {
 // ---- Debug-Ausgabe: Albumseitenkontur, Gradienten, Seitentyp, Fotogröße, Kantenbelegung je Rahmen, vermutete Lücken ----
 function debugInfo(L, sel, C) {
   const { w, h, pageLike, edge, eAng, Rb, Gb, Bb } = L, n = w * h;
-  const pq = pageQuad(L, sel), hull = pq.quad;
+  const pq = globalThis.PQ || pageQuad(L, sel), hull = pq.quad;
   // Gradientenbetrag (Sobel auf Helligkeit)
   const Y = new Float32Array(n); for (let i = 0; i < n; i++) Y[i] = 0.299 * Rb[i] + 0.587 * Gb[i] + 0.114 * Bb[i];
   const G = new Float32Array(n); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;
@@ -3002,7 +3030,7 @@ function debugInfo(L, sel, C) {
     mode: globalThis.PAGEMODE || '?', farbe: nF ? [Math.round(cR / nF), Math.round(cG / nF), Math.round(cB / nF)] : null,
     gradFrei: nF ? +(gF / nF).toFixed(1) : null, gradFoto: nP ? +(gP / nP).toFixed(1) : null, kantenFrei: nF ? +(100 * eF / nF).toFixed(1) : null, lab,
     kandidaten: C.length, frames, seeds, unerkannt: globalThis.UNREC || 0, w, h, schritte: globalThis.DBGSTEP || {},
-    seiten: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, pq.sides[k] ? { c: pq.sides[k].c, l: [pq.sides[k].P, pq.sides[k].Q].map(([x, y]) => [x / w, y / h]) } : null])) };
+    seiten: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, pq.sides[k] ? { c: pq.sides[k].c } : null])), ersatz: pq.fallback || {} };
 }
 
 // ---- Kleine, freistehende Fotos (rund/oval/klein) auf der freien Albumfläche ----
@@ -3143,10 +3171,66 @@ function pageQuad(L, sel) {
   side('oben', true, 1, Math.min(h - 2, Math.floor(fy0) + mY)); side('unten', true, Math.max(1, Math.ceil(fy1) - mY), h - 2);
   side('links', false, 1, Math.min(w - 2, Math.floor(fx0) + mX)); side('rechts', false, Math.max(1, Math.ceil(fx1) - mX), w - 2);
   const line = (r, def) => r ? [r.P, r.Q] : def;
-  const T = line(res.oben, [[0, 0], [w - 1, 0]]), B = line(res.unten, [[0, h - 1], [w - 1, h - 1]]), Lf = line(res.links, [[0, 0], [0, h - 1]]), R = line(res.rechts, [[w - 1, 0], [w - 1, h - 1]]);
   const X = (A, Bq) => { const [P, Q] = A, [U, V] = Bq, d = (Q[0] - P[0]) * (V[1] - U[1]) - (Q[1] - P[1]) * (V[0] - U[0]); if (Math.abs(d) < 1e-9) return P; const t = ((U[0] - P[0]) * (V[1] - U[1]) - (U[1] - P[1]) * (V[0] - U[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
-  const quad = [X(T, Lf), X(T, R), X(B, R), X(B, Lf)].map(([x, y]) => [Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))]);
-  return { quad, sides: res };
+  const mk = (T, B, Lf, R) => [X(T, Lf), X(T, R), X(B, R), X(B, Lf)].map(([x, y]) => [Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))]);
+  const IB = { oben: [[0, 0], [w - 1, 0]], unten: [[0, h - 1], [w - 1, h - 1]], links: [[0, 0], [0, h - 1]], rechts: [[w - 1, 0], [w - 1, h - 1]] };
+  // Ersatz für nicht gefundene Kanten: äußerste Fotokante auf dieser Seite (sonst Bildrand)
+  const FE = {}; if (sel.length) { const os = sel.map(q => orderCorners(q.map(p => p.slice()))), m = (a, b) => (a + b) / 2;
+    const pick = (f, key) => os.map(o => f(o)).sort((u, v) => key(u) - key(v))[0];
+    FE.oben = pick(o => [o[0], o[1]], e => m(e[0][1], e[1][1])); FE.unten = pick(o => [o[3], o[2]], e => -m(e[0][1], e[1][1]));
+    FE.links = pick(o => [o[0], o[3]], e => m(e[0][0], e[1][0])); FE.rechts = pick(o => [o[1], o[2]], e => -m(e[0][0], e[1][0])); }
+  const L2 = k => line(res[k], FE[k] || IB[k]), L3 = k => line(res[k], IB[k]);
+  const quad = mk(L2('oben'), L2('unten'), L2('links'), L2('rechts')), quadF = mk(L3('oben'), L3('unten'), L3('links'), L3('rechts'));
+  return { quad, quadF, sides: res, fallback: Object.fromEntries(['oben', 'unten', 'links', 'rechts'].map(k => [k, res[k] ? null : (FE[k] ? 'Fotokante' : 'Bildrand')])) };
+}
+
+// Anteil eines Vierecks innerhalb der Albumseite (Stichproben)
+function insidePage(Q, q) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys); let a = 0, k = 0;
+  for (let i = 0; i <= 8; i++) for (let j = 0; j <= 8; j++) { const x = x0 + (x1 - x0) * i / 8, y = y0 + (y1 - y0) * j / 8; if (!inPoly(q, x, y)) continue; k++; if (inPoly(Q, x, y)) a++; } return k ? a / k : 1; }
+// Kein Fotoeckpunkt außerhalb der Albumseite: Ecken jenseits einer gefundenen Albumkante werden entlang der Fotokante auf die Albumkante gezogen
+function clipToPage(L, sel, PQ) {
+  const Q = PQ.quadF, names = ['oben', 'rechts', 'unten', 'links'], tol = CFG.clipTol ?? 1.5; let n = 0;
+  const cx = Q.reduce((s, p) => s + p[0], 0) / 4, cy = Q.reduce((s, p) => s + p[1], 0) / 4;
+  for (let k = 0; k < 4; k++) { if (!PQ.sides[names[k]]) continue; const A = Q[k], B = Q[(k + 1) % 4]; let nx = -(B[1] - A[1]), ny = B[0] - A[0]; const l = Math.hypot(nx, ny) || 1; nx /= l; ny /= l;
+    if ((cx - A[0]) * nx + (cy - A[1]) * ny < 0) { nx = -nx; ny = -ny; } // Normale zeigt nach innen
+    const dIn = p => (p[0] - A[0]) * nx + (p[1] - A[1]) * ny;
+    for (let f = 0; f < sel.length; f++) { const o = orderCorners(sel[f].map(p => p.slice())), side = Math.min(Math.hypot(o[1][0] - o[0][0], o[1][1] - o[0][1]), Math.hypot(o[3][0] - o[0][0], o[3][1] - o[0][1]));
+      let ch = false; const nq = o.map(p => p.slice());
+      for (let i = 0; i < 4; i++) { const d = dIn(o[i]); if (d >= -tol) continue; if (-d > side * (CFG.clipMax ?? 0.08)) { ch = false; nq.length = 0; break; }
+        // entlang der Fotokante zum Nachbareck, das innen liegt
+        const cand = [o[(i + 1) % 4], o[(i + 3) % 4]].filter(p => dIn(p) > 0).map(p => { const t = d / (d - dIn(p)); return [o[i][0] + (p[0] - o[i][0]) * t, o[i][1] + (p[1] - o[i][1]) * t]; });
+        nq[i] = cand.length ? cand.sort((u, v) => Math.hypot(u[0] - o[i][0], u[1] - o[i][1]) - Math.hypot(v[0] - o[i][0], v[1] - o[i][1]))[0] : [o[i][0] - nx * d, o[i][1] - ny * d]; ch = true; }
+      if (ch && nq.length === 4) { sel[f] = nq; n++; } } }
+  return n;
+}
+
+// Kantenbelegung einer Strecke (Kantenpixel mit passender Richtung, ±1 px)
+function edgeCovL(L, P, Q) { const { w, h, edge, eAng } = L, dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+  let hit = 0, k = 0; for (let s = 0.05; s <= 0.95; s += 1.5 / len) { k++; const x0 = P[0] + dx * s, y0 = P[1] + dy * s; let f = 0; for (let o = -1; o <= 1 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i]) { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; if (d < 16) f = 1; } } hit += f; } return k ? hit / k : 0; }
+// Verdachtsfläche wird Foto, wenn sie die Größe eines erkannten Fotos hat, alle vier Kanten deutlich belegt sind, sie auf der Albumseite liegt und kein Foto überdeckt
+function promoteSeeds(L, sel, CS, PQ) {
+  if (!CS || !CS.seeds || !CS.seeds.length || !sel.length) return [];
+  const { rot, unrot } = CS, out = [], R = CFG.promR ?? 10;
+  const dims = sel.map(q => { const o = orderCorners(q.map(p => p.slice())); return [(Math.hypot(o[1][0] - o[0][0], o[1][1] - o[0][1]) + Math.hypot(o[2][0] - o[3][0], o[2][1] - o[3][1])) / 2, (Math.hypot(o[3][0] - o[0][0], o[3][1] - o[0][1]) + Math.hypot(o[2][0] - o[1][0], o[2][1] - o[1][1])) / 2]; });
+  const area = q => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
+  const covered = (q, others) => { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); let a = 0, k = 0; for (let i = 0; i <= 10; i++) for (let j = 0; j <= 10; j++) { const x = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * i / 10, y = Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * j / 10; if (!inPoly(q, x, y)) continue; k++; if (others.some(o => inPoly(o, x, y))) a++; } return k ? a / k : 0; };
+  const seen = [];
+  for (const r0 of CS.seeds) {
+    if (seen.some(s => Math.abs(s[0] - r0[0]) + Math.abs(s[1] - r0[1]) + Math.abs(s[2] - r0[2]) + Math.abs(s[3] - r0[3]) < 12)) continue; seen.push(r0);
+    // jede Seite einzeln auf die beste parallele Kante (±R) setzen, im gedrehten System
+    const r = r0.slice(), U = (u, v) => unrot(u, v);
+    const segCov = (k, val) => { const [x0, y0, x1, y1] = r; if (k === 0) return edgeCovL(L, U(x0, val), U(x1, val)); if (k === 2) return edgeCovL(L, U(x0, val), U(x1, val)); if (k === 1) return edgeCovL(L, U(val, y0), U(val, y1)); return edgeCovL(L, U(val, y0), U(val, y1)); };
+    const idx = [1, 2, 3, 0]; const cs = [0, 0, 0, 0];
+    for (let pass = 0; pass < 2; pass++) for (let k = 0; k < 4; k++) { const ii = idx[k]; let bv = r[ii], bc = -1; for (let d = -R; d <= R; d++) { const c = segCov(k, r0[ii] + d); if (c > bc + 1e-9 || (Math.abs(c - bc) < 1e-9 && Math.abs(d) < Math.abs(bv - r0[ii]))) { bc = c; bv = r0[ii] + d; } } r[ii] = bv; cs[k] = bc; }
+    const W = r[2] - r[0], H = r[3] - r[1]; if (W < 20 || H < 20) continue;
+    const q = [U(r[0], r[1]), U(r[2], r[1]), U(r[2], r[3]), U(r[0], r[3])];
+    const mn = Math.min(...cs), mean = cs.reduce((a, b) => a + b, 0) / 4;
+    const sizeOk = dims.some(([a, b]) => (Math.abs(W - a) / a < (CFG.promSize ?? 0.12) && Math.abs(H - b) / b < (CFG.promSize ?? 0.12)) || (Math.abs(W - b) / b < (CFG.promSize ?? 0.12) && Math.abs(H - a) / a < (CFG.promSize ?? 0.12)));
+    const inP = PQ ? insidePage(PQ.quadF, q) : 1, ov = covered(q, sel.concat(out));
+    if (CFG.promDbg) console.log('seed', r.map(Math.round).join(','), 'cov', cs.map(v => v.toFixed(2)).join(' '), 'size', sizeOk, 'page', inP.toFixed(2), 'ov', ov.toFixed(2));
+    if (mn < (CFG.promMin ?? 0.6) || mean < (CFG.promMean ?? 0.75) || !sizeOk || inP < 0.9 || ov > 0.08) continue;
+    out.push(q); }
+  return out;
 }
 
 </script>
@@ -3503,14 +3587,16 @@ function drawDebug(p, w, h) {
     for (const f of fr) { const [x, y] = V(f.c); const t = `K ${f2(f.kanten)}`; ctx.font = '700 11px ui-monospace, monospace'; const tw = ctx.measureText(t).width + 10;
       ctx.fillStyle = 'rgba(0,0,0,.78)'; ctx.fillRect(x - tw / 2, y + 13, tw, 17); ctx.fillStyle = f.min < 0.5 ? '#ff8a80' : '#ffee00'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y + 22); }
     const S2 = g.seiten || {}, st = g.schritte || {}, nr = (g.seeds || []).length;
-    html += '<h4>Legende</h4>' + `<div><span class="lg" style="color:#7dff6a"></span>Albumseite (gepunktet = Bildrand)</div><div><span class="lg" style="color:#ffee00"></span>erkannte Fotos</div><div><span class="lg" style="color:#ff3b30;border-top-style:dashed"></span>vermutete unerkannte Fotos</div>`;
-    html += '<h4>Albumseite</h4><table>' + ['oben', 'rechts', 'unten', 'links'].map(k => row('Kante ' + k, S2[k] ? 'Belegung ' + f2(S2[k].c) : 'Bildrand', S2[k] ? 'ok' : 'mut')).join('') +
+    html += '<h4>Legende</h4>' + `<div><span class="lg" style="color:#7dff6a"></span>Albumseite (gepunktet = Ersatz entlang Fotokante/Bildrand)</div><div><span class="lg" style="color:#ffee00"></span>erkannte Fotos</div><div><span class="lg" style="color:#ff3b30;border-top-style:dashed"></span>vermutete unerkannte Fotos</div>`;
+    const vn = {}; if (g.hull && g.hull.length === 4) { const P = g.hull.map(V), mx = P.reduce((s, p) => s + p[0], 0) / 4, my = P.reduce((s, p) => s + p[1], 0) / 4;
+      [['oben', 0, 1], ['rechts', 1, 2], ['unten', 2, 3], ['links', 3, 0]].forEach(([k, a, b]) => { const dx = (P[a][0] + P[b][0]) / 2 - mx, dy = (P[a][1] + P[b][1]) / 2 - my; vn[Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'rechts' : 'links') : (dy > 0 ? 'unten' : 'oben')] = k; }); }
+    html += '<h4>Albumseite</h4><table>' + ['oben', 'rechts', 'unten', 'links'].map(v => [v, vn[v] || v]).map(([v, k]) => row('Kante ' + v, S2[k] ? 'Belegung ' + f2(S2[k].c) : ((g.ersatz && g.ersatz[k]) || 'Bildrand') + ' (Ersatz)', S2[k] ? 'ok' : 'mut')).join('') +
       row('Typ', g.mode === 'farbe' ? 'farbig/dunkel' : 'hell') + row('Seitenfarbe', g.farbe ? `<span style="display:inline-block;width:10px;height:10px;background:rgb(${g.farbe});vertical-align:middle;margin-right:4px"></span>${g.farbe.join(',')}` : '–') + row('Anteil am Bild', g.seite + ' %') + '</table>';
     html += '<h4>Freie Albumfläche</h4><table>' + row('Gradient frei', g.gradFrei ?? '–', g.gradFrei > 4 ? 'bad' : 'ok') + row('Gradient in Fotos', g.gradFoto ?? '–') + row('Kantenpixel frei', (g.kantenFrei ?? '–') + ' %', g.kantenFrei > 12 ? 'bad' : '') + '</table>';
     html += `<h4>Fotos (${fr.length})</h4><table>` + row('<span class="mut">Nr · Größe</span>', '<span class="mut">o r u l · min</span>') +
       fr.map(f => row(`${f.nr ?? '?'} · ${f.gr}`, `${(f.s || []).map(v => Math.round(v * 100)).join(' ')} · ${f2(f.min)}`, f.min < 0.5 ? 'bad' : '')).join('') + '</table>';
     html += '<h4>Erkennung</h4><table>' + row('Kandidaten', g.kandidaten) + row('Verdachtsflächen', nr, nr ? 'bad' : 'ok') + row('geschätzt unerkannt', g.unerkannt, g.unerkannt ? 'bad' : 'ok') +
-      row('Überlappungen getrennt', st.ovl || 0) + row('kleine Fotos ergänzt', st.blob || 0) + row('Analyse', `${g.w}×${g.h} px`) + '</table>';
+      row('Überlappungen getrennt', st.ovl || 0) + row('Ecken auf Albumkante gezogen', st.clip || 0) + row('kleine Fotos ergänzt', st.blob || 0) + row('Analyse', `${g.w}×${g.h} px`) + '</table>';
     html += '<h4>Ausrichtung</h4><table>' + row('Drehung', ((p.rotAuto || 0) * 90) + '°') + row('Sicherheit', f2(p.rotConf || 0), (p.rotConf || 0) < 0.15 ? 'bad' : 'ok') + '</table>';
   }
   ctx.restore(); if (panel.innerHTML !== html) panel.innerHTML = html;

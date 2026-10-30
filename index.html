@@ -522,7 +522,7 @@ body.expert .foot { color: #fff; opacity: .9 }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 44</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 45</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -2187,6 +2187,7 @@ detectQuads = function (rgba, w, h, sens) {
   globalThis.UNREC = 0; globalThis.CSEED = null; if (CFG.contour !== false) { const cs = contourSearch(L, sel); globalThis.UNREC = cs.length; if (CFG.contourAdd) for (const q of cs) sel.push(q); }
   if (CFG.segFill && globalThis.CSEED) for (const q of segmentSeeds(L, sel, globalThis.CSEED)) sel.push(q);
   if (CFG.pageFeat !== false) try { globalThis.PAGEFEAT = pageFeatures(L, sel); } catch (e) { globalThis.PAGEFEAT = null; }
+  globalThis.DBGOUT = null; if (CFG.debug) try { globalThis.DBGOUT = debugInfo(L, sel, C); } catch (e) { globalThis.DBGOUT = { err: String(e) }; }
   globalThis.LAST = null;
   const out = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
@@ -2921,6 +2922,43 @@ function pageFeatures(L, sel) {
   return [n, cvA, maxDev, cont / free, ed / free, (globalThis.UNREC || 0), (globalThis.UNREC2 || 0), globalThis.PAGEMODE === 'farbe' ? 1 : 0, ain / tot];
 }
 
+// ---- Debug-Ausgabe: Albumseitenkontur, Gradienten, Seitentyp, Fotogröße, Kantenbelegung je Rahmen, vermutete Lücken ----
+function debugInfo(L, sel, C) {
+  const { w, h, pageLike, edge, eAng, Rb, Gb, Bb } = L, n = w * h;
+  // Albumseite = konvexe Hülle der als Seite erkannten Pixel
+  const pts = []; for (let y = 0; y < h; y += 2) { let a = -1, b = -1; for (let x = 0; x < w; x++) if (pageLike[y * w + x]) { if (a < 0) a = x; b = x; } if (a >= 0) pts.push([a, y], [b, y]); }
+  let hull = []; if (pts.length > 6) { pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]); const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+    hull = lo.slice(0, -1).concat(up.slice(0, -1)); }
+  // Gradientenbetrag (Sobel auf Helligkeit)
+  const Y = new Float32Array(n); for (let i = 0; i < n; i++) Y[i] = 0.299 * Rb[i] + 0.587 * Gb[i] + 0.114 * Bb[i];
+  const G = new Float32Array(n); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;
+    const gx = Y[i - w + 1] + 2 * Y[i + 1] + Y[i + w + 1] - Y[i - w - 1] - 2 * Y[i - 1] - Y[i + w - 1], gy = Y[i + w - 1] + 2 * Y[i + w] + Y[i + w + 1] - Y[i - w - 1] - 2 * Y[i - w] - Y[i - w + 1]; G[i] = Math.hypot(gx, gy) / 8; }
+  const inF = new Uint8Array(n); for (const q of sel) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); for (let y = Math.max(0, Math.floor(Math.min(...ys)) - 4); y <= Math.min(h - 1, Math.ceil(Math.max(...ys)) + 4); y++) for (let x = Math.max(0, Math.floor(Math.min(...xs)) - 4); x <= Math.min(w - 1, Math.ceil(Math.max(...xs)) + 4); x++) if (inPoly(q, x, y)) inF[y * w + x] = 1; }
+  const inH = (x, y) => hull.length > 2 && inPoly(hull, x, y);
+  let gF = 0, nF = 0, gP = 0, nP = 0, eF = 0, cR = 0, cG = 0, cB = 0;
+  // freie Albumfläche: in der Seitenkontur, nicht in Rahmen (mit 4 px Abstand)
+  const ring = new Uint8Array(n); for (let y = 4; y < h - 4; y++) for (let x = 4; x < w - 4; x++) { const i = y * w + x; if (inF[i]) continue; if (inF[i - 4] || inF[i + 4] || inF[i - 4 * w] || inF[i + 4 * w]) ring[i] = 1; }
+  let fx = 0, fy = 0;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;
+    if (inF[i]) { gP += G[i]; nP++; continue; } if (ring[i] || !inH(x, y)) continue; gF += G[i]; nF++; if (edge[i]) eF++; cR += Rb[i]; cG += Gb[i]; cB += Bb[i]; fx += x; fy += y; }
+  // freie Fläche: Punkt mit größtem Abstand zu Rahmen, für die Beschriftung
+  let lab = null; { let best = -1; for (let y = 8; y < h - 8; y += 6) for (let x = 8; x < w - 8; x += 6) { if (inF[y * w + x] || !inH(x, y)) continue; let d = 1e9; for (const q of sel) for (const [px, py] of q) d = Math.min(d, Math.hypot(px - x, py - y)); if (!sel.length) d = 50; if (d > best) { best = d; lab = [x / w, y / h]; } } }
+  // Kantenbelegung je Rahmen
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 16; };
+  const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
+    let hit = 0, k = 0; for (let s2 = 0.04; s2 <= 0.96; s2 += 1.5 / len) { k++; const x0 = P[0] + dx * s2, y0 = P[1] + dy * s2; let f = 0; for (let o = -2; o <= 2 && !f; o++) { const x = Math.round(x0 + nx * o), y = Math.round(y0 + ny * o); if (x < 0 || y < 0 || x >= w || y >= h) continue; const i = y * w + x; if (edge[i] && angOk(i, t)) f = 1; } hit += f; } return k ? hit / k : 0; };
+  const frames = sel.map(q => { const o = orderCorners(q.map(p => p.slice())), c = [cov(o[0], o[1]), cov(o[1], o[2]), cov(o[2], o[3]), cov(o[3], o[0])];
+    const a = (Math.hypot(o[1][0] - o[0][0], o[1][1] - o[0][1]) + Math.hypot(o[2][0] - o[3][0], o[2][1] - o[3][1])) / 2, b = (Math.hypot(o[3][0] - o[0][0], o[3][1] - o[0][1]) + Math.hypot(o[2][0] - o[1][0], o[2][1] - o[1][1])) / 2;
+    return { c: [o.reduce((s3, p) => s3 + p[0], 0) / 4 / w, o.reduce((s3, p) => s3 + p[1], 0) / 4 / h], kanten: +(c.reduce((x, y) => x + y, 0) / 4).toFixed(2), min: +Math.min(...c).toFixed(2), gr: Math.round(Math.max(a, b)) + '×' + Math.round(Math.min(a, b)) }; });
+  const seeds = ((globalThis.CSEED && globalThis.CSEED.seeds) || []).slice(0, 12).map(r => { const U = globalThis.CSEED.unrot; return [U(r[0], r[1]), U(r[2], r[1]), U(r[2], r[3]), U(r[0], r[3])].map(([x, y]) => [x / w, y / h]); });
+  return { hull: hull.map(([x, y]) => [x / w, y / h]), seite: hull.length > 2 ? Math.round(100 * Math.abs(hull.reduce((s2, p, i) => { const q = hull[(i + 1) % hull.length]; return s2 + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2 / n) : 0,
+    mode: globalThis.PAGEMODE || '?', farbe: nF ? [Math.round(cR / nF), Math.round(cG / nF), Math.round(cB / nF)] : null,
+    gradFrei: nF ? +(gF / nF).toFixed(1) : null, gradFoto: nP ? +(gP / nP).toFixed(1) : null, kantenFrei: nF ? +(100 * eF / nF).toFixed(1) : null, lab,
+    kandidaten: C.length, frames, seeds, unerkannt: globalThis.UNREC || 0, w, h };
+}
+
 </script>
 <script>
 const $ = id => document.getElementById(id);
@@ -2958,7 +2996,7 @@ self.onmessage = e => { const m = e.data, { id, data, w, h, sens } = m;
     if (m.type === 'user') { globalThis.LRN_USER = m.trees; return; }
     if (m.type === 'learn') { self.postMessage({ id, ...learnRows(data, w, h, sens, m.truth) }); return; }
     if (m.type === 'train') { self.postMessage({ id, trees: trainUser(m.X, m.y) }); return; }
-    const q = detectQuads(data, w, h, sens); const o = pageOrientation(data, w, h, q); self.postMessage({ id, q, o, u: globalThis.UNREC || 0 }); }
+    CFG.debug = !!e.data.dbg; const q = detectQuads(data, w, h, sens); const o = pageOrientation(data, w, h, q); self.postMessage({ id, q, o, u: globalThis.UNREC || 0, g: globalThis.DBGOUT, f: globalThis.PAGEFEAT }); }
   catch (err) { self.postMessage({ id, err: String(err) }); } };`;
     worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
     worker.onmessage = e => { const p = pending.get(e.data.id); if (p) { pending.delete(e.data.id); e.data.err ? p.rej(new Error(e.data.err)) : p.res(e.data); } };
@@ -3021,9 +3059,9 @@ async function resetLearned(silent) { LEARN.mem = []; LEARN.rows = []; LEARN.tre
   const wk = getWorker(); if (wk) wk.postMessage({ type: 'user', trees: null }); updateLearnInfo(); if (!silent) toast('Gelerntes zurückgesetzt'); }
 function detectAsync(data, w, h, sens) {
   const wk = getWorker();
-  const sync = () => { const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q), u: globalThis.UNREC || 0 }; };
+  const sync = () => { CFG.debug = !!S.debug; const q = detectQuads(data, w, h, sens); return { q, o: pageOrientation(data, w, h, q), u: globalThis.UNREC || 0, g: globalThis.DBGOUT, f: globalThis.PAGEFEAT }; };
   if (!wk) return Promise.resolve(sync());
-  return new Promise((res, rej) => { const id = ++wid; pending.set(id, { res, rej }); wk.postMessage({ id, data, w, h, sens }); }).catch(() => sync());
+  return new Promise((res, rej) => { const id = ++wid; pending.set(id, { res, rej }); wk.postMessage({ id, data, w, h, sens, dbg: !!S.debug }); }).catch(() => sync());
 }
 async function runDetect(page, sens, fresh) {
   const c = scaledCanvas(page.preview, page.preview.width, page.preview.height, DET);
@@ -3043,8 +3081,8 @@ async function runDetect(page, sens, fresh) {
     page.detSnap = snapOf(page); return;
   }
   page.memo = false;
-  const { q, o, u } = await detectAsync(d.data, c.width, c.height, sens);
-  page.unrec = u || 0; page.detN = q.length;
+  const { q, o, u, g } = await detectAsync(d.data, c.width, c.height, sens);
+  page.unrec = u || 0; page.dbg = g || null; page.detN = q.length;
   // Kanten in der höher aufgelösten Vorschau nachschärfen
   const quads = refineQuads(grayOf(page.preview), page.preview.width, page.preview.height, q, Math.max(3, page.preview.width / c.width * 2.5));
   // Ausrichtung: alle Fotos der Seite stimmen gemeinsam ab; unsichere Seiten übernehmen die Lage der sicheren
@@ -3250,8 +3288,39 @@ function drawEditor() {
     ctx.fillStyle = sel ? '#1d1500' : '#fff'; ctx.fillText(label, cx, cy + 0.5);
   });
   if (S.pts) for (const [x, y] of S.pts) { ctx.beginPath(); ctx.arc(x * w, y * h, 7, 0, 7); ctx.fillStyle = '#ff8a1f'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); }
+  if (S.debug) drawDebug(p, w, h);
   if (loupe) drawLoupe(p);
 }
+// ---- Debug-Ansicht (Tipp auf die Versionsnummer) ----
+function drawDebug(p, w, h) {
+  const g = p.dbg; ctx.save();
+  const V = c => { const [x, y] = toView(p, c); return [x * w, y * h]; };
+  const lines = [];
+  if (!g) lines.push('Debug: keine Daten – Seite neu erkennen');
+  else if (g.err) lines.push('Debug-Fehler: ' + g.err);
+  else {
+    // Albumseitenkontur gelb
+    if (g.hull && g.hull.length > 2) { ctx.beginPath(); g.hull.forEach((c, i) => { const [x, y] = V(c); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath();
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.stroke(); ctx.lineWidth = 2.2; ctx.strokeStyle = '#ffee00'; ctx.stroke(); }
+    // vermutete unerkannte Fotos rot gestrichelt
+    ctx.setLineDash([6, 4]); for (const r of g.seeds || []) { ctx.beginPath(); r.forEach((c, i) => { const [x, y] = V(c); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.lineWidth = 2; ctx.strokeStyle = '#ff3b30'; ctx.stroke(); } ctx.setLineDash([]);
+    const tag = (x, y, txt, bg, fg) => { ctx.font = '600 11px ui-monospace, monospace'; const rows = txt.split('\n'), tw = Math.max(...rows.map(r => ctx.measureText(r).width)) + 10, th = rows.length * 14 + 6;
+      x = Math.min(w - tw - 2, Math.max(2, x - tw / 2)); y = Math.min(h - th - 2, Math.max(2, y)); ctx.fillStyle = bg; ctx.fillRect(x, y, tw, th); ctx.fillStyle = fg; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; rows.forEach((r, i) => ctx.fillText(r, x + 5, y + 4 + i * 14)); };
+    // Gradient auf der freien Albumfläche
+    if (g.lab) { const [x, y] = V(g.lab); tag(x, y - 20, `freie Fläche\nGradient ${g.gradFrei}\nKanten ${g.kantenFrei} %`, 'rgba(255,238,0,.92)', '#000'); }
+    // je Rahmen: Kantenbelegung, Größe
+    for (const f of g.frames || []) { const [x, y] = V(f.c); tag(x, y + 14, `K ${f.kanten} min ${f.min}\n${f.gr}`, 'rgba(0,0,0,.75)', f.min < 0.5 ? '#ff8a80' : '#b9f6ca'); }
+    const f = g.farbe ? `rgb(${g.farbe.join(',')})` : '–';
+    lines.push(`Seite ${g.mode} · Fläche ${g.seite} % · Farbe ${f}`, `Gradient frei ${g.gradFrei} · Foto ${g.gradFoto} · Kanten frei ${g.kantenFrei} %`,
+      `Kandidaten ${g.kandidaten} · Rahmen ${(g.frames || []).length} · unerkannt ${g.unerkannt}`, `rot gestrichelt: Verdachtsflächen ${(g.seeds || []).length}`, `Drehung ${(p.rotAuto || 0) * 90}° · Sicherheit ${(+(p.rotConf || 0)).toFixed(2)} · Analyse ${g.w}×${g.h}`);
+  }
+  ctx.font = '600 11px ui-monospace, monospace'; const tw = Math.max(...lines.map(r => ctx.measureText(r).width)) + 12;
+  const y0 = h - lines.length * 14 - 12; ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(4, y0, Math.min(w - 8, tw), lines.length * 14 + 8); ctx.fillStyle = '#ffee00'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  lines.forEach((r, i) => ctx.fillText(r, 10, y0 + 4 + i * 14)); ctx.restore();
+}
+$('appVer').style.cursor = 'pointer';
+$('appVer').onclick = async () => { S.debug = !S.debug; $('appVer').textContent = $('appVer').textContent.replace(/ · Debug$/, '') + (S.debug ? ' · Debug' : '');
+  toast(S.debug ? 'Debug-Ansicht an' : 'Debug-Ansicht aus'); const p = page(); if (S.debug && p && !p.dbg && !p.sample) { status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value, true); status('', false); } drawEditor(); };
 function norm(x, y) { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; }
 
 function drawLoupe(p) {

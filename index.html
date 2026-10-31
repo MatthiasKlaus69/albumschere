@@ -776,7 +776,7 @@ body { --f-ui: var(--f-lux) }
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 51</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 52</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -2444,6 +2444,7 @@ detectQuads = function (rgba, w, h, sens) {
   globalThis.DBGSTEP = { ovl: 0, blob: 0 };
   if (CFG.overlap !== false) globalThis.DBGSTEP.ovl = resolveOverlaps(L, sel);
   if (CFG.blobs !== false) for (const q of smallBlobs(L, sel)) { sel.push(q); globalThis.DBGSTEP.blob++; }
+  if (CFG.dumpPQ) globalThis.PQDUMP = { w: L.w, h: L.h, edge: L.edge, eAng: L.eAng, pageLike: L.pageLike, Rb: L.Rb, Gb: L.Gb, Bb: L.Bb, sel: sel.map(q => q.map(p => p.slice())) };
   globalThis.PQ = null; try { globalThis.PQ = pageQuad(L, sel); } catch (e) {}
   if (CFG.freeAreas !== false && globalThis.PQ && (globalThis.PQ.region || sel.length)) { const fa = freeAreas(L, sel, globalThis.PQ.quad); for (const q of fa) sel.push(q); globalThis.DBGSTEP.free = fa.length; if (fa.length) try { globalThis.PQ = pageQuad(L, sel); } catch (e) {} }
   if (CFG.sizeFit === true) { const sf = sizeFit(L, sel, globalThis.PQ); for (const q of sf) sel.push(q); globalThis.DBGSTEP.fit = sf.length; }
@@ -3338,7 +3339,7 @@ function resolveOverlaps(L, sel) {
 
 // ---- Albumseite als geschlossenes Viereck: je Seite die stärkste lange Gerade außerhalb der Fotos, etwa parallel zum Bildrand ----
 // Findet sich auf einer Seite keine Kante, reicht die Albumseite über den Bildrand hinaus: dann gilt der Bildrand.
-function pageQuad(L, sel) {
+function pageQuad(L, sel) { if (CFG.pq2 !== false) return pageQuad2(L, sel);
   const { w, h, edge, eAng } = L;
   const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 14; };
   const cov = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy) || 1, t = ((Math.atan2(-dx, dy) * 180 / Math.PI) % 180 + 180) % 180, nx = dy / len, ny = -dx / len;
@@ -3535,7 +3536,7 @@ function pageRegion(L, sel) {
 
 // ---- Fotoflächen auf der Albumseite: geschlossene Nicht-Papier-Flächen, die nicht von Rahmen belegt sind ----
 function freeAreas(L, sel, Q, PR) {
-  const { w, h, pageLike, edge } = L, n = w * h, out = []; if (!Q) return out;
+  const { w, h, pageLike, edge, Rb, Gb, Bb } = L, n = w * h, out = []; if (!Q) return out;
   const os = sel.map(q => orderCorners(q.map(p => p.slice())));
   const qa = (() => { let s = 0; for (let i = 0; i < 4; i++) { const a = Q[i], b = Q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; })();
   const areas = os.map(o => { let s = 0; for (let i = 0; i < 4; i++) { const a = o[i], b = o[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; }).sort((a, b) => a - b);
@@ -3544,6 +3545,9 @@ function freeAreas(L, sel, Q, PR) {
   const xs = Q.map(p => p[0]), ys = Q.map(p => p[1]), X0 = Math.max(1, Math.floor(Math.min(...xs))), X1 = Math.min(w - 2, Math.ceil(Math.max(...xs))), Y0 = Math.max(1, Math.floor(Math.min(...ys))), Y1 = Math.min(h - 2, Math.ceil(Math.max(...ys)));
   const inQ = new Uint8Array(n), cov = new Uint8Array(n);
   for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) if (inPoly(Q, x + .5, y + .5)) inQ[y * w + x] = 1;
+  // Seitenfarbe in der Albumseite (für Kontrast der Fotoflächen: verblasste Bilder hinter Pergamin sind keine Fotos dieser Seite)
+  const pr = [], pg = [], pb = []; for (let y = Y0; y <= Y1; y += 3) for (let x = X0; x <= X1; x += 3) { const i = y * w + x; if (inQ[i] && pageLike[i]) { pr.push(Rb[i]); pg.push(Gb[i]); pb.push(Bb[i]); } }
+  const mdn = a => a.slice().sort((x, y) => x - y)[a.length >> 1], PCf = pr.length > 30 ? [mdn(pr), mdn(pg), mdn(pb)] : null;
   for (const o of os) { const bx = o.map(p => p[0]), by = o.map(p => p[1]); for (let y = Math.max(0, Math.floor(Math.min(...by)) - 5); y <= Math.min(h - 1, Math.ceil(Math.max(...by)) + 5); y++) for (let x = Math.max(0, Math.floor(Math.min(...bx)) - 5); x <= Math.min(w - 1, Math.ceil(Math.max(...bx)) + 5); x++) {
     if (inPoly(o, x + .5, y + .5)) { cov[y * w + x] = 1; continue; } let dmin = 1e9; for (let e = 0; e < 4; e++) { const A = o[e], B = o[(e + 1) % 4], vx = B[0] - A[0], vy = B[1] - A[1], l2 = vx * vx + vy * vy || 1, t = Math.max(0, Math.min(1, ((x - A[0]) * vx + (y - A[1]) * vy) / l2)); dmin = Math.min(dmin, Math.hypot(x - A[0] - t * vx, y - A[1] - t * vy)); } if (dmin <= 5) cov[y * w + x] = 1; } }
   // Kandidatenmaske: in der Seite, kein Papier, kein Rahmen; mit Radius 3 öffnen (Schrift/Linien entfernen)
@@ -3553,13 +3557,13 @@ function freeAreas(L, sel, Q, PR) {
   const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n), done = new Uint8Array(n);
   const ca = Math.cos(ang), sa = Math.sin(ang), un = (u, v) => [u * ca - v * sa, u * sa + v * ca];
   for (let y = Y0; y <= Y1; y++) for (let x = X0; x <= X1; x++) { const s0 = y * w + x; if (!C[s0] || lab[s0] >= 0 || done[s0]) continue; for (let i = 0; i < n; i++) if (lab[i] === 1) lab[i] = 2;
-    let top = 0, c = 0, e = 0, u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9, edgeQ = 0, ringT = 0, ringP = 0; const px = []; stk[top++] = s0; lab[s0] = 1;
-    while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (edge[i]) e++; const u = xx * ca + yy * sa, v = -xx * sa + yy * ca; if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
+    let top = 0, c = 0, e = 0, u0 = 1e9, v0 = 1e9, u1 = -1e9, v1 = -1e9, edgeQ = 0, ringT = 0, ringP = 0, cd = 0; const px = []; stk[top++] = s0; lab[s0] = 1;
+    while (top) { const i = stk[--top], xx = i % w, yy = (i / w) | 0; c++; if (edge[i]) e++; if (PCf) cd += Math.abs(Rb[i] - PCf[0]) + Math.abs(Gb[i] - PCf[1]) + Math.abs(Bb[i] - PCf[2]); const u = xx * ca + yy * sa, v = -xx * sa + yy * ca; if (u < u0) u0 = u; if (u > u1) u1 = u; if (v < v0) v0 = v; if (v > v1) v1 = v;
       for (const j of [i - 1, i + 1, i - w, i + w]) { if (j < 0 || j >= n) continue; if (!inQ[j]) edgeQ++; if (C[j] && lab[j] < 0) { lab[j] = 1; stk[top++] = j; }
-        if (!C[j]) { const k = i + 5 * (j - i); if (k >= 0 && k < n && !cov[k] && Math.abs((k % w) - xx) <= 5) { ringT++; if (pageLike[k]) ringP++; } } } }
+        if (!C[j]) { const k = i + 5 * (j - i); if (k >= 0 && k < n && !cov[k] && inQ[k] && Math.abs((k % w) - xx) <= 5) { ringT++; if (pageLike[k]) ringP++; } } } }
     const A = (u1 - u0) * (v1 - v0), W = u1 - u0, H = v1 - v0;
-    const why = c < 0.25 * med ? 'klein' : A > 1.6 * mx ? 'groß' : c / A < (CFG.faFill ?? 0.55) ? 'Füllung' : Math.max(W, H) / Math.min(W, H) > 3 ? 'Form' : e / c < (CFG.faTex ?? 0.04) ? 'kein Inhalt' : ringP / Math.max(1, ringT) < (CFG.faRing ?? 0.75) ? 'nicht von Seite umgeben' : '';
-    if (CFG.faDbg) console.log('fläche', Math.round(u0), Math.round(v0), Math.round(W), Math.round(H), 'px', c, 'füll', (c / A).toFixed(2), 'kanten', (e / c).toFixed(3), 'ring', (ringP / Math.max(1, ringT)).toFixed(2), 'med', Math.round(med), why);
+    const why = c < 0.25 * med ? 'klein' : A > 1.6 * mx ? 'groß' : c / A < (CFG.faFill ?? 0.55) ? 'Füllung' : Math.max(W, H) / Math.min(W, H) > 3 ? 'Form' : e / c < (CFG.faTex ?? 0.04) ? 'kein Inhalt' : ringP / Math.max(1, ringT) < (CFG.faRing ?? 0.75) ? 'nicht von Seite umgeben' : (PCf && cd / c < (CFG.faCol ?? 150)) ? 'zu blass' : '';
+    if (CFG.faDbg) console.log('fläche', Math.round(u0), Math.round(v0), Math.round(W), Math.round(H), 'px', c, 'füll', (c / A).toFixed(2), 'kanten', (e / c).toFixed(3), 'ring', (ringP / Math.max(1, ringT)).toFixed(2), 'farbabst', Math.round(cd / c), 'med', Math.round(med), why);
     if ((why === 'groß' || why === 'nicht von Seite umgeben' || (!why && c > (CFG.faSplit ?? 1.8) * med)) && c > (CFG.faSplit ?? 1.8) * med && ringP / Math.max(1, ringT) >= (CFG.faRingSplit ?? 0.6)) {
       // zu groß: Teilflächen über stärkere Erosion trennen (freeComps teilt rekursiv)
       const sub = new Uint8Array(n); const cv2 = new Uint8Array(n); for (let i = 0; i < n; i++) cv2[i] = 1;
@@ -3593,6 +3597,85 @@ function snapSides(L, sel) {
     if (nq.some((p, i) => Math.hypot(p[0] - o[i][0], p[1] - o[i][1]) > 2.5 * R)) continue;
     sel[f] = nq; n++; }
   return n;
+}
+
+// ---- Albumseite v2: Hypothesen je Seite im Fotowinkel, Bewertung aus Kantenbelegung + Farbkontrast innen/außen, Fotos müssen innen liegen ----
+// Fehlt eine Seite: Rechteck aus der Papierfläche (aufgezogen), sonst äußerste Fotokante, sonst Bildrand.
+function pageQuad2(L, sel) {
+  const { w, h, edge, eAng, pageLike, Rb, Gb, Bb } = L, n = w * h;
+  const os = sel.map(q => orderCorners(q.map(p => p.slice())));
+  let ang = 0; if (os.length) { const as = os.map(o => { const a = Math.atan2(o[1][1] - o[0][1], o[1][0] - o[0][0]); return ((a + Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2) - Math.PI / 4; }).sort((a, b) => a - b); ang = as[as.length >> 1]; }
+  const ca = Math.cos(ang), sa = Math.sin(ang), toUV = (x, y) => [x * ca + y * sa, -x * sa + y * ca], toXY = (u, v) => [u * ca - v * sa, u * sa + v * ca];
+  // Seitenfarbe: Median der Papierpixel im Bereich der Fotos (ohne Fotos), sonst aller Papierpixel
+  const FM = new Uint8Array(n); for (const q of os) { const xs = q.map(p => p[0]), ys = q.map(p => p[1]); for (let y = Math.max(0, Math.floor(Math.min(...ys))); y <= Math.min(h - 1, Math.ceil(Math.max(...ys))); y++) for (let x = Math.max(0, Math.floor(Math.min(...xs))); x <= Math.min(w - 1, Math.ceil(Math.max(...xs))); x++) if (inPoly(q, x + .5, y + .5)) FM[y * w + x] = 1; }
+  let bx0 = 0, by0 = 0, bx1 = w - 1, by1 = h - 1; if (os.length) { const xs = os.flat().map(p => p[0]), ys = os.flat().map(p => p[1]), mx = (Math.max(...xs) - Math.min(...xs)) * 0.2, my = (Math.max(...ys) - Math.min(...ys)) * 0.2; bx0 = Math.max(0, Math.floor(Math.min(...xs) - mx)); bx1 = Math.min(w - 1, Math.ceil(Math.max(...xs) + mx)); by0 = Math.max(0, Math.floor(Math.min(...ys) - my)); by1 = Math.min(h - 1, Math.ceil(Math.max(...ys) + my)); }
+  const rr = [], rg = [], rb = []; for (let y = by0; y <= by1; y += 2) for (let x = bx0; x <= bx1; x += 2) { const i = y * w + x; if (pageLike[i] && !FM[i]) { rr.push(Rb[i]); rg.push(Gb[i]); rb.push(Bb[i]); } }
+  if (rr.length < 50) for (let i = 0; i < n; i += 3) if (pageLike[i]) { rr.push(Rb[i]); rg.push(Gb[i]); rb.push(Bb[i]); }
+  const md = a => a.slice().sort((x, y) => x - y)[a.length >> 1]; const PCo = { v: rr.length ? [md(rr), md(rg), md(rb)] : null };
+  const T = CFG.pq2Col ?? 60;
+  const isPage = (x, y) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= w || y >= h) return 0; const i = y * w + x; if (FM[i]) return 1; const PC = PCo.v; if (!PC) return pageLike[i]; return ((CFG.pq2PL !== false && pageLike[i]) || Math.abs(Rb[i] - PC[0]) + Math.abs(Gb[i] - PC[1]) + Math.abs(Bb[i] - PC[2]) < T) ? 1 : 0; };
+  const angOk = (i, t) => { let d = Math.abs(eAng[i] - t) % 180; if (d > 90) d = 180 - d; return d < 14; };
+  // gedrehte Ausdehnung des Bildes und der Fotos
+  const cs = [[0, 0], [w, 0], [0, h], [w, h]].map(([x, y]) => toUV(x, y)), U0 = Math.min(...cs.map(c => c[0])), U1 = Math.max(...cs.map(c => c[0])), V0 = Math.min(...cs.map(c => c[1])), V1 = Math.max(...cs.map(c => c[1]));
+  const fc = os.flat().map(([x, y]) => toUV(x, y)); let fu0 = (U0 + U1) / 2 - 1, fu1 = fu0 + 2, fv0 = (V0 + V1) / 2 - 1, fv1 = fv0 + 2;
+  if (fc.length) { fu0 = Math.min(...fc.map(c => c[0])); fu1 = Math.max(...fc.map(c => c[0])); fv0 = Math.min(...fc.map(c => c[1])); fv1 = Math.max(...fc.map(c => c[1])); }
+  const tol = Math.max(3, Math.min(w, h) * 0.015);
+  let PRG = null; if (CFG.pageRegion !== false) try { PRG = pageRegion(L, sel); } catch (e) {}
+  const ext = { oben: -Infinity, unten: Infinity, links: -Infinity, rechts: Infinity }; // Mindest-Ausdehnung der Albumseite aus der Papierfläche
+  // Ersatz für dunkle/farbige Seiten: zusammenhängende, ruhige Fläche in Seitenfarbe (Ring um die Fotos) nahe den Fotos
+  let CR = null; if (!PRG && os.length && CFG.pq2Color !== false) { const ring = []; for (const o of os) { const c = [(o[0][0] + o[2][0]) / 2, (o[0][1] + o[2][1]) / 2];
+      for (let e = 0; e < 4; e++) for (let t = 0.1; t <= 0.9; t += 0.05) { const A = o[e], B = o[(e + 1) % 4], px = A[0] + (B[0] - A[0]) * t, py = A[1] + (B[1] - A[1]) * t, dx = px - c[0], dy = py - c[1], dl = Math.hypot(dx, dy) || 1;
+        const x = Math.round(px + dx / dl * 9), y = Math.round(py + dy / dl * 9); if (x < 0 || y < 0 || x >= w || y >= h || FM[y * w + x]) continue; ring.push(y * w + x); } }
+    if (ring.length > 20) { const RC = [md(ring.map(i => Rb[i])), md(ring.map(i => Gb[i])), md(ring.map(i => Bb[i]))];
+      const E = new Int32Array((w + 1) * (h + 1)); for (let y = 0; y < h; y++) { let r = 0; for (let x = 0; x < w; x++) { r += edge[y * w + x] ? 1 : 0; E[(y + 1) * (w + 1) + x + 1] = E[y * (w + 1) + x + 1] + r; } }
+      const den = (x, y, r) => { const x0 = Math.max(0, x - r), y0 = Math.max(0, y - r), x1 = Math.min(w, x + r + 1), y1 = Math.min(h, y + r + 1); return (E[y1 * (w + 1) + x1] - E[y0 * (w + 1) + x1] - E[y1 * (w + 1) + x0] + E[y0 * (w + 1) + x0]) / ((x1 - x0) * (y1 - y0)); };
+      const M = new Uint8Array(n); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (FM[i]) { M[i] = 1; continue; } if (Math.abs(Rb[i] - RC[0]) + Math.abs(Gb[i] - RC[1]) + Math.abs(Bb[i] - RC[2]) < (CFG.pq2CR ?? 60) && den(x, y, 4) < (CFG.pq2Den ?? 0.14)) M[i] = 1; }
+      const lab = new Int32Array(n).fill(-1), stk = new Int32Array(n); let id = 0, best = -1, bc = 0; const seed = new Set(ring);
+      for (const s0 of ring) { if (!M[s0] || lab[s0] >= 0) continue; let top = 0, c = 0; stk[top++] = s0; lab[s0] = id; while (top) { const i = stk[--top], x = i % w; c++; for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i - w, i + w]) if (j >= 0 && j < n && M[j] && lab[j] < 0) { lab[j] = id; stk[top++] = j; } } if (c > bc) { bc = c; best = id; } id++; }
+      if (CFG.pq2Dbg) console.log("Farbfläche", RC.map(Math.round).join(","), "größte", (bc / n).toFixed(3)); if (bc > n * 0.08) { CR = { lab, best }; if (rr.length < 400 || !PRG) PCo.v = RC; } } }
+  const REG = PRG || CR;
+  if (REG && CFG.pq2Paper !== false) { const us = [], vs = []; for (let y = 0; y < h; y += 3) for (let x = 0; x < w; x += 3) if (REG.lab[y * w + x] === REG.best) { const [u, v] = toUV(x, y); us.push(u); vs.push(v); }
+    if (us.length > 50) { us.sort((a, b) => a - b); vs.sort((a, b) => a - b); const q = CFG.pq2Q ?? 0.03; ext.links = us[Math.floor(us.length * q)]; ext.rechts = us[Math.floor(us.length * (1 - q))]; ext.oben = vs[Math.floor(vs.length * q)]; ext.unten = vs[Math.floor(vs.length * (1 - q))]; } }
+  // Linie einer Seite: horizontal (oben/unten): v = p + k*(u - uc); vertikal (links/rechts): u = p + k*(v - vc)
+  const uc = (fu0 + fu1) / 2, vc = (fv0 + fv1) / 2;
+  const evalLine = (horiz, out, p, k) => { // out: +1 = nach außen größer
+    const tdeg = horiz ? ((Math.atan2(-(ca - k * sa), (sa + k * ca)) * 180 / Math.PI) % 180 + 180) % 180 : ((Math.atan2(-(-sa + k * ca) * -1, (ca + k * sa) * -1) * 180 / Math.PI) % 180 + 180) % 180;
+    let hit = 0, kk = 0, fi = 0, fo = 0, kb = 0, kbi = 0;
+    const a0 = horiz ? U0 : V0, a1 = horiz ? U1 : V1;
+    for (let a = a0; a <= a1; a += 1.5) { const b = p + k * (a - (horiz ? uc : vc)); const [x, y] = horiz ? toXY(a, b) : toXY(b, a); if (x < 1 || y < 1 || x > w - 2 || y > h - 2) continue;
+      kk++; let f = 0; const xi = Math.round(x), yi = Math.round(y);
+      for (let o = -1; o <= 1 && !f; o++) { const [x2, y2] = horiz ? toXY(a, b + o) : toXY(b + o, a); const i = Math.round(y2) * w + Math.round(x2); if (i >= 0 && i < n && edge[i] && angOk(i, tdeg)) f = 1; } hit += f;
+      if (((a - a0) | 0) % 4 === 0) { const din = horiz ? toXY(a, b - out * 8) : toXY(b - out * 8, a), dout = horiz ? toXY(a, b + out * 8) : toXY(b + out * 8, a); const a1v = isPage(din[0], din[1]), a2v = isPage(dout[0], dout[1]); if (a1v >= 0) { kbi++; fi += a1v; } if (a2v >= 0) { kb++; fo += a2v; } } }
+    if (kk < 30) return null; return { cov: hit / kk, fi: kbi ? fi / kbi : 0, fo: kb ? fo / kb : 1 }; };
+  const sides = {}, res = {};
+  const spec = { oben: [true, -1, fv0, V0], unten: [true, 1, fv1, V1], links: [false, -1, fu0, U0], rechts: [false, 1, fu1, U1] };
+  for (const [name, [horiz, out, inner, edgeLim]] of Object.entries(spec)) {
+    let best = null;
+    const lim = ext[name], innerX = out > 0 ? Math.max(inner, isFinite(lim) ? lim : inner) : Math.min(inner, isFinite(lim) ? lim : inner); const pStart = innerX + out * (-tol), pEnd = edgeLim;
+    for (let p = pStart; out > 0 ? p <= pEnd : p >= pEnd; p += out) for (let k = -0.06; k <= 0.0601; k += 0.02) {
+      // Fotos innen: alle Ecken auf der Innenseite (Toleranz)
+      if (fc.some(([u, v]) => horiz ? out * (v - (p + k * (u - uc))) > tol : out * (u - (p + k * (v - vc))) > tol)) continue;
+      const r = evalLine(horiz, out, p, k); if (!r || r.fi < (CFG.pq2Fi ?? 0.5)) continue;
+      const S = (CFG.pq2We ?? 0.45) * r.cov + (1 - (CFG.pq2We ?? 0.45)) * (r.fi - r.fo);
+      if (!best || S > best.S) best = { S, p, k, ...r }; }
+    if (best && best.S >= (CFG.pq2Min ?? 0.25)) { res[name] = best; sides[name] = { c: +best.S.toFixed(2), cov: +best.cov.toFixed(2), fi: +best.fi.toFixed(2), fo: +best.fo.toFixed(2) }; } }
+  // Seiten als Linien im Bild
+  const lineOf = (name) => { const [horiz] = spec[name], r = res[name]; if (!r) return null; return horiz ? [toXY(U0, r.p + r.k * (U0 - uc)), toXY(U1, r.p + r.k * (U1 - uc))] : [toXY(r.p + r.k * (V0 - vc), V0), toXY(r.p + r.k * (V1 - vc), V1)]; };
+  // Ersatz: aufgezogenes Rechteck der Papierfläche, Fotokante, Bildrand
+  const FE = { oben: [toXY(U0, fv0), toXY(U1, fv0)], unten: [toXY(U0, fv1), toXY(U1, fv1)], links: [toXY(fu0, V0), toXY(fu0, V1)], rechts: [toXY(fu1, V0), toXY(fu1, V1)] };
+  const IB = { oben: [[0, 0], [w - 1, 0]], unten: [[0, h - 1], [w - 1, h - 1]], links: [[0, 0], [0, h - 1]], rechts: [[w - 1, 0], [w - 1, h - 1]] };
+  const fb = {}, L2 = {}, L3 = {};
+  const EXL = { oben: isFinite(ext.oben) ? [toXY(U0, ext.oben), toXY(U1, ext.oben)] : null, unten: isFinite(ext.unten) ? [toXY(U0, ext.unten), toXY(U1, ext.unten)] : null,
+    links: isFinite(ext.links) ? [toXY(ext.links, V0), toXY(ext.links, V1)] : null, rechts: isFinite(ext.rechts) ? [toXY(ext.rechts, V0), toXY(ext.rechts, V1)] : null };
+  for (const k of ['oben', 'unten', 'links', 'rechts']) { const ln = lineOf(k); if (ln) { L2[k] = L3[k] = ln; fb[k] = null; continue; }
+    if (EXL[k] && !PRG) { // Seitenfläche, aber nicht enger als die Fotos
+      const fl = { oben: Math.min(ext.oben, fv0), unten: Math.max(ext.unten, fv1), links: Math.min(ext.links, fu0), rechts: Math.max(ext.rechts, fu1) }[k];
+      L2[k] = L3[k] = (k === 'oben' || k === 'unten') ? [toXY(U0, fl), toXY(U1, fl)] : [toXY(fl, V0), toXY(fl, V1)]; fb[k] = 'Seitenfläche'; continue; }
+    if (PRG && PRG.lines[k]) { L2[k] = L3[k] = PRG.lines[k]; fb[k] = 'Papierfläche'; } else { L2[k] = os.length ? FE[k] : IB[k]; L3[k] = IB[k]; fb[k] = os.length ? 'Fotokante' : 'Bildrand'; } }
+  const X = (A, Bq) => { const [P, Q] = A, [U, V] = Bq, d = (Q[0] - P[0]) * (V[1] - U[1]) - (Q[1] - P[1]) * (V[0] - U[0]); if (Math.abs(d) < 1e-9) return P; const t = ((U[0] - P[0]) * (V[1] - U[1]) - (U[1] - P[1]) * (V[0] - U[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
+  const mk = Lx => [X(Lx.oben, Lx.links), X(Lx.oben, Lx.rechts), X(Lx.unten, Lx.rechts), X(Lx.unten, Lx.links)].map(([x, y]) => [Math.max(0, Math.min(w - 1, x)), Math.max(0, Math.min(h - 1, y))]);
+  const conf = ['oben', 'unten', 'links', 'rechts'].reduce((s2, k) => s2 + (res[k] ? res[k].S : 0), 0) / 4;
+  return { quad: mk(L2), quadF: mk(L3), region: !!PRG, sides, fallback: fb, conf: +conf.toFixed(2) };
 }
 
 </script>

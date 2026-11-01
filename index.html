@@ -675,6 +675,15 @@ body { --f-ui: var(--f-lux) }
 .dprog .dtrack i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(180deg, #f6e2c4, #c9a57c 55%, #8a6a4c); box-shadow: 0 0 8px rgba(226,195,154,.6); transition: width .2s ease }
 .dprog span { font: 400 13px var(--f-lux); color: var(--gold-hi); letter-spacing: .05em; white-space: nowrap; min-width: 150px }
 body.expert .dprog .dtrack i { background: linear-gradient(180deg, #ffd6a8, #ff8a1f) } body.debug .dprog .dtrack i { background: linear-gradient(180deg, #cfe3ff, #3a7be0) }
+
+/* Kopfbereich auf dem Handy kompakt: Abstand zur Statusleiste genau einmal, kleiner Gehäuserand oben */
+@media (max-width: 759px) {
+  .head { margin-top: 0 !important; min-height: 0 !important; padding-top: 0 !important }
+  .app { margin-top: max(4px, env(safe-area-inset-top, 0px)) !important; padding-top: 18px !important }
+  .app::before { top: 5px }
+}
+/* Tasten: kein Markieren von Text beim Antippen (iOS-Menü „Kopieren/Nachschlagen“) */
+button, .mbtn, .tool, .hexp3, .seg, .cntgrid, label { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -784,7 +793,7 @@ body.expert .dprog .dtrack i { background: linear-gradient(180deg, #ffd6a8, #ff8
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 55</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 56</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -3794,16 +3803,16 @@ function kiDetect(rgba, w, h, minScore) {
       return (G[v0 * GW + u0] * (1 - fu) + G[v0 * GW + u1] * fu) * (1 - fv) + (G[v1 * GW + u0] * (1 - fu) + G[v1 * GW + u1] * fu) * fv; };
     const pts = []; for (let Y = Math.floor(by0); Y <= Math.ceil(by1); Y++) { let first = -1, last = -1; for (let X = Math.floor(bx0); X <= Math.ceil(bx1); X++) if (lg(X + 0.5, Y + 0.5) > 0) { if (first < 0) first = X; last = X; } if (first >= 0) pts.push([first, Y], [last + 1, Y], [first, Y + 1], [last + 1, Y + 1]); }
     if (pts.length < 8) continue;
-    const q = minAreaRect(convexHull(pts)).map(([X, Y]) => [(X - px) / sc, (Y - py) / sc]);
+    const q = kiMinRect(kiHull(pts)).map(([X, Y]) => [(X - px) / sc, (Y - py) / sc]);
     out.push({ q, s: c.s });
   }
   return out;
 }
-function convexHull(P) { const p = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+function kiHull(P) { const p = P.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
   for (const q of p) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
   for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
   return lo.slice(0, -1).concat(up.slice(0, -1)); }
-function minAreaRect(H) { let best = null; // je Hüllkante als Ausrichtung prüfen (rotierende Messschieber)
+function kiMinRect(H) { let best = null; // je Hüllkante als Ausrichtung prüfen (rotierende Messschieber)
   for (let i = 0; i < H.length; i++) { const a = H[i], b = H[(i + 1) % H.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (!l) continue; const ux = (b[0] - a[0]) / l, uy = (b[1] - a[1]) / l;
     let mn1 = Infinity, mx1 = -Infinity, mn2 = Infinity, mx2 = -Infinity; for (const p of H) { const s = p[0] * ux + p[1] * uy, t = -p[0] * uy + p[1] * ux; if (s < mn1) mn1 = s; if (s > mx1) mx1 = s; if (t < mn2) mn2 = t; if (t > mx2) mx2 = t; }
     const A = (mx1 - mn1) * (mx2 - mn2); if (!best || A < best.A) best = { A, ux, uy, mn1, mx1, mn2, mx2 }; }
@@ -3841,9 +3850,12 @@ detectQuads = function (rgba, w, h, sens) {
   if (N) { if (use.length > N) use = use.slice(0, N); else if (use.length < N) use = all.slice(0, Math.min(N, all.length)); }
   globalThis.KISTAT = { n: use.length, scores: use.map(d => +d.s.toFixed(2)) };
   let quads = use.map(d => d.q);
+  if (CFG.kiRefine !== false && quads.length) try { quads = kiRefine(rgba, w, h, quads, use.map(d => d.s0 ?? d.s)); } catch (e) { globalThis.KIERR = String(e); }
+  if (N && quads.length < N) { const ovl = (A, B) => { const xs = A.map(p => p[0]), ys = A.map(p => p[1]); let k = 0, o = 0; for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const X = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * i / 6, Y = Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * j / 6; if (!inPoly(A, X, Y)) continue; k++; if (inPoly(B, X, Y)) o++; } return k ? o / k : 0; };
+    for (const d of all) { if (quads.length >= N) break; if (quads.some(q => ovl(d.q, q) > 0.2 || ovl(q, d.q) > 0.2)) continue; quads.push(d.q); } }
   const area = q => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
   // Rückfall / Auffüllen mit der klassischen Erkennung (nur Rahmen, die keine KI-Fotos überdecken)
-  if (!quads.length || (N && quads.length < N)) { const cl = detectQuadsClassic2(rgba, w, h, sens).map(o => o.c.map(([x, y]) => [x * w, y * h]));
+  if (!quads.length || (N && quads.length < N)) { let clr = []; try { clr = detectQuadsClassic2(rgba, w, h, sens); } catch (e) { globalThis.KIERR = String(e); } const cl = clr.map(o => o.c.map(([x, y]) => [x * w, y * h]));
     for (const c of cl) { if (N && quads.length >= N) break; const xs = c.map(p => p[0]), ys = c.map(p => p[1]); let ov = 0, k = 0;
       for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const X = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * i / 6, Y = Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * j / 6; if (!inPoly(c, X, Y)) continue; k++; if (quads.some(q => inPoly(q, X, Y))) ov++; }
       if (!k || ov / k < 0.2) quads.push(c); } }
@@ -3855,6 +3867,102 @@ detectQuads = function (rgba, w, h, sens) {
   for (const q of out) { const row = rows.find(rw => Math.abs(rw[0].cy - q.cy) < Math.min(rw[0].hh, q.hh) / 2); row ? row.push(q) : rows.push([q]); }
   return rows.flatMap(rw => rw.sort((a, b) => a.cx - b.cx)).map(q => ({ c: q.c, rot: 0 }));
 };
+
+// ---- Nachbearbeitung: zerteilte Fotos zusammenführen, angeschnittene Fotos bis zur Albumseite aufziehen ----
+// Zwei Rahmen gehören zu EINEM Foto, wenn zwischen ihnen keine Albumseite (Papierfarbe) liegt und an der Trennlinie keine gerade Kante verläuft.
+function kiRefine(rgba, w, h, quads, scores) { scores = scores || quads.map(() => 1);
+  if (quads.length < 2 && CFG.kiGrow === false) return quads;
+  const n = w * h, R = new Float32Array(n), G = new Float32Array(n), B = new Float32Array(n), Y = new Float32Array(n);
+  for (let i = 0; i < n; i++) { R[i] = rgba[4 * i]; G[i] = rgba[4 * i + 1]; B[i] = rgba[4 * i + 2]; Y[i] = 0.299 * R[i] + 0.587 * G[i] + 0.114 * B[i]; }
+  const MAG = new Float32Array(n), ANG = new Float32Array(n);
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;
+    const gx = Y[i - w + 1] + 2 * Y[i + 1] + Y[i + w + 1] - Y[i - w - 1] - 2 * Y[i - 1] - Y[i + w - 1], gy = Y[i + w - 1] + 2 * Y[i + w] + Y[i + w + 1] - Y[i - w - 1] - 2 * Y[i - w] - Y[i - w + 1];
+    MAG[i] = Math.hypot(gx, gy) / 8; ANG[i] = ((Math.atan2(gy, gx) * 180 / Math.PI) % 180 + 180) % 180; }
+  const inAny = (x, y, skip) => quads.some((q, j) => j !== skip && inPoly(q, x, y));
+  // Seitenfarbe: Median der nicht belegten Pixel im Bereich der Fotos
+  const xs = quads.flat().map(p => p[0]), ys = quads.flat().map(p => p[1]), X0 = Math.max(0, Math.floor(Math.min(...xs))), X1 = Math.min(w - 1, Math.ceil(Math.max(...xs))), Y0 = Math.max(0, Math.floor(Math.min(...ys))), Y1 = Math.min(h - 1, Math.ceil(Math.max(...ys)));
+  const rr = [], gg = [], bb = []; for (let y = Y0; y <= Y1; y += 2) for (let x = X0; x <= X1; x += 2) if (!inAny(x, y, -1)) { const i = y * w + x; if (MAG[i] < 6) { rr.push(R[i]); gg.push(G[i]); bb.push(B[i]); } }
+  if (rr.length < 50) return quads;
+  const md = a => a.sort((p, q) => p - q)[a.length >> 1], PC = [md(rr), md(gg), md(bb)];
+  const paper = (x, y) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= w || y >= h) return 1; const i = y * w + x; return Math.abs(R[i] - PC[0]) + Math.abs(G[i] - PC[1]) + Math.abs(B[i] - PC[2]) < (CFG.kiPaperT ?? 55) ? 1 : 0; };
+  // Kantenbelegung entlang einer Strecke (Gradient quer zur Strecke)
+  const lineEdge = (P, Q) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, t = ((Math.atan2(ny, nx) * 180 / Math.PI) % 180 + 180) % 180; let hit = 0, k = 0;
+    for (let s = 0.1; s <= 0.9; s += 1.5 / L) { k++; let f = 0; for (let o = -2; o <= 2 && !f; o++) { const x = Math.round(P[0] + dx * s + nx * o), y = Math.round(P[1] + dy * s + ny * o); if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) continue; const i = y * w + x; let d = Math.abs(ANG[i] - t) % 180; if (d > 90) d = 180 - d; if (MAG[i] > (CFG.kiEdgeMag ?? 14) && d < 20) f = 1; } hit += f; } return k ? hit / k : 0; };
+  let qs = quads.map(q => orderCorners(q.map(p => p.slice()))); const sc = scores.slice();
+  const area = q => { let s = 0; for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4]; s += a[0] * b[1] - b[0] * a[1]; } return Math.abs(s) / 2; };
+  let merged = 0, grown = 0;
+  // 0) Verschachtelte Rahmen: liegt ein Rahmen überwiegend in einem anderen, ist es dasselbe Foto – der äußere bleibt
+  { const inside = (A, B) => { const xs = A.map(p => p[0]), ys = A.map(p => p[1]); let k = 0, o = 0; for (let i = 0; i <= 8; i++) for (let j = 0; j <= 8; j++) { const X = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * i / 8, Y = Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * j / 8; if (!inPoly(A, X, Y)) continue; k++; if (inPoly(B, X, Y)) o++; } return k ? o / k : 0; };
+    const cont = qs.map((A, j) => qs.map((B, i) => i !== j && area(B) < area(A) && inside(B, A) > (CFG.kiNest ?? 0.7) ? i : -1).filter(i => i >= 0));
+    // enthält ein Rahmen mehrere andere, umfasst er die halbe Seite → er fällt weg; enthält er genau einen, ist der innere ein Teilstück → der innere fällt weg
+    cont.forEach((L, j) => { if (L.length >= 2) { if (CFG.kiDbg) console.log('Sammelrahmen', j + 1, 'enthält', L.length); qs[j] = null; merged++; } });
+    cont.forEach((L, j) => { if (L.length === 1 && qs[j] && qs[L[0]]) { if (CFG.kiDbg) console.log('verschachtelt', L[0] + 1, 'in', j + 1); qs[L[0]] = null; merged++; } });
+    for (let i = qs.length - 1; i >= 0; i--) if (!qs[i]) { qs.splice(i, 1); sc.splice(i, 1); } }
+  // 1) Zusammenführen
+  for (let changed = true; changed && qs.length > 1;) { changed = false;
+    outer: for (let i = 0; i < qs.length; i++) for (let j = i + 1; j < qs.length; j++) { const A = qs[i], Bq = qs[j];
+      // gemeinsame Seite: Seite von A, deren Mittelpunkt nahe an einer Seite von B liegt
+      for (let a = 0; a < 4; a++) for (let b = 0; b < 4; b++) { const A1 = A[a], A2 = A[(a + 1) % 4], B1 = Bq[b], B2 = Bq[(b + 1) % 4];
+        const ma = [(A1[0] + A2[0]) / 2, (A1[1] + A2[1]) / 2], mb = [(B1[0] + B2[0]) / 2, (B1[1] + B2[1]) / 2];
+        const la = Math.hypot(A2[0] - A1[0], A2[1] - A1[1]), lb = Math.hypot(B2[0] - B1[0], B2[1] - B1[1]);
+        const va = [(A2[0] - A1[0]) / la, (A2[1] - A1[1]) / la], vb = [(B2[0] - B1[0]) / lb, (B2[1] - B1[1]) / lb]; if (Math.abs(va[0] * vb[0] + va[1] * vb[1]) < 0.96) continue;
+        if (CFG.kiDbg > 1) console.log('  Seiten', i + 1, j + 1, a, b);
+        const nA = [-va[1], va[0]], gap = Math.abs((mb[0] - ma[0]) * nA[0] + (mb[1] - ma[1]) * nA[1]); if (CFG.kiDbg > 1) console.log('   gap', gap.toFixed(1)); if (gap > Math.max(8, 0.02 * Math.max(w, h))) continue;
+        // Überlappung entlang der Seite
+        const pr = p => (p[0] - A1[0]) * va[0] + (p[1] - A1[1]) * va[1], b0 = Math.min(pr(B1), pr(B2)), b1 = Math.max(pr(B1), pr(B2)), ov = Math.min(la, b1) - Math.max(0, b0);
+        if (CFG.kiDbg > 1) console.log('   ov', ov.toFixed(1), la.toFixed(0), lb.toFixed(0)); if (ov < 0.6 * Math.min(la, lb)) continue;
+        // Band zwischen den Rahmen: Papieranteil
+        const s0 = Math.max(0, b0), s1 = Math.min(la, b1); let pp = 0, pk = 0;
+        for (let s = s0 + 0.1 * (s1 - s0); s <= s1 - 0.1 * (s1 - s0); s += 2) for (let o = -3; o <= gap + 3; o += 2) { const sg = Math.sign((mb[0] - ma[0]) * nA[0] + (mb[1] - ma[1]) * nA[1]) || 1; pk++; pp += paper(A1[0] + va[0] * s + nA[0] * o * sg, A1[1] + va[1] * s + nA[1] * o * sg); }
+        const pf = pp / Math.max(1, pk), mid = [(ma[0] + mb[0]) / 2, (ma[1] + mb[1]) / 2], P1 = [A1[0] + va[0] * s0 + (mid[0] - ma[0]), A1[1] + va[1] * s0 + (mid[1] - ma[1])], P2 = [A1[0] + va[0] * s1 + (mid[0] - ma[0]), A1[1] + va[1] * s1 + (mid[1] - ma[1])], ec = lineEdge(P1, P2);
+        if (CFG.kiDbg) console.log('Paar', i + 1, j + 1, 'Papier', pf.toFixed(2), 'Kante', ec.toFixed(2));
+        // Vektor-Test (Konturfortsetzung): an beiden Enden der Trennlinie den Rand Foto/Albumseite links und rechts der Linie suchen;
+        // zeigen die Randvektoren in die gleiche Richtung (bzw. 180°) und schließen ohne Versatz aneinander an, ist es EIN Foto.
+        const cont = (() => { const u = [P2[0] - P1[0], P2[1] - P1[1]], Lu = Math.hypot(u[0], u[1]) || 1; u[0] /= Lu; u[1] /= Lu; const nn = [-u[1], u[0]], res = [];
+          for (const [E, dir] of [[P1, -1], [P2, 1]]) { // Ende oben (gegen u) und unten (mit u)
+            const bnd = off => { // vom Inneren (10 px vor dem Ende) entlang ±u nach außen bis Papier
+              for (let t = -12; t <= 40; t++) { const x = E[0] + nn[0] * off + u[0] * dir * t, y = E[1] + nn[1] * off + u[1] * dir * t; if (paper(x, y)) return t; } return null; };
+            const offs = [-14, -8, 8, 14].map(o => [o, bnd(o)]); if (offs.some(o => o[1] === null)) { res.push(null); continue; }
+            const vl = [offs[1][0] - offs[0][0], offs[1][1] - offs[0][1]], vr = [offs[3][0] - offs[2][0], offs[3][1] - offs[2][1]];
+            const ang = Math.abs(Math.atan2(vl[0] * vr[1] - vl[1] * vr[0], vl[0] * vr[0] + vl[1] * vr[1])) * 180 / Math.PI;
+            const pred = offs[1][1] + (offs[2][0] - offs[1][0]) * vl[1] / vl[0], jump = Math.abs(pred - offs[2][1]);
+            res.push({ ang: Math.min(ang, 180 - ang), jump, depth: Math.min(offs[1][1], offs[2][1]) }); }
+          return res; })();
+        const contOk = cont.every(c => c && c.ang < (CFG.kiContAng ?? 25) && c.jump < (CFG.kiContJump ?? 5));
+        if (CFG.kiDbg) console.log('  Vektoren', i + 1, j + 1, JSON.stringify(cont.map(c => c && { a: Math.round(c.ang), s: +c.jump.toFixed(1), t: c.depth })), contOk ? 'durchgehend' : 'Knick/Lücke');
+        const weak = Math.min(sc[i], sc[j]) < (CFG.kiWeak ?? 0.6) || (CFG.kiVec !== false && contOk && ec < (CFG.kiContEdge ?? 1.01) && cont.some(c => c.depth < -2));
+        if (pf < (CFG.kiMergePaper ?? 0.12) && contOk && (ec < (CFG.kiMergeEdge ?? 0.35) || Math.min(sc[i], sc[j]) < (CFG.kiWeak ?? 0.6))) {
+          const U = kiMinRect(kiHull(A.concat(Bq))); qs.splice(j, 1); sc.splice(j, 1); qs[i] = U; sc[i] = Math.max(sc[i], 0.6); merged++; changed = true; break outer; } } } }
+  // 2) Aufziehen: Rahmenseite nach außen schieben, solange dahinter weder Papier noch ein anderes Foto liegt
+  if (CFG.kiGrow === true) for (let i = 0; i < qs.length; i++) { const q = qs[i], c = [(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2];
+    for (let k = 0; k < 4; k++) { const A = q[k], Bp = q[(k + 1) % 4], L = Math.hypot(Bp[0] - A[0], Bp[1] - A[1]); if (L < 10) continue; const v = [(Bp[0] - A[0]) / L, (Bp[1] - A[1]) / L]; let nrm = [-v[1], v[0]];
+      if ((c[0] - A[0]) * nrm[0] + (c[1] - A[1]) * nrm[1] > 0) nrm = [-nrm[0], -nrm[1]];
+      const perp = Math.hypot(q[(k + 2) % 4][0] - Bp[0], q[(k + 2) % 4][1] - Bp[1]), maxD = Math.round((CFG.kiGrowMax ?? 0.8) * perp); let d = 0;
+      for (let t = 2; t <= maxD; t += 2) { let np = 0, nk = 0; for (let s = 0.15 * L; s <= 0.85 * L; s += 3) { const x = A[0] + v[0] * s + nrm[0] * t, y = A[1] + v[1] * s + nrm[1] * t; nk++; if (!paper(x, y) && !inAny(x, y, i) && x > 1 && y > 1 && x < w - 2 && y < h - 2) np++; }
+        if (np / Math.max(1, nk) >= (CFG.kiGrowFill ?? 0.7)) d = t; else break; }
+      // Ende muss an Albumseite (Papier) liegen – sonst läuft der Rahmen über den Seitenrand hinaus
+      let endP = 0, endK = 0; for (let s2 = 0.15 * L; s2 <= 0.85 * L; s2 += 3) { const x = A[0] + v[0] * s2 + nrm[0] * (d + 4), y = A[1] + v[1] * s2 + nrm[1] * (d + 4); endK++; if (x > 1 && y > 1 && x < w - 2 && y < h - 2 && paper(x, y)) endP++; }
+      const endPaper = endP / Math.max(1, endK);
+      let cd = 0, ck = 0; for (let s2 = 0.15 * L; s2 <= 0.85 * L; s2 += 3) { const xi = Math.round(A[0] + v[0] * s2 - nrm[0] * 3), yi = Math.round(A[1] + v[1] * s2 - nrm[1] * 3), xo = Math.round(A[0] + v[0] * s2 + nrm[0] * 3), yo = Math.round(A[1] + v[1] * s2 + nrm[1] * 3);
+        if (xi < 0 || yi < 0 || xo < 0 || yo < 0 || xi >= w || xo >= w || yi >= h || yo >= h) continue; const a1 = yi * w + xi, a2 = yo * w + xo; ck++; cd += Math.abs(R[a1] - R[a2]) + Math.abs(G[a1] - G[a2]) + Math.abs(B[a1] - B[a2]); }
+      const cross = ck ? cd / ck : 999; if (CFG.kiDbg && d) console.log('Wachsen?', i + 1, k, d, 'Kante', lineEdge(A, Bp).toFixed(2), 'Sprung', Math.round(cross), 'Ende Papier', endPaper.toFixed(2));
+      if (d >= Math.max(6, 0.06 * perp) && lineEdge(A, Bp) < (CFG.kiGrowEdge ?? 0.5) && endPaper >= (CFG.kiGrowEnd ?? 0.3)) { q[k] = [A[0] + nrm[0] * d, A[1] + nrm[1] * d]; q[(k + 1) % 4] = [Bp[0] + nrm[0] * d, Bp[1] + nrm[1] * d]; grown++; if (CFG.kiDbg) console.log('aufgezogen', i + 1, 'Seite', k, d, 'px'); } } }
+  // 3) Kanten einzeln einpassen (Perspektive: Fotos erscheinen als Trapez, nicht als Rechteck): jede Seite unabhängig verschieben und kippen
+  let snapped = 0;
+  if (CFG.kiSnap === true) { const X = (P, Q, A, B) => { const d = (Q[0] - P[0]) * (B[1] - A[1]) - (Q[1] - P[1]) * (B[0] - A[0]); if (Math.abs(d) < 1e-9) return null; const t = ((A[0] - P[0]) * (B[1] - A[1]) - (A[1] - P[1]) * (B[0] - A[0])) / d; return [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]; };
+    const Rr = CFG.kiSnapR ?? Math.max(4, Math.round(0.012 * Math.max(w, h)));
+    for (let f = 0; f < qs.length; f++) { const o = orderCorners(qs[f].map(p => p.slice())), lines = []; let ch = false;
+      for (let k = 0; k < 4; k++) { const A = o[k], Bp = o[(k + 1) % 4], L = Math.hypot(Bp[0] - A[0], Bp[1] - A[1]) || 1, nx = -(Bp[1] - A[1]) / L, ny = (Bp[0] - A[0]) / L;
+        const base = lineEdge(A, Bp); let best = [A, Bp], bc = base;
+        for (let a = -Rr; a <= Rr; a++) for (let b = -Rr; b <= Rr; b++) { const P = [A[0] + nx * a, A[1] + ny * a], Q = [Bp[0] + nx * b, Bp[1] + ny * b], c = lineEdge(P, Q); if (c > bc + 0.02) { bc = c; best = [P, Q]; } }
+        if (bc >= Math.max(0.45, base + 0.08)) { lines.push(best); ch = true; } else lines.push([A, Bp]); }
+      if (!ch) continue;
+      const nq = [X(...lines[3], ...lines[0]), X(...lines[0], ...lines[1]), X(...lines[1], ...lines[2]), X(...lines[2], ...lines[3])];
+      if (nq.some(p => !p) || nq.some((p, i) => Math.hypot(p[0] - o[i][0], p[1] - o[i][1]) > 2.5 * Rr)) continue;
+      qs[f] = nq; snapped++; } }
+  globalThis.KIREF = { merged, grown, snapped };
+  return qs;
+}
 
 </script>
 <script>

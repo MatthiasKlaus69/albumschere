@@ -684,6 +684,29 @@ body.expert .dprog .dtrack i { background: linear-gradient(180deg, #ffd6a8, #ff8
 }
 /* Tasten: kein Markieren von Text beim Antippen (iOS-Menü „Kopieren/Nachschlagen“) */
 button, .mbtn, .tool, .hexp3, .seg, .cntgrid, label { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none }
+
+/* ===== Layout oben bündig, Browser: Logo – Funktionen – Umschalter in einer Zeile ===== */
+.app { margin-top: 0 !important; padding-top: 22px !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important }
+.app::before { top: 4px !important }
+@media (max-width: 759px) { .app { margin-top: 0 !important; padding-top: calc(14px + env(safe-area-inset-top, 0px)) !important } .app::before { top: calc(4px + env(safe-area-inset-top, 0px)) !important } .head { margin-top: 0 !important } }
+@media (min-width: 1100px) {
+  .app { grid-template-columns: auto minmax(0, 1fr) auto !important; grid-template-areas: "head menu mode" "save save save" "work work work" "foot foot foot" !important; align-items: center; column-gap: 18px !important }
+  .head { padding-left: 6px !important; min-height: 0 !important } .head .logo-img { width: 210px !important }
+  .menu { display: flex !important; flex-wrap: nowrap !important; align-items: center; gap: 10px !important; padding: 14px 18px !important }
+  .menu .mbtn, .menu .mname { height: 52px !important; flex: 1 1 0; min-width: 0; padding: 0 10px !important; font-size: 16px !important; white-space: nowrap }
+  .menu .mname { flex: 1.15 1 0 } .menu .mgrow, .menu .mtarget, .menu .dirrow { display: none !important }
+  #modeSw.inbar { position: static !important; transform: none !important; grid-area: mode }
+  .work { margin-top: 4px }
+}
+/* nicht aktive Tasten: Schrift weiß, Taste flach statt erhaben */
+.menu .mbtn:disabled { opacity: 1 !important; color: #fff !important; transform: none !important; filter: saturate(.55) brightness(.82) }
+.menu .mbtn:disabled svg.i { color: #fff !important; opacity: .75 }
+.hexp3 button, body:not(.expert):not(.debug) .hexp3 button { color: #fff !important }
+/* gedrückt halten (Auswählen / Fotografieren, solange Erkennung läuft) */
+.menu .mbtn.held { transform: translateY(3px) !important; box-shadow: 0 1px 0 #160f0a, inset 0 3px 8px rgba(0,0,0,.6) !important; filter: brightness(.9) }
+.empty p { display: none }
+
+#modeSw button[aria-checked="false"] { color: #fff !important; opacity: 1 !important; text-shadow: 0 1px 2px rgba(0,0,0,.6) }
 </style>
 <style>body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -749,7 +772,6 @@ button, .mbtn, .tool, .hexp3, .seg, .cntgrid, label { -webkit-user-select: none;
     <div class="empty" id="emptyStage" hidden>
       <svg class="i"><use href="#i-img"/></svg>
       <b>Noch keine Albumseite</b>
-      <p>Fotografiere eine Albumseite oder wähle Fotos aus. Die App findet die einzelnen Fotos, richtet sie auf und speichert sie in voller Auflösung.</p>
     </div>
     <section class="stage" id="stage" aria-label="Albumseite mit erkannten Fotos">
       <aside class="dbgp" id="dbgPanel" hidden></aside>
@@ -793,7 +815,7 @@ button, .mbtn, .tool, .hexp3, .seg, .cntgrid, label { -webkit-user-select: none;
       <div class="gridwrap"><div class="grid" id="grid"></div></div>
     </section>
   </main>
-  <footer class="foot"><span id="appVer">Version 58</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
+  <footer class="foot"><span id="appVer">Version 59</span><span id="pageName" hidden></span><span id="secEdit" hidden></span><input id="sens" type="hidden" value="50"></footer>
 </div>
 <div class="mbar" id="mbar">
   <div class="mmsg" id="mmsg" role="status" aria-live="polite"></div>
@@ -3843,9 +3865,26 @@ function kiMinRect(H) { let best = null; // je Hüllkante als Ausrichtung prüfe
 
 // ---- Einbindung: KI zuerst; klassische Erkennung als Rückfall und zum Auffüllen bis zur angegebenen Anzahl ----
 const detectQuadsClassic2 = detectQuads; globalThis.detectQuadsClassic2 = detectQuadsClassic2;
+// Kontrastvariante: Helligkeit auf 1.–99. Perzentil spreizen, dann Gamma so, dass die mittlere Helligkeit bei 0,5 liegt
+function kiContrast(rgba, w, h) { const n = w * h, H = new Uint32Array(256); for (let i = 0; i < n; i += 3) H[(0.299 * rgba[4 * i] + 0.587 * rgba[4 * i + 1] + 0.114 * rgba[4 * i + 2]) | 0]++;
+  let tot = 0; for (const v of H) tot += v; let c = 0, lo = 0, hi = 255; for (let i = 0; i < 256; i++) { c += H[i]; if (c < tot * 0.01) lo = i; if (c <= tot * 0.99) hi = i; } if (hi - lo < 20) { lo = 0; hi = 255; }
+  let m = 0; for (let i = 0; i < 256; i++) m += H[i] * Math.min(1, Math.max(0, (i - lo) / (hi - lo))); m /= tot; const g = Math.min(2.2, Math.max(0.45, Math.log(0.5) / Math.log(Math.min(0.95, Math.max(0.05, m)))));
+  const T = new Uint8ClampedArray(256); for (let i = 0; i < 256; i++) T[i] = 255 * Math.pow(Math.min(1, Math.max(0, (i - lo) / (hi - lo))), g);
+  const o = new Uint8ClampedArray(rgba.length); for (let i = 0; i < rgba.length; i += 4) { o[i] = T[rgba[i]]; o[i + 1] = T[rgba[i + 1]]; o[i + 2] = T[rgba[i + 2]]; o[i + 3] = 255; } return o; }
 detectQuads = function (rgba, w, h, sens) {
   if (!globalThis.KI_MODEL || CFG.ki === false) return detectQuadsClassic2(rgba, w, h, sens);
   let all; try { all = kiDetect(rgba, w, h, 0.05); } catch (e) { globalThis.KIERR = String(e); return detectQuadsClassic2(rgba, w, h, sens); }
+  // Zweiter Durchlauf mit verändertem Kontrast (Helligkeit gespreizt, Gamma auf mittlere Helligkeit): bestätigt Treffer (höhere Sicherheit)
+  //  und findet Fotos, die sich im Original kaum von der Albumseite abheben.
+  globalThis.KITTA = null;
+  if (CFG.kiTTA !== false) try { const v = kiContrast(rgba, w, h), alt = kiDetect(v, w, h, 0.05); let conf = 0, add = 0;
+    const iouQ = (A, B) => { const xs = [...A, ...B].map(p => p[0]), ys = [...A, ...B].map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys); let i = 0, u = 0;
+      for (let a = 0; a < 14; a++) for (let b = 0; b < 14; b++) { const X = x0 + (x1 - x0) * (a + 0.5) / 14, Y = y0 + (y1 - y0) * (b + 0.5) / 14, p = inPoly(A, X, Y), q = inPoly(B, X, Y); if (p && q) i++; if (p || q) u++; } return u ? i / u : 0; };
+    for (const d of all) d.k1 = d.s;
+    for (const e of alt) { let bi = null, bv = 0; for (const d of all) { const v2 = iouQ(d.q, e.q); if (v2 > bv) { bv = v2; bi = d; } }
+      if (bi && bv > 0.6) { if (e.s > bi.s && bi.s >= 0.2) { bi.s = Math.min(0.999, bi.s + (CFG.kiTTAw ?? 0.5) * (e.s - bi.s)); conf++; } bi.k2 = Math.max(bi.k2 || 0, e.s); }
+      else if (e.s >= (CFG.kiTTAadd ?? 0.7) && !all.some(d => d.s >= 0.3 && iouQ(d.q, e.q) > 0.15)) { e.k2 = e.s; e.k1 = 0; e.tta = 1; all.push(e); add++; } }
+    all.sort((a, b) => b.s - a.s); globalThis.KITTA = { conf, add }; } catch (e) { globalThis.KIERR = 'Kontrast: ' + e; }
   // am Bildrand abgeschnittene Fotos gehören zur Nachbarseite / liegen außerhalb der Albumseite
   const edgeCut = d => { const xs = d.q.map(p => p[0]), ys = d.q.map(p => p[1]), m = Math.max(2, 0.006 * Math.max(w, h)); return Math.min(...xs) <= m || Math.min(...ys) <= m || Math.max(...xs) >= w - 1 - m || Math.max(...ys) >= h - 1 - m; };
   if (CFG.kiEdge !== false) all = all.filter(d => !edgeCut(d) || d.s >= (CFG.kiEdgeConf ?? 0.9));
@@ -3883,7 +3922,21 @@ detectQuads = function (rgba, w, h, sens) {
       for (let i = 0; i <= 6; i++) for (let j = 0; j <= 6; j++) { const X = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * i / 6, Y = Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * j / 6; if (!inPoly(c, X, Y)) continue; k++; if (quads.some(q => inPoly(q, X, Y))) ov++; }
       if (!k || ov / k < 0.2) quads.push(c); } }
   else { globalThis.UNREC = 0; }
-  globalThis.DBGOUT = CFG.debug ? { mode: 'KI', kandidaten: all.length, frames: [], seeds: [], hull: [], seite: 0, unerkannt: 0, w, h, schritte: { ki: use.length }, seiten: {}, ersatz: {}, ki: globalThis.KISTAT } : null;
+  globalThis.DBGOUT = null;
+  // DEBUG: Albumseite (grün) und unerkannte Fotoflächen (rot gestrichelt) aus der klassischen Analyse, Rahmen aus der KI
+  if (CFG.debug) { let D = null; const ks = globalThis.KISTAT, un = globalThis.UNREC;
+    try { detectQuadsClassic2(rgba, w, h, sens); D = globalThis.DBGOUT; } catch (e) { D = { err: String(e) }; }
+    D = Object.assign({ frames: [], seeds: [], hull: [], seite: 0, seiten: {}, ersatz: {} }, D || {}, { mode: 'KI', kandidaten: all.length, w, h, ki: ks });
+    D.schritte = Object.assign({}, D.schritte || {}, { ki: use.length, rahmen: quads.length });
+    const qn = quads.map(q => q.map(([x, y]) => [x / w, y / h]));
+    const cover = r => { let k = 0, o = 0; for (let i = 1; i < 6; i++) for (let j = 1; j < 6; j++) { const a = i / 6, b = j / 6, X = (r[0][0] * (1 - a) + r[1][0] * a) * (1 - b) + (r[3][0] * (1 - a) + r[2][0] * a) * b, Y = (r[0][1] * (1 - a) + r[1][1] * a) * (1 - b) + (r[3][1] * (1 - a) + r[2][1] * a) * b; k++; if (qn.some(q => inPoly(q, X, Y))) o++; } return o / k; };
+    // Sicherheit je Rahmen: bester KI-Kandidat am Rahmen (Original / Kontrastvariante), sonst Herkunft
+    const ctrQ = q => [q.reduce((a, p) => a + p[0], 0) / 4, q.reduce((a, p) => a + p[1], 0) / 4];
+    D.konf = quads.map(q => { const [cx, cy] = ctrQ(q); let b = null, bd = 1e9; for (const d of all) { if (!inPoly(q, ...ctrQ(d.q))) continue; const [x, y] = ctrQ(d.q), dd = Math.hypot(x - cx, y - cy); if (dd < bd) { bd = dd; b = d; } }
+      return { c: [cx / w, cy / h], s: b ? +b.s.toFixed(2) : null, k1: b && b.k1 != null ? +b.k1.toFixed(2) : null, k2: b && b.k2 != null ? +b.k2.toFixed(2) : null, q: b ? (b.tta ? 'Kontrast' : 'KI') : 'U-Net/klassisch' }; });
+    D.tta = globalThis.KITTA;
+    const pc = D.farbe; const paperish = r => { if (!pc) return false; let k = 0, m = 0; for (let i = 1; i < 10; i++) for (let j = 1; j < 10; j++) { const a = i / 10, b = j / 10, X = ((r[0][0] * (1 - a) + r[1][0] * a) * (1 - b) + (r[3][0] * (1 - a) + r[2][0] * a) * b) * w | 0, Y = ((r[0][1] * (1 - a) + r[1][1] * a) * (1 - b) + (r[3][1] * (1 - a) + r[2][1] * a) * b) * h | 0, o = 4 * (Y * w + X); k++; if (Math.hypot(rgba[o] - pc[0], rgba[o + 1] - pc[1], rgba[o + 2] - pc[2]) < 45) m++; } return m / k > 0.5; };
+    D.seeds = (D.seeds || []).filter(r => cover(r) < 0.12 && !paperish(r)); D.unerkannt = D.seeds.length; globalThis.DBGOUT = D; globalThis.KISTAT = ks; globalThis.UNREC = un; }
   const out = quads.map(q => { const o = orderCorners(q.map(p => p.slice())), ys = o.map(p => p[1]), xs = o.map(p => p[0]);
     return { c: o.map(([x, y]) => [Math.min(1, Math.max(0, x / w)), Math.min(1, Math.max(0, y / h))]), cy: (Math.min(...ys) + Math.max(...ys)) / 2 / h, cx: (Math.min(...xs) + Math.max(...xs)) / 2 / w, hh: (Math.max(...ys) - Math.min(...ys)) / h }; });
   out.sort((a, b) => a.cy - b.cy); const rows = [];
@@ -3983,7 +4036,7 @@ function kiRefine(rgba, w, h, quads, scores) { scores = scores || quads.map(() =
         if ((c[0] - A[0]) * nx + (c[1] - A[1]) * ny > 0) { nx = -nx; ny = -ny; } // Normale nach außen
         const base = sideScore(A, Bp, [nx, ny], f); let best = [A, Bp], bs = base;
         if (base.po < 0.35) { lines.push([A, Bp]); continue; } // grenzt nicht an Albumseite → unverändert
-        for (let a = -Rr; a <= Rr; a++) for (let b = -Rr; b <= Rr; b++) { if (!a && !b) continue; const P = [A[0] + nx * a, A[1] + ny * a], Q = [Bp[0] + nx * b, Bp[1] + ny * b], r = sideScore(P, Q, [nx, ny], f); if (r.ov > 0.05) continue; if (r.s > bs.s + 1e-6) { bs = r; best = [P, Q]; } }
+        for (let a = -Rr; a <= Rr; a++) for (let b = -Rr; b <= Rr; b++) { if (!a && !b) continue; if (Math.abs(a - b) / L > (CFG.kiSnapTilt ?? 0.021)) continue; const P = [A[0] + nx * a, A[1] + ny * a], Q = [Bp[0] + nx * b, Bp[1] + ny * b], r = sideScore(P, Q, [nx, ny], f); if (r.ov > 0.05) continue; if (r.s > bs.s + 1e-6) { bs = r; best = [P, Q]; } }
         if (best[0] !== A && bs.po >= (CFG.kiSnapPo ?? 0.6) && bs.pi <= (CFG.kiSnapPi ?? 0.3) && bs.s >= base.s + (CFG.kiSnapGain ?? 0.1)) { lines.push(best); ch = true; } else lines.push([A, Bp]); }
       if (!ch) continue;
       const nq = [X(...lines[3], ...lines[0]), X(...lines[0], ...lines[1]), X(...lines[1], ...lines[2]), X(...lines[2], ...lines[3])];
@@ -4261,8 +4314,15 @@ async function addFiles(files) {
   if (S.expert && S.pages.length > first) { expertRun(); return; }
   toast(`${list.length} ${list.length === 1 ? 'Seite' : 'Seiten'} hinzugefügt`);
 }
-$('inCam').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
-$('inPick').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+// Taste bleibt gedrückt, solange Auswahl/Erkennung läuft
+let heldBtn = null;
+function holdBtn(el) { releaseBtn(); heldBtn = el; el.classList.add('held'); }
+function releaseBtn() { if (heldBtn) heldBtn.classList.remove('held'); heldBtn = null; }
+document.querySelectorAll('label.mbtn[for="inPick"], #lblCam').forEach(l => l.addEventListener('click', () => { holdBtn(l);
+  // Dialog abgebrochen: beim Zurückkehren ohne Auswahl wieder lösen
+  const back = () => setTimeout(() => { if (heldBtn === l && !S.busyAdd) releaseBtn(); }, 1200); window.addEventListener('focus', back, { once: true }); }));
+$('inCam').onchange = async e => { S.busyAdd = true; try { await addFiles(e.target.files); } finally { S.busyAdd = false; releaseBtn(); } e.target.value = ''; };
+$('inPick').onchange = async e => { S.busyAdd = true; try { await addFiles(e.target.files); } finally { S.busyAdd = false; releaseBtn(); } e.target.value = ''; };
 $('inDir').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
 if (!('webkitdirectory' in document.createElement('input')) || /iPhone|iPad|Android/i.test(navigator.userAgent)) { if ($('lblDir')) $('lblDir').hidden = true; }
 
@@ -4420,6 +4480,13 @@ function drawDebug(p, w, h) {
     html += '<h4>Freie Albumfläche</h4><table>' + row('Gradient frei', g.gradFrei ?? '–', g.gradFrei > 4 ? 'bad' : 'ok') + row('Gradient in Fotos', g.gradFoto ?? '–') + row('Kantenpixel frei', (g.kantenFrei ?? '–') + ' %', g.kantenFrei > 12 ? 'bad' : '') + '</table>';
     html += `<h4>Fotos (${fr.length})</h4><table>` + row('<span class="mut">Nr · Größe</span>', '<span class="mut">o r u l · min</span>') +
       fr.map(f => row(`${f.nr ?? '?'} · ${f.gr}`, `${(f.s || []).map(v => Math.round(v * 100)).join(' ')} · ${f2(f.min)}`, f.min < 0.5 ? 'bad' : '')).join('') + '</table>';
+    // Sicherheit (Confidence) je Foto: Wert am Rahmen + Tabelle
+    const kf = (g.konf || []).map(k => { let bi = -1, bd = 1e9; p.quads.forEach((q, i) => { const [x, y] = ctr(q), d = Math.hypot(x - k.c[0], y - k.c[1]); if (d < bd) { bd = d; bi = i; } }); return { ...k, nr: bd < 0.08 ? bi + 1 : null }; }).sort((a, b) => (a.nr || 99) - (b.nr || 99));
+    for (const k of kf) { const [x, y] = V(k.c), t = k.s == null ? k.q : 'C ' + Math.round(k.s * 100) + ' %'; ctx.font = '700 11px ui-monospace, monospace'; const tw = ctx.measureText(t).width + 10;
+      ctx.fillStyle = 'rgba(0,0,0,.78)'; ctx.fillRect(x - tw / 2, y + 32, tw, 17); ctx.fillStyle = k.s == null ? '#9ad0ff' : k.s < 0.6 ? '#ff8a80' : k.s < 0.85 ? '#ffd27a' : '#7dff6a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y + 41); }
+    if (kf.length) html += '<h4>Sicherheit (Confidence)</h4><table>' + row('<span class="mut">Nr · Quelle</span>', '<span class="mut">gesamt · normal / Kontrast</span>') +
+      kf.map(k => row(`${k.nr ?? '?'} · ${k.q}`, k.s == null ? '–' : `${Math.round(k.s * 100)} % · ${k.k1 == null ? '–' : Math.round(k.k1 * 100)} / ${k.k2 == null ? '–' : Math.round(k.k2 * 100)}`, k.s != null && k.s < 0.6 ? 'bad' : 'ok')).join('') +
+      (g.tta ? row('Kontraststufe 2', `${g.tta.conf} bestätigt · ${g.tta.add} neu`) : '') + '</table>';
     html += '<h4>Erkennung</h4><table>' + row('Kandidaten', g.kandidaten) + row('Verdachtsflächen', nr, nr ? 'bad' : 'ok') + row('geschätzt unerkannt', g.unerkannt, g.unerkannt ? 'bad' : 'ok') +
       row('Überlappungen getrennt', st.ovl || 0) + row('Ecken auf Albumkante gezogen', st.clip || 0) + row('kleine Fotos ergänzt', st.blob || 0) + row('Analyse', `${g.w}×${g.h} px`) + '</table>';
     html += '<h4>Ausrichtung</h4><table>' + row('Drehung', ((p.rotAuto || 0) * 90) + '°') + row('Sicherheit', f2(p.rotConf || 0), (p.rotConf || 0) < 0.15 ? 'bad' : 'ok') + '</table>';
@@ -4486,6 +4553,7 @@ cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', 
 
 function updateButtons() {
   const p = page(), has = p && S.sel >= 0 && S.sel < p.quads.length;
+  $('bReset').disabled = !S.pages.length && !S.results.length;
   $('bRot').disabled = !has; $('bDel').disabled = !has; $('bMerge').disabled = !has || p.quads.length < 2; $('bUndo').disabled = !p || !p.undo || !p.undo.length;
 }
 function markDirty() {
@@ -4846,6 +4914,8 @@ async function pickMode(m) { const was = S.debug; setMode(m);
   toast(m === 'expert' ? 'Express an: Fotografieren → alles läuft automatisch' : m === 'debug' ? 'Debug-Ansicht an' : 'Modus NORMAL');
   const p = page(); if (S.debug && !was && p && !p.dbg && !p.sample) { status('Erkenne Fotos …', true); await tick(); await runDetect(p, +$('sens').value, true); status('', false); } drawEditor(); }
 $('mNormal').onclick = () => pickMode('normal'); $('bExpert').onclick = () => pickMode(S.expert ? 'normal' : 'expert'); $('mDebug').onclick = () => pickMode('debug');
+{ const mq = matchMedia('(min-width: 1100px)'), sw = $('modeSw'), head = document.querySelector('.head'), app = document.querySelector('.app');
+  const place = () => { if (mq.matches) { sw.classList.add('inbar'); app.insertBefore(sw, $('menu').nextSibling); } else { sw.classList.remove('inbar'); head.appendChild(sw); } }; place(); mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place); }
 { let m = 'normal'; try { m = localStorage.getItem('albumschere.mode') || (S.expert ? 'expert' : 'normal'); } catch (e) {} setMode(m); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function xMenu(msg, buttons) { $('xov').hidden = false; $('xImg').hidden = true; $('xCap').textContent = ''; $('xMenu').hidden = false; $('xMsg').textContent = msg;
@@ -4875,11 +4945,20 @@ S.upRot = null;
 let upResolve = null;
 // leiser, angenehmer Klickton bei jedem Tastendruck (WebAudio, ohne Datei)
 let AC = null;
-function clickSound() { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); const t = AC.currentTime;
-  const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = 'triangle'; o.frequency.setValueAtTime(1850, t); o.frequency.exponentialRampToValueAtTime(900, t + 0.035);
-  f.type = 'lowpass'; f.frequency.value = 3200; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
-  o.connect(f); f.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 0.06); } catch (e) {} }
-document.addEventListener('pointerdown', e => { const b = e.target.closest('button, label.mbtn, .mbtn, .tool, polygon'); if (b && !b.disabled) clickSound(); }, true);
+// Wertiger Klick: kurzer, gedämpfter „Tock“ (Holz/Metall), vorberechnet für geringe Verzögerung
+let CLK = null;
+function clickBuf() { if (CLK) return CLK; const sr = AC.sampleRate, n = Math.round(sr * 0.09), b = AC.createBuffer(1, n, sr), d = b.getChannelData(0); let ph1 = 0, ph2 = 0, lp = 0;
+  for (let i = 0; i < n; i++) { const t = i / sr, f1 = 1650 * Math.exp(-t * 18) + 950, f2 = 210;
+    ph1 += 2 * Math.PI * f1 / sr; ph2 += 2 * Math.PI * f2 / sr;
+    const noise = (Math.random() * 2 - 1) * Math.exp(-t * 900); lp += 0.35 * (noise - lp);
+    d[i] = 0.55 * Math.sin(ph1) * Math.exp(-t * 95) + 0.5 * Math.sin(ph2) * Math.exp(-t * 55) + 0.35 * lp; }
+  let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(d[i])); for (let i = 0; i < n; i++) d[i] /= m; return (CLK = b); }
+function clickSound() { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume();
+  const src = AC.createBufferSource(), g = AC.createGain(), f = AC.createBiquadFilter(); src.buffer = clickBuf(); f.type = 'lowpass'; f.frequency.value = 4200; g.gain.value = 0.22;
+  src.connect(f); f.connect(g); g.connect(AC.destination); src.start(); } catch (e) {} }
+// iOS: Ton erst nach der ersten Berührung freigeschaltet
+document.addEventListener('touchstart', () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); clickBuf(); } catch (e) {} }, { once: true, passive: true });
+document.addEventListener('pointerdown', e => { const b = e.target.closest('button, label, .mbtn, .tool, polygon, .thumb, .seg button, #cv, .cntgrid button'); if (b && !b.disabled && !(b.tagName === 'LABEL' && b.querySelector('input[type=text]'))) clickSound(); }, true);
 let cntResolve = null;
 function askCount(src) { $('cntov').style.backgroundImage = src ? `url(${src})` : ''; $('cntov').hidden = false; return new Promise(r => { cntResolve = r; }); }
 document.querySelectorAll('#cntov .cntgrid button').forEach(b => b.addEventListener('click', () => { $('cntov').hidden = true; const r = cntResolve; cntResolve = null; if (r) r(+b.dataset.n); }));
